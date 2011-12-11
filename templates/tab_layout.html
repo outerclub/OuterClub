@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="slide_show">
+		<h2>Happening Right Now</h2>
+		<div class="slide_show_content">
+			<img src="/static/images/slide_show.png">
+		</div>
+	</div>
+	<div class="menu_tab">
+		<ul>
+			<li class="
+                {% if request.path == '/' %}
+                    active
+                {% endif %}
+                first">
+				<a href="{{ url_for('index') }} ">Welcome</a>
+			</li>
+			<li class="
+                {% if request.path == '/categories' %}
+                    active
+                {% endif %}
+                ">
+				<a href="{{ url_for('categories') }}">Categories</a>
+			</li>
+			<li class="trendingnow">
+				<a href="trendingnow.html">Trending Now</a>
+			</li>
+			<li class="startthread">
+				<a href="startthread.html">Start Thread</a>
+			</li>
+		</ul>
+    </div>
+	<div class="content">
+
+        <div class="content_top">
+            <div class="article_section">
+            {% block inner %} {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
