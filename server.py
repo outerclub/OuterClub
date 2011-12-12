@@ -22,7 +22,18 @@ def categories():
 
 @app.route('/categories/<category>')
 def category(category):
-    print 'hi'
+    popular_tags = ['Nokia','Technology','Apple']
+    posts = []
+    for i in range(5):
+        posts.append({'id':i,'title':'random title', \
+                      'user': 'myUser', \
+                      'date': '19 July 2011 at 4:55PM', \
+                      'tags': ['tag 1','tag 2','tag 3']})
+    return render_template('category.html',popular=popular_tags,posts=posts)
+
+@app.route('/post')
+def post():
+    print 'post'
 
 app.debug = True
 app.run()

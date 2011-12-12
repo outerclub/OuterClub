@@ -12,7 +12,12 @@
 
 body{
 	margin:0;
-	font-family:"Myriad Pro",Helvetica,Arial,Sans-Serif;
+	font-family:Helvetica,Arial,Sans-Serif;
+    font-size: 12px;
+}
+
+#newthread {
+    padding: 5px;
 }
 
 /**
@@ -44,4 +49,11 @@ body{
 }
 .footer_menu_right{
     float: right;
+}
+
+/**
+ * Miscellaneous
+ */
+.clear {
+clear: both;
 }

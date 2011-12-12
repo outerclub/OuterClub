@@ -36,6 +36,12 @@
 			<div class="section_bg_right"></div>
 		</div>
 	</div>
+	<div id="newthread">
+	    <form method="post" action="{{ url_for('post') }}">
+	    New Discussion: <input type="text" name="topic" />
+	    <input type="submit" name="submit" value="Submit" />
+	    </form>
+	</div>
 
 {% block content %} {% endblock %}
 </div>
@@ -48,7 +54,7 @@
 				<a href="" class="last">Refer a friend</a>
 			</div>
 			<div class="footer_menu_right">
-				Copyright @2011 THE OUTERCLUB. All rights reserved
+				Copyright @2011 THE OUTERCLUB. All rights reserved.
 			</div>
 		</div>
 </div>

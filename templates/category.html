@@ -1,0 +1,86 @@
+{% extends 'layout.html' %}
+{% block content %}
+	<div class="content_wrapper">
+		<div class="heading">
+            <div class="left">
+			    <img src="/static/images/technology_icon.png" /><h2>Technology Board</h2>
+            </div>
+            <div class="right">
+			    <h3>Show Newest First</h3><img src="/static/images/show_new_bg.png" />
+			    <a href="">Start a Thread</a>
+            </div>
+		</div>	
+        <div class="clear"></div>
+		<div class="populer_tag">
+			<span>Populer Tags:</span>
+            <ul>
+            {% for tag in popular %}
+			<li><a href="">{{ tag }}</a></li>
+            {% endfor %}
+            </ul>
+		</div>
+		<div class="sub_populer_tag">
+            <div class="left">
+                <img src="/static/images/icon1.png" />
+                <img src="/static/images/icon2.png" />
+            </div>
+                <div class="star"><a href=""></a></div>
+			<div class="post_content">
+				<h1>Lorem ipsum dolor sit amet</h1> <img src="/static/images/magnifire.png" />
+				<div>Started by Kyle on 19 July 2011 at 4:55PM</div>
+				<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent viverra condimentum sollicitudin. Integer scelerisque magna in ipsum dignissim condimentum. Aenean bibendum, nisi sit amet scelerisque semper, nisi arcu aliquet urna, elementum molestie ante nulla non leo...</p>
+			</div>
+			<div class="sub_populer_tag_nav">
+				<a href="#">Latin</a>
+				<a href="#">College</a>
+				<a href="#">Richard</a>
+				<a href="#">Literature</a>
+				<a href="#">Classical</a>
+				<a href="#">English</a>
+			</div>
+            <div class="clear"></div>
+		</div>
+		<div class="pagination">
+			<a href="#" class="previous">&nbsp;</a>
+			<a href="#">1</a>
+			<a href="#">2</a>
+			<a href="#">3</a>
+			<a href="#">4</a>
+			<a href="#" class="active">5</a>
+			<a href="#">6</a>
+			<a href="#">7</a>
+			<a href="#">8</a>
+			<a href="#">9</a>
+			<a href="#">10</a>
+			<a href="#">11</a>
+			<a href="#">12</a>
+			<a href="#" class="next">&nbsp;</a>
+		</div>
+		<div class="posts">
+            {% for post in posts %}
+			<div class="post">
+				<div class="icons">
+					<a href="#" class="icon_small icon_small1">icon 1</a>
+					<a href="#" class="icon_small icon_small2">icon 2</a>
+					<a href="#" class="icon_small icon_small3">icon 3</a>
+				</div>
+				<div class="post_content">
+					<h1>{{ post.title }}</h1> <img src="/static/images/magnifire.png" />
+					<div>Started by {{ post.user }} on {{ post.date }}</div>
+				</div>
+				<div class="post_nav">
+                    {% for tag in posts.tags %}
+					<a href="#">{{ tag }}</a>
+                    {% endfor %}
+				</div>
+				<div class="star">
+					<a href="#">&nbsp;</a>
+				</div>
+                <div class="clear"></div>
+			</div>
+            {% endfor %}
+		</div>
+		<div class="adpalce">
+		</div>
+    </div>
+{% endblock %}
