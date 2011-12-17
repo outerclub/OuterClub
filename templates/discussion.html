@@ -1,0 +1,103 @@
+{% extends 'layout.html' %}
+{% block content %}
+	<div class="content_wrapper">
+		<div class="heading">
+            <div class="left">
+			    <img src="/static/images/technology_icon.png" /><h2>Technology Board</h2>
+            </div>
+            <div class="right">
+			    <a href="">Start a Thread</a>
+            </div>
+		</div>	
+        <div class="clear"></div>
+		<div class="populer_tag">
+			<span>Populer Tags:</span>
+            <ul>
+            {% for tag in popular %}
+			<li><a href="">{{ tag }}</a></li>
+            {% endfor %}
+            </ul>
+		</div>
+	<div class="sub_populer_tag">
+			<div class="star">
+				<a href="#">Star</a>
+			</div>
+            <div class="post_content">
+				<h1>{{ discussion.title }}</h1>
+            </div>
+            <div class="clear"></div>
+		</div>
+		<div class="thread_posts">
+			<div class="thread_article_nav">
+				<ul>
+					<li class="nav nav_1 active">
+						<a href="" class="active">New Posts</a>
+					</li>
+					<li class="nav nav_2">
+						<a href="" class="">Landmark</a>
+					</li>
+					<li class="nav nav_3">
+						<a href="">Thread Stats</a>
+					</li>
+					<li class="nav nav_4">
+						<a href="">Notifications</a>
+					</li>
+					<li class="nav nav_5">
+						<a href="">Drafts</a>
+					</li>
+					<li class="nav nav_6 last">
+						<a href="">User Profile</a>
+					</li>
+				</ul>
+				<div class="user_profile">					
+				</div>
+			</div>
+			<div class="thread_article">
+				<div class="thread_article_post first_post">
+					<div class="left">
+						<img src="/static/images/user_1.png"/>
+					</div>
+					<div class="middle">
+						<h3>{{ discussion.user }}</h3>
+						<span>on {{ discussion.date }}</span>
+						<p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium  doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisqua m est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. </p>
+						<div class="post_nav thread_right_nav">
+                            {% for tag in discussion.tags %}
+							<a href="#">{{ tag }}</a>
+                            {% endfor %}
+						</div>
+						<p class="comment">
+							<a href="" class="follow">Follow</a>
+							<a href="" class="comment">Add Comment</a>
+						</p>
+					</div>
+				</div>
+                {% for response in discussion.responses %}
+				<div class="thread_article_post">
+					<div class="left">
+						<img src="/static/images/user_2.png"/>
+					</div>
+					<div class="middle">
+						<h3>{{ response.user }}</h3>
+						<span>on {{ response.date }}</span>
+						<p>{{ response.content }}</p>
+						<p class="comment">
+							<a href="" class="follow">Follow</a>
+							<a href="" class="comment">Add Comment</a>
+						</p>
+					</div>
+                    <div class="flag">
+                        <img class="first" src="/static/images/flag_1.png"/>
+                        <img src="/static/images/flag_2.png"/>
+                        <img src="/static/images/flag_3.png"/>
+                        <img src="/static/images/flag_4.png"/>
+                    </div>
+				</div>
+                {% endfor %}
+			</div>
+            <div class="clear"></div>
+        </div>
+
+    </div>
+
+{% endblock %}
