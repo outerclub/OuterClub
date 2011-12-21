@@ -3,7 +3,8 @@
 	<div class="content_wrapper">
 		<div class="heading">
             <div class="left">
-			    <img src="/static/images/technology_icon.png" /><h2>Technology Board</h2>
+                <a href="{{ url_for('category',category=category_url) }}">
+			    <img src="/static/images/technology_icon.png" /><h2>{{ category_name }}</h2></a>
             </div>
             <div class="right">
 			    <h3>Show Newest First</h3><img src="/static/images/show_new_bg.png" />
@@ -80,7 +81,7 @@
 			</div>
             {% endfor %}
 		</div>
-		<div class="adpalce">
+		<div class="adpalce" style="display: hidden">
 		</div>
     </div>
 {% endblock %}

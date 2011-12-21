@@ -721,7 +721,11 @@ span#no{
     margin: 0;
     text-transform: uppercase;
 }
-.heading a{
+.heading .left a {
+    border: 0;
+    text-decoration: underline;
+}
+.heading .right a{
     display: inline-block;
     font-family: BebasRegular;
     font-size: 14px;
