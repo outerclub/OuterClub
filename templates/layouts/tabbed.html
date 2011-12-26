@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends 'layouts/default.html' %}
 {% block content %}
 <div class="slide_show">
 		<h2>Happening Right Now</h2>
@@ -22,8 +22,12 @@
                 ">
 				<a href="{{ url_for('categories') }}">Categories</a>
 			</li>
-			<li class="trendingnow">
-				<a href="trendingnow.html">Trending Now</a>
+			<li class="
+                {% if request.path == '/trending' %}
+                    active
+                {% endif %}
+                    trendingnow">
+				<a href="{{ url_for('trending') }}">Trending Now</a>
 			</li>
 			<li class="startthread">
 				<a href="startthread.html">Start Thread</a>

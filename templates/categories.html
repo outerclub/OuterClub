@@ -1,32 +1,17 @@
-{% extends 'tab_layout.html' %}
+{% extends 'layouts/tabbed.html' %}
+{% block title %}
+Categories
+{% endblock %}
 {% block inner %}
 <style type="text/css">
-#nav ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-#nav li {
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-}
-#nav li a {
-    color: white;
-    display: block;
-    padding: 50px;
-    background-color: #333;
-    margin: 1px;
-}
-#nav li a:hover {
-    background-color: #777;
-    text-decoration: none;
-}
+@import url(/static/css/categories.css);
 </style>
+<div align="center">
 <ul id="nav">
-{% for c in categories.iterkeys() %}
-<li><a href="{{ url_for('category',category=c) }}">{{ categories[c] }}</a></li>
+{% for c in categories %}
+<li><a href="{{ url_for('category',category=c.url) }}"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a></li>
 {% endfor %}
 </ul>
+</div>
 
 {% endblock %}

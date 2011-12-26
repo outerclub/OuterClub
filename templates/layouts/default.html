@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>The Outer Club</title>
+<title>TheOuterClub - {% block title %} Unknown {% endblock %}</title>
 <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='style.css') }}"/>
 <script type="text/javascript" src="{{ url_for('static',filename='jquery-1.7.1.min.js') }}"></script>
 </head>
@@ -42,23 +42,14 @@
 	    New Discussion: <input type="text" name="topic" />
 	    <input type="submit" name="submit" value="Submit" />
 	    </form>
+	    Welcome <strong>{{ username }}</strong> <a href="{{ url_for('logout') }}">Log out</a>
 	</div>
 
 {% block content %} {% endblock %}
 </div>
 
-<div class="footer">
-		<div class="footer_menu">
-			<div class="footer_menu_left">
-				<a href="{{ url_for('about') }}">About Us</a> |
-				<a href="">Contact Us</a> |
-				<a href="" class="last">Refer a friend</a>
-			</div>
-			<div class="footer_menu_right">
-				Copyright @2011 THE OUTERCLUB. All rights reserved.
-			</div>
-		</div>
-</div>
+{% include 'partials/footer.html' %}
+
 </body>
 </html>
 

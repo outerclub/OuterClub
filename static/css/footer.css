@@ -1,0 +1,32 @@
+/**
+ * Footer
+ */
+.footer{
+    background-color: #333;
+	margin-top: 80px;
+    float: left;
+    width: 100%;
+    font-weight: bold;
+    color: #555;
+}
+.footer_menu{
+    width: 990px;
+    margin: 0 auto 0 auto;
+    padding-top: 30px;
+    padding-bottom: 40px;
+}
+.footer_menu_left{
+    float: left;
+}
+.footer a,.footer_menu_right {
+    color: #ccc;
+}
+.footer_menu_left a{
+    margin-left: 5px;
+    margin-right: 5px;
+	text-decoration: none;
+}
+.footer_menu_right{
+    float: right;
+}
+

@@ -1,5 +1,11 @@
-{% extends 'layout.html' %}
+{% extends 'layouts/default.html' %}
+{% block title %}
+{{ discussion.title }}
+{% endblock %}
 {% block content %}
+    <style type="text/css">
+    @import url(/static/css/discussion.css)
+    </style>
     <script type="text/javascript">
         $(document).ready(function() {
             $("button").click(function() {

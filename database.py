@@ -19,3 +19,13 @@ def fetchPopularTags(cursor,cat_id):
     for r in cursor.fetchall():
         tags.append(r[0])
     return tags
+
+def fetchTrendingDiscussions(cursor):
+    cursor.execute('select d_id,image,user_id,title,postDate,content from discussion inner join category using (cat_id) limit 10')
+    
+    discussions = []
+    i=1
+    for d in cursor.fetchall():
+        discussions.append({'rank':i,'d_id': d[0],'image':d[1],'title':d[3],'date':d[4],'content':d[5]})
+        i += 1
+    return discussions

@@ -1,0 +1,57 @@
+.number,div .active {
+    background-color: #5080d1;
+    color: white;
+    text-decoration: none;
+}
+.entry h2,.entry .date {
+    color: #5080d1;
+}
+.entry {
+    clear: both;
+    margin-bottom: 10px;
+    background-color: #fff;
+    overflow: hidden;
+    width: 100%;
+    color: gray;
+    display: block;
+
+}
+.entry:hover {
+    background-color: #ccc;
+}
+.entry:hover .number {
+    color: #ccc;
+}
+.entry h2 {
+    text-transform: uppercase;
+    float: left;
+    margin: 0 0 7px 0;
+    font-family: BebasRegular
+}
+.entry .date {
+    position: absolute;
+    right:0;
+    top: 10px;
+}
+.text {
+    float: left;
+    padding: 5px 10px 5px 10px;
+    position: relative;
+    width: 600px; 
+}
+.entry .number {
+    font: 55px Myriad Pro;
+    width: 86px;
+    height: 90px;
+}
+.number span {
+    padding: 5px 0 0 10px;
+    display: block;
+}
+.entry p {
+    clear:left;
+}
+.number,.entry img {
+    float: left;
+}
+

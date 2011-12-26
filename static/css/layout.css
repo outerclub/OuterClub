@@ -1,3 +1,4 @@
+@import url(footer.css);
 @font-face {
     font-family: 'BebasRegular';
     src: url('/static/BEBAS___-webfont.eot');
@@ -14,41 +15,11 @@ body{
 	margin:0;
 	font-family:Helvetica,Arial,Sans-Serif;
     font-size: 12px;
+    background: black url(/static/images/new/background.png) repeat-x 0 0;
 }
 
 #newthread {
     padding: 5px;
-}
-
-/**
- * Footer
- */
-.footer{
-    background-color: #333;
-	margin-top: 80px;
-    float: left;
-    width: 100%;
-    color: #555;
-}
-.footer_menu{
-    width: 990px;
-    margin: 0 auto 0 auto;
-    padding-top: 30px;
-    padding-bottom: 30px;
-}
-.footer_menu_left{
-    float: left;
-}
-.footer a,.footer_menu_right {
-    color: #ccc;
-}
-.footer_menu_left a{
-    margin-left: 5px;
-    margin-right: 5px;
-	text-decoration: none;
-}
-.footer_menu_right{
-    float: right;
 }
 
 /**

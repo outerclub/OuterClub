@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>The Outer Club</title>
+<style type="text/css">
+@import url(/static/css/footer.css);
+body {
+    font-family: Helvetica, Arial, Sans-serif;
+    font-size: 12px;
+    background-color: #333;
+    margin: 0;
+} 
+#grayBg {
+    background-color: #c9c9c9
+}
+    
+#center {
+    margin: 0 auto 0 auto;
+    width: 1500px;
+    height: 800px;
+    overflow: hidden;
+    background: url('/static/images/new/signup_bg.png') repeat;
+    text-align: center;
+}
+.wrap {
+    position: relative;
+    top: 600px;
+    width: 221px;
+    height: 44px;
+    margin: 0 auto;
+    background: url('/static/images/new/signup_bubble.png') no-repeat;
+    display: inline-block;
+}
+button {
+    position: relative;
+    top: 650px;
+    height: 127px;
+    width: 251px;
+    background: url('/static/images/new/signup_submit.png') no-repeat;
+    border: 0;
+    opacity: 0.85;
+}
+button:hover {
+    opacity: 1;
+}
+input {
+    background: url('/static/images/new/transparent.png') repeat;
+    border: 0;
+    font-size: 16px;
+    color: #494949;
+    margin: 10px 0 0 10px;
+}
+.clear {
+    clear: both;
+}
+</style>
+</head>
+<body>
+<div id="grayBg">
+<div id="center">
+    <form action="/signup" method="post">
+    <div class="wrap">
+        <input type="text" name='username' value="USERNAME" />
+    </div>
+    <div class="wrap">
+        <input type="text" name='email' value="E-MAIL" />
+    </div>
+    <div class="wrap">
+        <input type="text" name='password' value="PASSWORD" />
+    </div>
+    <div class="clear"></div>
+    <div id="button">
+    <button type="submit"></button>
+    </div>
+    </form>
+</div>
+</div>
+{% include 'partials/footer.html' %}
+</body>
+</html>
