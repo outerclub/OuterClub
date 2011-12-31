@@ -2,24 +2,27 @@ from flask import render_template
 import MySQLdb
 from flask import Flask,request,session
 import flask
-import database as db
+import database as db,config
 from datetime import datetime
 import hashlib
+import random
 app = Flask(__name__)
 
 conn = None
 conn = MySQLdb.connect('localhost','root','','oc')
 cur = conn.cursor()
+
 def isLoggedIn():
     return  'username' in session
 
-def initSession(id,name):
+def initSession(id,name,avatar):
     session['user_id'] = id
     session['username'] = name
+    session['avatar'] = avatar
 def login():
     return flask.redirect(flask.url_for('signup'))
 def globals():
-    return {'username':session['username'],'user_id':session['user_id']}
+    return {'username':session['username'],'user_id':session['user_id'],'avatar':session['avatar']}
 
 @app.route('/')
 def index():
@@ -72,7 +75,7 @@ def category(category):
         tags = db.fetchDiscussionTags(cur2,discussion[0])
         posts.append({'id':discussion[0], 'title':discussion[2],  \
                       'user':discussion[1], \
-                      'date': discussion[3], \
+                      'date': config.dateFormat(discussion[3]), \
                       'tags': tags})
     popular_tags = db.fetchPopularTags(cur,cat_id)
 
@@ -87,7 +90,7 @@ def discussion(id):
         return login()
 
     # fetch the main discussion metadata
-    res = cur.execute('select user.name,title,postDate,content,cat_id from (discussion inner join user using (user_id)) where d_id=%s',(id,))
+    res = cur.execute('select user.name,title,postDate,content,cat_id,avatar_image from (discussion inner join user using (user_id)) where d_id=%s',(id,))
     discussion = cur.fetchone()
     cur.execute('select name from category where cat_id=%s',(discussion[4],))
     categoryName = cur.fetchone()[0]
@@ -97,8 +100,9 @@ def discussion(id):
     # populate the data object 
     discussion = {'id': id, 'title':discussion[1], \
                   'user':discussion[0], \
-                   'date': discussion[2], \
+                   'date': config.dateFormat(discussion[2]), \
                    'content': discussion[3], \
+                    'avatar': discussion[5], \
                    'tags': tags, \
                   }
     responses = db.fetchResponses(cur,id)
@@ -110,7 +114,13 @@ def discussion(id):
     return render_template('discussion.html',**g)
 @app.route('/post',methods=['POST'])
 def post():
-    print 'post'
+    cur.execute('select cat_id from category where name=%s', (request.form['area'],))
+    cat_id = cur.fetchone()[0]
+    cur.execute('insert into discussion (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,session['user_id'],request.form['title'],request.form['content']))
+    conn.commit()
+
+    newUrl = request.form['area'].replace(' ','+')
+    return flask.redirect(flask.url_for('category',category=newUrl))
 
 @app.route('/reply',methods=['POST'])
 def reply():
@@ -122,7 +132,10 @@ def reply():
     cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,session['user_id'],data))
     conn.commit()
 
-    return "true"
+    cur.execute('select replyDate,content from response where r_id=%s', (cur.lastrowid,))
+    myRow = cur.fetchone()
+
+    return flask.jsonify({'date':config.dateFormat(myRow[0]),'user':session['username'],'content': myRow[1],'avatar': session['avatar']})
 
 @app.route('/signup',methods=['GET','POST'])
 def signup():
@@ -134,12 +147,20 @@ def signup():
     if request.method == 'GET':
         return render_template('signup.html')
 
-    # process the form submission
-    res = cur.execute('insert into user (name,email,password) values (%s,%s,%s)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest()))
-    conn.commit()
-    initSession(cur.lastrowid,request.form['username'])
+    # check to see if user exists
+    cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
+    test = cur.fetchone()
+
+    if (test != None):
+        initSession(test[0],request.form['username'],test[1])
+    else:
+        avatar = 'user_%s.png' % random.randrange(1,6)
+        # process the form submission
+        res = cur.execute('insert into user (name,email,password,avatar_image) values (%s,%s,%s,%s)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar))
+        conn.commit()
+        initSession(cur.lastrowid,request.form['username'],avatar)
     
-    return index()
+    return flask.redirect(flask.url_for('index'))
     
 @app.route('/logout')
 def logout():

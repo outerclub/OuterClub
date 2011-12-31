@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>The Outer Club</title>
+<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
 <style type="text/css">
 @import url(/static/css/footer.css);
 body {
@@ -55,6 +56,38 @@ input {
     clear: both;
 }
 </style>
+<script type="text/javascript">
+$(document).ready(function() {
+    $("input[name='username']").focusin(function() {
+        if ($(this).val() == 'USERNAME')
+            $(this).val('');
+    });
+    $("input[name='username']").focusout(function() {
+        if ($(this).val() == '')
+            $(this).val('USERNAME');
+    });
+    $("input[name='email']").focusin(function() {
+        if ($(this).val() == 'E-MAIL')
+            $(this).val('');
+    });
+    $("input[name='email']").focusout(function() {
+        if ($(this).val() == '')
+            $(this).val('E-MAIL');
+    });
+    $("input[name='fakepw']").focusin(function() {
+        $(this).hide();
+        $("input[name='password']").show().focus();
+              
+    });
+    $("input[name='password']").focusout(function() {
+        if ($(this).val() == '')
+         {
+            $(this).hide();
+            $("input[name='fakepw']").show();
+         }
+    });
+});
+</script>
 </head>
 <body>
 <div id="grayBg">
@@ -67,7 +100,8 @@ input {
         <input type="text" name='email' value="E-MAIL" />
     </div>
     <div class="wrap">
-        <input type="text" name='password' value="PASSWORD" />
+        <input type="text" name="fakepw" value="PASSWORD" />
+        <input style="display: none" type="password" name='password' value="" />
     </div>
     <div class="clear"></div>
     <div id="button">

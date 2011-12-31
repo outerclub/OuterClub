@@ -4,7 +4,7 @@
 <head>
 <title>TheOuterClub - {% block title %} Unknown {% endblock %}</title>
 <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='style.css') }}"/>
-<script type="text/javascript" src="{{ url_for('static',filename='jquery-1.7.1.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='js/jquery-1.7.1.min.js') }}"></script>
 </head>
 <body>
 <div id="wrapper990">
@@ -39,7 +39,26 @@
 	</div>
 	<div id="newthread">
 	    <form method="post" action="{{ url_for('post') }}">
-	    New Discussion: <input type="text" name="topic" />
+	    New Discussion:<br />
+	    Title: <input type="text" name="title" />
+	    <br />
+	    Content: <input type="text" name="content" />
+	    <br />
+	    Area: <select name="area">
+	        <option value="lounge">lounge</option>
+	        <option value="current events">current events</option>
+	        <option value="high school">high school</option>
+	        <option value="college">college</option>
+	        <option value="love clinic">love clinic</option>
+	        <option value="sports">sports</option>
+	        <option value="philosophy">philosophy</option>
+	        <option value="adulthood">adulthood</option>
+	        <option value="technology">technology</option>
+	        <option value="video & computer games">video &amp; computer games</option>
+	        <option value="fashion">fashion</option>
+	        <option value="tv & movies">tv &amp; movies</option>
+	        <option value="music">music</option>
+	        </select>
 	    <input type="submit" name="submit" value="Submit" />
 	    </form>
 	    Welcome <strong>{{ username }}</strong> <a href="{{ url_for('logout') }}">Log out</a>

@@ -1,9 +1,15 @@
 /**
  * Footer
  */
+.chairs {
+    margin-top: 80px;
+    background: transparent url(/static/images/new/floor.png) repeat-x center bottom;
+    width: 100%;
+    height: 312px;
+    text-align: center;
+}
 .footer{
     background-color: #333;
-	margin-top: 80px;
     float: left;
     width: 100%;
     font-weight: bold;

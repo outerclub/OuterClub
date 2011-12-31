@@ -4,16 +4,65 @@
 {% endblock %}
 {% block content %}
     <style type="text/css">
-    @import url(/static/css/discussion.css)
+    @import url(/static/css/category.css);
+    @import url(/static/css/discussion.css);
     </style>
     <script type="text/javascript">
+        function createDiscussion(fadeIn,user,date,content,avatar) {
+            var previousD = $(".discussion");
+            // get last full date
+            var lastDateSplit;
+            for (var x=previousD.size()-1; x >= 0; x--)
+            {
+                lastDateSplit = $(previousD.get(x)).find('.date').text().split(' ');
+                if (lastDateSplit.length == 5)
+                {
+                    break;
+                }
+            }
+            
+            var currentDateSplit = date.split(' ');
+
+            // same date as before?
+            if (currentDateSplit[0] == lastDateSplit[0] && currentDateSplit[1] == lastDateSplit[1] &&
+                currentDateSplit[2] == lastDateSplit[2])
+            {
+                date = currentDateSplit[4];
+            }
+            var str ='<div class="discussion" style="display: none">';
+            str += '<div class="user">'+
+                    '<div class="description">'+
+                        '<h2>'+user+'</h2>'+
+                        '<div>Prestige: 67</div>'+
+                    '</div>'+
+                    '<img src="/static/images/new/avatars/'+avatar+'" />'+
+                '</div>'+
+                '<div class="content">'+
+                    content+
+                    '<br />'+
+                    '<div class="date">'+date+'</div>'+
+                '</div>';
+            str += '</div>';
+
+            $(".reply").before(str);
+            if (fadeIn) {
+                $(".discussion:last").fadeIn();
+            } else {
+                $(".discussion:last").show();
+            }
+        };
         $(document).ready(function() {
             $("button").click(function() {
-                $.post('{{ url_for('reply') }}', { d_id:'{{ discussion.id }}', data: $("input[name='response']").val()},
+                $.post('{{ url_for('reply') }}', { d_id:'{{ discussion.id }}', data: $("textarea").val()},
                     function(data) {
-                        $(".thread_article_post:last").after("HELO!");
+                        $("textarea").val('');
+                        createDiscussion(true,data.user,data.date,data.content,data.avatar);
                 });
             });
+            {% for response in responses %}
+            createDiscussion(false,'{{ response.user }}', '{{ response.date }}','{{ response.content }}','{{ response.avatar }}');
+            
+            {% endfor %}
         });
     </script>
 	<div class="content_wrapper">
@@ -34,86 +83,36 @@
             {% endfor %}
             </ul>
 		</div>
-	<div class="sub_populer_tag">
-			<div class="star">
-				<a href="#">Star</a>
-			</div>
-            <div class="post_content">
-				<h1>{{ discussion.title }}</h1>
+        <div class="discussion_frame">
+            <div class="room">
+            </div>
+            <div class="discussion">
+                <div class="user">
+                    <div class="description">
+                        <h2>{{ discussion.user }}</h2>
+                        <div>Prestige: 67</div>
+                    </div>
+                    <img src="/static/images/new/avatars/{{ discussion.avatar }}" /> 
+                </div>
+                <div class="content">
+                    {{ discussion.content }}
+                    <br />
+                    <div class="date">{{ discussion.date }}</div>
+                    <br />
+                    <img src="/static/images/nav_icon.png">
+                    <a class="tag" href="#">Latin</a>
+                    
+                </div>
+            </div>
+
+            <div class="reply">
+                <span class="info">Write a comment</span><br />
+                <textarea rows="6" cols="80"></textarea>
+                <button>Post</button>
+
             </div>
             <div class="clear"></div>
-		</div>
-		<div class="thread_posts">
-			<div class="thread_article_nav">
-				<ul>
-					<li class="nav nav_1 active">
-						<a href="" class="active">New Posts</a>
-					</li>
-					<li class="nav nav_2">
-						<a href="" class="">Landmark</a>
-					</li>
-					<li class="nav nav_3">
-						<a href="">Thread Stats</a>
-					</li>
-					<li class="nav nav_4">
-						<a href="">Notifications</a>
-					</li>
-					<li class="nav nav_5">
-						<a href="">Drafts</a>
-					</li>
-					<li class="nav nav_6 last">
-						<a href="">User Profile</a>
-					</li>
-				</ul>
-				<div class="user_profile">					
-				</div>
-			</div>
-			<div class="thread_article">
-				<div class="thread_article_post first_post">
-					<div class="left">
-						<img src="/static/images/user_1.png"/>
-					</div>
-					<div class="middle">
-						<h3>{{ discussion.user }}</h3>
-						<span>on {{ discussion.date }}</span>
-						<p>{{ discussion.content }}</p>
-						<div class="post_nav thread_right_nav">
-                            {% for tag in discussion.tags %}
-							<a href="#">{{ tag }}</a>
-                            {% endfor %}
-						</div>
-						<p class="comment">
-							<a href="" class="follow">Follow</a>
-							<a href="" class="comment">Add Comment</a>
-						</p>
-					</div>
-				</div>
-                {% for response in responses %}
-				<div class="thread_article_post">
-					<div class="left">
-						<img src="/static/images/user_2.png"/>
-					</div>
-					<div class="middle">
-						<h3>{{ response.user }}</h3>
-						<span>on {{ response.date }}</span>
-						<p>{{ response.content }}</p>
-						<p class="comment">
-							<a href="" class="follow">Follow</a>
-							<a href="" class="comment">Add Comment</a>
-						</p>
-					</div>
-                    <div class="flag">
-                        <img class="first" src="/static/images/flag_1.png"/>
-                        <img src="/static/images/flag_2.png"/>
-                        <img src="/static/images/flag_3.png"/>
-                        <img src="/static/images/flag_4.png"/>
-                    </div>
-				</div>
-                {% endfor %}
-			</div>
-
-            <div style="background:white">Reply: <input type="text" name="response" value="" /> <button name="submit">Submit</button></div>
-            <div class="clear"></div>
+            
         </div>
     </div>
 

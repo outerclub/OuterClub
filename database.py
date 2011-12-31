@@ -1,3 +1,5 @@
+import config
+
 def fetchDiscussionTags(cursor,d_id):
     cursor.execute('select tag.name from link_discussion_tag inner join tag using (tag_id) where d_id=%s',(d_id,))
     tags = []
@@ -6,11 +8,13 @@ def fetchDiscussionTags(cursor,d_id):
     return tags
     
 def fetchResponses(cursor,d_id):
-    cursor.execute('select r_id,user.name,replyDate,content from response inner join user using (user_id) where d_id=%s order by replyDate asc', (d_id,))
+    cursor.execute('select r_id,user.name,replyDate,content,avatar_image from response inner join user using (user_id) where d_id=%s order by replyDate asc', (d_id,))
     responses = []
     for resp in cursor.fetchall():
         responses.append({'r_id':resp[0],'user':resp[1], \
-                          'date': resp[2], 'content': resp[3]})
+                          'date': config.dateFormat(resp[2]), 'content': resp[3], \
+                          'avatar': resp[4]})
+    print responses
     return responses
 
 def fetchPopularTags(cursor,cat_id):
