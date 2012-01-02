@@ -15,12 +15,17 @@ body {
 #grayBg {
     background-color: #c9c9c9
 }
-    
+#grayBg .footer {
+    color: #ccc;
+}
+#grayBg .footer_menu {
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
 #center {
     margin: 0 auto 0 auto;
     width: 1500px;
-    height: 800px;
-    overflow: hidden;
+    height: 830px;
     background: url('/static/images/new/signup_bg.png') repeat;
     text-align: center;
 }
@@ -45,7 +50,7 @@ button {
 button:hover {
     opacity: 1;
 }
-input {
+#center input {
     background: url('/static/images/new/transparent.png') repeat;
     border: 0;
     font-size: 16px;
@@ -91,24 +96,36 @@ $(document).ready(function() {
 </head>
 <body>
 <div id="grayBg">
-<div id="center">
-    <form action="/signup" method="post">
-    <div class="wrap">
-        <input type="text" name='username' value="USERNAME" />
-    </div>
-    <div class="wrap">
-        <input type="text" name='email' value="E-MAIL" />
-    </div>
-    <div class="wrap">
-        <input type="text" name="fakepw" value="PASSWORD" />
-        <input style="display: none" type="password" name='password' value="" />
+    <div class="footer">
+     <div class="footer_menu">
+        <div class="footer_menu_left">
+            <form action="/login" method="post">
+            Username: <input type="text" name="l_username" /> &nbsp;Password: <input type="password" name="l_password" />
+            <input type="submit" name="submit" value="Log In" />
+            </form>
+        </div>
+     </div>
     </div>
     <div class="clear"></div>
-    <div id="button">
-    <button type="submit"></button>
+    <div id="center">
+        <form action="/signup" method="post">
+        <div class="wrap">
+            <input type="text" name='username' value="USERNAME" />
+        </div>
+        <div class="wrap">
+            <input type="text" name='email' value="E-MAIL" />
+        </div>
+        <div class="wrap">
+            <input type="text" name="fakepw" value="PASSWORD" />
+            <input style="display: none" type="password" name='password' value="" />
+        </div>
+        <div class="clear"></div>
+        <div id="button">
+        <button type="submit"></button>
+        </div>
+        </form>
     </div>
-    </form>
-</div>
+    <div class="clear"></div>
 </div>
 {% include 'partials/footer.html' %}
 </body>

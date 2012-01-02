@@ -19,7 +19,7 @@ def initSession(id,name,avatar):
     session['user_id'] = id
     session['username'] = name
     session['avatar'] = avatar
-def login():
+def displaySignup():
     return flask.redirect(flask.url_for('signup'))
 def globals():
     return {'username':session['username'],'user_id':session['user_id'],'avatar':session['avatar']}
@@ -27,7 +27,7 @@ def globals():
 @app.route('/')
 def index():
     if not isLoggedIn():
-        return login()
+        return displaySignup()
     g = globals()
 
     return render_template('index.html',**g)
@@ -35,7 +35,7 @@ def index():
 @app.route('/about')
 def about():
     if not isLoggedIn():
-        return login()
+        return displaySignup()
     g = globals()
 
     return render_template('about.html',**g)
@@ -43,7 +43,7 @@ def about():
 @app.route('/categories')
 def categories():
     if not isLoggedIn():
-        return login()
+        return displaySignup()
 
     res = cur.execute('select name,image from category order by cat_id asc') 
     categories = []
@@ -60,7 +60,7 @@ def categories():
 @app.route('/category/<category>')
 def category(category):
     if not isLoggedIn():
-        return login()
+        return displaySignup()
 
     # fetch the category id from the name
     category = category.replace('+',' ')
@@ -87,7 +87,7 @@ def category(category):
 @app.route('/discussion/<id>')
 def discussion(id):
     if not isLoggedIn():
-        return login()
+        return displaySignup()
 
     # fetch the main discussion metadata
     res = cur.execute('select user.name,title,postDate,content,cat_id,avatar_image from (discussion inner join user using (user_id)) where d_id=%s',(id,))
@@ -125,7 +125,7 @@ def post():
 @app.route('/reply',methods=['POST'])
 def reply():
     if not isLoggedIn():
-        return login()
+        return displaySignup()
     d_id = request.form['d_id']
     data = request.form['data']
 
@@ -137,6 +137,22 @@ def reply():
 
     return flask.jsonify({'date':config.dateFormat(myRow[0]),'user':session['username'],'content': myRow[1],'avatar': session['avatar']})
 
+@app.route('/login',methods=['POST'])
+def login():
+    if isLoggedIn():
+        return flask.redirect(flask.url_for('index'))
+
+    # check to see if user exists
+    cur.execute('select user_id,avatar_image,password from user where name=%s', (request.form['l_username'],))
+    test = cur.fetchone()
+
+    if test != None:
+        initSession(test[0],request.form['l_username'],test[1])
+        return flask.redirect(flask.url_for('index'))
+    # user doesn't exist!
+    else:
+        return displaySignup()
+    
 @app.route('/signup',methods=['GET','POST'])
 def signup():
     # don't let the user sign up if he's logged in
@@ -151,8 +167,9 @@ def signup():
     cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
     test = cur.fetchone()
 
+    # if the user exists
     if (test != None):
-        initSession(test[0],request.form['username'],test[1])
+        return render_template('signup.html')
     else:
         avatar = 'user_%s.png' % random.randrange(1,6)
         # process the form submission
@@ -171,7 +188,7 @@ def logout():
 @app.route('/trending')
 def trending():
     if not isLoggedIn():
-        return login()
+        return displaySignup()
     d = db.fetchTrendingDiscussions(cur)
 
     g = globals()

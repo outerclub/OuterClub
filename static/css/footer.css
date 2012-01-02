@@ -13,9 +13,14 @@
     float: left;
     width: 100%;
     font-weight: bold;
-    color: #555;
 }
-.footer_menu{
+.footer a:hover {
+    text-decoration: underline
+}
+.footer a,.footer {
+    color: #ccc
+}
+.footer_menu {
     width: 990px;
     margin: 0 auto 0 auto;
     padding-top: 30px;
@@ -24,8 +29,8 @@
 .footer_menu_left{
     float: left;
 }
-.footer a,.footer_menu_right {
-    color: #ccc;
+.footer span {
+    color: #555;
 }
 .footer_menu_left a{
     margin-left: 5px;
