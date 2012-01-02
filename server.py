@@ -6,6 +6,23 @@ import database as db,config
 from datetime import datetime
 import hashlib
 import random
+
+from rtg.t_rtg import RtgService
+from rtg.t_rtg.ttypes import *
+
+from thrift import Thrift
+from thrift.transport import TSocket
+from thrift.transport import TTransport
+from thrift.protocol import TBinaryProtocol
+
+# setup rtg
+transport = TSocket.TSocket('localhost',9090)
+transport = TTransport.TBufferedTransport(transport)
+protocol = TBinaryProtocol.TBinaryProtocol(transport)
+
+client = RtgService.Client(protocol)
+
+# setup app
 app = Flask(__name__)
 
 conn = None
@@ -68,7 +85,7 @@ def category(category):
     cat_id = cur.fetchone()[0]
 
     # fetch the discussions for this category
-    res = cur.execute('select d_id,user.name,title,postDate,content from discussion inner join user using (user_id) where cat_id=%s',(cat_id,))
+    res = cur.execute('select d_id,user.name,title,postDate,content from discussion inner join user using (user_id) where cat_id=%s order by postDate desc',(cat_id,))
     posts = []
     cur2 = conn.cursor()
     for discussion in cur.fetchall():
@@ -126,16 +143,27 @@ def post():
 def reply():
     if not isLoggedIn():
         return displaySignup()
-    d_id = request.form['d_id']
+    d_id = int(request.form['d_id'])
     data = request.form['data']
 
     cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,session['user_id'],data))
     conn.commit()
-
-    cur.execute('select replyDate,content from response where r_id=%s', (cur.lastrowid,))
+    
+    cur.execute('select replyDate from response where r_id=%s', (cur.lastrowid,))
     myRow = cur.fetchone()
 
-    return flask.jsonify({'date':config.dateFormat(myRow[0]),'user':session['username'],'content': myRow[1],'avatar': session['avatar']})
+    push = TResponse()
+    push.d_id = d_id
+    push.user_id = session['user_id']
+    push.username = session['username']
+    push.avatar = session['avatar']
+    push.date = config.dateFormat(myRow[0])
+    push.content = data
+    transport.open()
+    client.newResponse(push)
+    transport.close()
+
+    return ''
 
 @app.route('/login',methods=['POST'])
 def login():

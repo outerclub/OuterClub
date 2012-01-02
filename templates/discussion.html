@@ -7,6 +7,7 @@
     @import url(/static/css/category.css);
     @import url(/static/css/discussion.css);
     </style>
+    <script type="text/javascript" src="/static/js/socket.io.js"></script> 
     <script type="text/javascript">
         function createDiscussion(fadeIn,user,date,content,avatar) {
             var previousD = $(".discussion");
@@ -51,12 +52,21 @@
                 $(".discussion:last").show();
             }
         };
+        var socket;
         $(document).ready(function() {
+            socket = new io.connect('http://localhost:8002/?key=asdf',{ rememberTransport: false });
+            socket.on('connect',function() {
+                socket.emit('register','/discussion/{{ discussion.id}}');
+            });
+            socket.on('response',function(data) {
+                createDiscussion(true,data.user,data.date,data.content,data.avatar);
+            });
+            socket.on('viewers',function(data) {
+            });
             $("button").click(function() {
                 $.post('{{ url_for('reply') }}', { d_id:'{{ discussion.id }}', data: $("textarea").val()},
                     function(data) {
                         $("textarea").val('');
-                        createDiscussion(true,data.user,data.date,data.content,data.avatar);
                 });
             });
             {% for response in responses %}

@@ -5,15 +5,16 @@
   <script src="socket.io.js"></script>
   <script>
     $(function() {
-        var s = new io.connect('http://' + window.location.hostname + ':8002', {
+        var s = new io.connect('http://' + window.location.hostname + ':8002/?key=asdf', {
             rememberTransport: false
         });
 
         s.on('connect', function() {
-            s.send('New participant joined');
+            s.emit('register','/discussion/1');
+            s.emit('register','/discussion/2');
         });
 
-        s.on('message', function(data) {
+        s.on('response', function(data) {
             $("#chat").append("<div>" + data + "</div>");
         });
 

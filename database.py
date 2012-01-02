@@ -14,7 +14,6 @@ def fetchResponses(cursor,d_id):
         responses.append({'r_id':resp[0],'user':resp[1], \
                           'date': config.dateFormat(resp[2]), 'content': resp[3], \
                           'avatar': resp[4]})
-    print responses
     return responses
 
 def fetchPopularTags(cursor,cat_id):
