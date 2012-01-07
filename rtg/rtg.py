@@ -78,49 +78,57 @@ class External(threading.Thread):
 
 class QueueProc(threading.Thread):
     keyToConn = dict()
-    connToKey = dict()
-    connToPaths= dict()
-    pathsToConns = dict() 
+    conns = dict()
+    paths = dict() 
     queue = Queue.Queue()
+    
+    def connsToKeys(self,arr):
+        ret = set()
+        for c in arr:
+            ret.add(self.conns[c]['key'])
+        return list(ret)
+
+    def updateViewers(self,path,viewers):
+        for conn in self.paths[path]['conns']:
+            conn.emit('viewers',viewers)
 
     def run(self):
         while True:
             msg = self.queue.get(True)
             if isinstance(msg,event.Open):
-                self.connToPaths[msg.conn] = set()
+                self.conns[msg.conn] = {'key':msg.key,'paths':set()}
                 if not msg.key in self.keyToConn:
                     self.keyToConn[msg.key] = []
                 
                 self.keyToConn[msg.key].append(msg.conn)
-                self.connToKey[msg.conn] = msg.key
             elif isinstance(msg,event.Register):
                 # add connection and path
-                self.connToPaths[msg.conn].add(msg.path)
-                if not msg.path in self.pathsToConns:
-                    self.pathsToConns[msg.path] = set()
-                self.pathsToConns[msg.path].add(msg.conn)
+                self.conns[msg.conn]['paths'].add(msg.path)
+                if not msg.path in self.paths:
+                    self.paths[msg.path] = {'conns':set()}
+                self.paths[msg.path]['conns'].add(msg.conn)
                 
                 if (msg.path.startswith('/discussion/')):
-                    pass
+                    self.updateViewers(msg.path,self.connsToKeys(self.paths[msg.path]['conns']))
             elif isinstance(msg,event.Close):
-                # remove connection from all pathsToConns
-                for path in self.connToPaths[msg.conn]:
-                    if (msg.path.startswith('/discussion')):
-                        pass
-                    self.pathsToConns[path].remove(msg.conn)
+                # remove connection from all paths
+                for path in self.conns[msg.conn]['paths']:
+                    if msg.conn in self.paths[path]['conns']:
+                        self.paths[path]['conns'].remove(msg.conn)
+                        if (path.startswith('/discussion/')):
+                            self.updateViewers(path,self.connsToKeys(self.paths[msg.path]['conns']))
 
                 # cleanup path?
-                if not self.pathsToConns[path]:
-                    del self.pathsToConns[path]
+                if not self.paths[path]['conns']:
+                    del self.paths[path]
                  
                 # cleanup connection
-                del self.connToPaths[msg.conn]
-                self.keyToConn[self.connToKey[msg.conn]].remove(msg.conn)
-                del self.connToKey[msg.conn]
+                del self.conns[msg.conn]
+                self.keyToConn[self.conns[msg.conn]['key']].remove(msg.conn)
             elif isinstance(msg,event.Message):
                 # distribute to path
-                if (msg.path in self.pathsToConns):
-                    for conn in self.pathsToConns[msg.path]: 
+                if (msg.path in self.paths):
+                    for conn in self.paths[msg.path]['conns']: 
                         if msg.etype == 'response':
                             p = msg.payload
                             conn.emit(msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar':p.avatar})

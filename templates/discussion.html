@@ -54,7 +54,7 @@
         };
         var socket;
         $(document).ready(function() {
-            socket = new io.connect('http://localhost:8002/?key=asdf',{ rememberTransport: false });
+            socket = new io.connect('http://localhost:8002/?key={{ session['user_id'] }}',{ rememberTransport: false });
             socket.on('connect',function() {
                 socket.emit('register','/discussion/{{ discussion.id}}');
             });
@@ -62,6 +62,7 @@
                 createDiscussion(true,data.user,data.date,data.content,data.avatar);
             });
             socket.on('viewers',function(data) {
+                alert(data);
             });
             $("button").click(function() {
                 $.post('{{ url_for('reply') }}', { d_id:'{{ discussion.id }}', data: $("textarea").val()},
