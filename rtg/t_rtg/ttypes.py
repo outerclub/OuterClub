@@ -26,6 +26,8 @@ class TResponse(object):
    - avatar
    - date
    - content
+   - category_image
+   - category_id
   """
 
   thrift_spec = (
@@ -36,15 +38,19 @@ class TResponse(object):
     (4, TType.STRING, 'avatar', None, None, ), # 4
     (5, TType.STRING, 'date', None, None, ), # 5
     (6, TType.STRING, 'content', None, None, ), # 6
+    (7, TType.STRING, 'category_image', None, None, ), # 7
+    (8, TType.I32, 'category_id', None, None, ), # 8
   )
 
-  def __init__(self, d_id=None, user_id=None, username=None, avatar=None, date=None, content=None,):
+  def __init__(self, d_id=None, user_id=None, username=None, avatar=None, date=None, content=None, category_image=None, category_id=None,):
     self.d_id = d_id
     self.user_id = user_id
     self.username = username
     self.avatar = avatar
     self.date = date
     self.content = content
+    self.category_image = category_image
+    self.category_id = category_id
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -85,6 +91,16 @@ class TResponse(object):
           self.content = iprot.readString();
         else:
           iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.STRING:
+          self.category_image = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.I32:
+          self.category_id = iprot.readI32();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -118,6 +134,14 @@ class TResponse(object):
     if self.content is not None:
       oprot.writeFieldBegin('content', TType.STRING, 6)
       oprot.writeString(self.content)
+      oprot.writeFieldEnd()
+    if self.category_image is not None:
+      oprot.writeFieldBegin('category_image', TType.STRING, 7)
+      oprot.writeString(self.category_image)
+      oprot.writeFieldEnd()
+    if self.category_id is not None:
+      oprot.writeFieldBegin('category_id', TType.I32, 8)
+      oprot.writeI32(self.category_id)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

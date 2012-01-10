@@ -7,7 +7,6 @@
     @import url(/static/css/category.css);
     @import url(/static/css/discussion.css);
     </style>
-    <script type="text/javascript" src="/static/js/socket.io.js"></script> 
     <script type="text/javascript">
         function createDiscussion(fadeIn,user,date,content,avatar) {
             var previousD = $(".discussion");
@@ -16,7 +15,7 @@
             for (var x=previousD.size()-1; x >= 0; x--)
             {
                 lastDateSplit = $(previousD.get(x)).find('.date').text().split(' ');
-                if (lastDateSplit.length == 5)
+                if (lastDateSplit.length == 4)
                 {
                     break;
                 }
@@ -28,7 +27,7 @@
             if (currentDateSplit[0] == lastDateSplit[0] && currentDateSplit[1] == lastDateSplit[1] &&
                 currentDateSplit[2] == lastDateSplit[2])
             {
-                date = currentDateSplit[4];
+                date = currentDateSplit[3];
             }
             var str ='<div class="discussion" style="display: none">';
             str += '<div class="user">'+
@@ -53,8 +52,8 @@
             }
         };
         var socket;
+        var currentViewers = [];
         $(document).ready(function() {
-            socket = new io.connect('http://localhost:8002/?key={{ session['user_id'] }}',{ rememberTransport: false });
             socket.on('connect',function() {
                 socket.emit('register','/discussion/{{ discussion.id}}');
             });
@@ -62,7 +61,30 @@
                 createDiscussion(true,data.user,data.date,data.content,data.avatar);
             });
             socket.on('viewers',function(data) {
-                alert(data);
+                // scan for removals
+                var toRemove = [];
+                for (var i=0; i < currentViewers.length; i++)
+                {
+                    var v = currentViewers[i];
+                    if (!(v in data))
+                    {
+                        $("#v_"+v).fadeOut(function() {
+                            $(this).remove();
+                        });
+                        currentViewers = currentViewers.splice(i,1);
+                        i--;
+                    }
+                }
+                // scan for insertions
+                for (v in data) {
+                    if (!(v in currentViewers)) {
+                        user = jQuery('<img id="v_'+v+'"src="/static/images/new/avatars/user_1.png" />');
+                        user.hide();
+                        $(".discussion_frame .users").append(user);
+                        user.fadeIn();
+                        currentViewers.push(v);
+                    }
+                }
             });
             $("button").click(function() {
                 $.post('{{ url_for('reply') }}', { d_id:'{{ discussion.id }}', data: $("textarea").val()},
@@ -86,16 +108,10 @@
             </div>
 		</div>	
         <div class="clear"></div>
-		<div class="populer_tag">
-			<span>Populer Tags:</span>
-            <ul>
-            {% for tag in popular %}
-			<li><a href="">{{ tag }}</a></li>
-            {% endfor %}
-            </ul>
-		</div>
         <div class="discussion_frame">
             <div class="room">
+            </div>
+            <div class="users">
             </div>
             <div class="discussion">
                 <div class="user">

@@ -5,6 +5,13 @@
 <title>TheOuterClub - {% block title %} Unknown {% endblock %}</title>
 <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='style.css') }}"/>
 <script type="text/javascript" src="{{ url_for('static',filename='js/jquery-1.7.1.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='js/socket.io.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='js/outer.js') }}"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    init('{{ session['user_id'] }}');
+});
+</script>
 </head>
 <body>
 <div id="wrapper990">
@@ -62,6 +69,11 @@
 	    <input type="submit" name="submit" value="Submit" />
 	    </form>
 	    Welcome <strong>{{ username }}</strong> <a href="{{ url_for('logout') }}">Log out</a>
+	</div>
+<div class="slide_show">
+		<h2>Happening Right Now</h2>
+		<div class="slide_show_content">
+		</div>
 	</div>
 
 {% block content %} {% endblock %}

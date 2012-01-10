@@ -33,7 +33,6 @@ class SocketIOHandler(tornado.web.RequestHandler):
 
 class ChatConnection(tornadio2.conn.SocketConnection):
     def on_open(self, info):
-        print 'open'
         QueueProc.put(event.Open(self,info.arguments['key'][0]))
 
     def on_message(self,message):
@@ -45,7 +44,6 @@ class ChatConnection(tornadio2.conn.SocketConnection):
 
     def on_close(self):
         QueueProc.put(event.Close(self))
-        print 'kill'
 
 # Create tornadio server
 ChatRouter = tornadio2.router.TornadioRouter(ChatConnection)
@@ -116,15 +114,15 @@ class QueueProc(threading.Thread):
                     if msg.conn in self.paths[path]['conns']:
                         self.paths[path]['conns'].remove(msg.conn)
                         if (path.startswith('/discussion/')):
-                            self.updateViewers(path,self.connsToKeys(self.paths[msg.path]['conns']))
+                            self.updateViewers(path,self.connsToKeys(self.paths[path]['conns']))
 
-                # cleanup path?
-                if not self.paths[path]['conns']:
-                    del self.paths[path]
+                    # cleanup path?
+                    if not self.paths[path]['conns']:
+                        del self.paths[path]
                  
                 # cleanup connection
-                del self.conns[msg.conn]
                 self.keyToConn[self.conns[msg.conn]['key']].remove(msg.conn)
+                del self.conns[msg.conn]
             elif isinstance(msg,event.Message):
                 # distribute to path
                 if (msg.path in self.paths):
@@ -132,6 +130,12 @@ class QueueProc(threading.Thread):
                         if msg.etype == 'response':
                             p = msg.payload
                             conn.emit(msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar':p.avatar})
+                            
+                            reply_data = {'user':p.username,'user_id':p.user_id,'date':p.date,'content':p.content,'avatar':p.avatar,'category_image':p.category_image,'category_id':p.category_id,'d_id':p.d_id}
+                            self.queue.put(event.Message('/happening','happening',{'type':'reply','data':reply_data}))
+                        elif msg.etype == 'happening':
+                            p = msg.payload
+                            conn.emit(msg.etype,{'type':p['type'],'data':p['data']})
                     
             if msg == event.QueueKill:
                 break
@@ -145,6 +149,7 @@ class QueueProc(threading.Thread):
 
 class TRtgHandler:
     def newResponse(self,response):
+        print response
         QueueProc.put(event.Message('/discussion/%d' % (response.d_id), 'response',response))
 
 handler = TRtgHandler()

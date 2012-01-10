@@ -6,6 +6,8 @@ struct TResponse
     4:optional string avatar,
     5:optional string date,
     6:optional string content
+    7:string category_image
+    8:i32 category_id
 }
 service RtgService
 {

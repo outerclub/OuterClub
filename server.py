@@ -26,7 +26,7 @@ client = RtgService.Client(protocol)
 app = Flask(__name__)
 
 conn = None
-conn = MySQLdb.connect('localhost','root','','oc')
+conn = MySQLdb.connect('localhost','root','asdfgh','oc')
 cur = conn.cursor()
 
 def isLoggedIn():
@@ -123,6 +123,7 @@ def discussion(id):
                    'tags': tags, \
                   }
     responses = db.fetchResponses(cur,id)
+    print responses
 
     g = globals()
     g.update({'discussion':discussion,'popular':popular_tags,'responses':responses,'category_name':categoryName,'category_url':categoryName.replace(' ','+')})
@@ -159,6 +160,12 @@ def reply():
     push.avatar = session['avatar']
     push.date = config.dateFormat(myRow[0])
     push.content = data
+
+    cur.execute('select cat_id,category.image from discussion inner join category using (cat_id) where d_id=%s',(d_id,))
+    myRow = cur.fetchone()
+
+    push.category_id = myRow[0]
+    push.category_image = myRow[1]
     transport.open()
     client.newResponse(push)
     transport.close()
@@ -225,4 +232,4 @@ def trending():
 
 app.debug = True
 app.secret_key = 'hello, how are you today?'
-app.run()
+app.run(host='0.0.0.0')
