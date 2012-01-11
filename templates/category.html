@@ -2,10 +2,41 @@
 {% block title %}
 {{ category_name }}
 {% endblock %}
+{% block headers %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/category.css') }}" />
+{% endblock %}
+{% block footers %}
+    <script type="text/javascript">
+    $(document).ready(function() {
+        socket.on('connect',function() {
+            socket.emit('register','/category/{{ category_id }}');
+        });
+        socket.on('discussion',function(data) {
+            var d = createDiscussion(true,data.d_id,data.title,data.user,data.date);
+            $('.posts').prepend(d);
+            d.fadeIn();
+        });
+        {% for post in posts %}
+        $('.posts').append(createDiscussion(false,{{ post.id }}, '{{ post.title }}', '{{ post.user }}', '{{ post.date }}'));
+        {% endfor %}
+        
+    });
+    function createDiscussion(hide,id,title,user,date) {
+        var html = jQuery('<div class="post" onclick="location.href=\'/discussion/'+id+'\'">'
+            + '<div class="post_content">'
+            + '<h1>'+title+'</h1> <img src="/static/images/new/magnify.png" />'
+            + '<div>Started by '+user+' on '+date+'</div>'
+            + '</div>'
+            + '<div class="post_nav">'
+            //+ '<a class="tag" href="#">testTag</a>'
+            + '</div><div class="clear"></div></div>');
+        if (hide)
+            html.hide();
+        return html;
+    };
+    </script>
+{% endblock %}
 {% block content %}
-    <style type="text/css">
-        @import url(/static/css/category.css);
-    </style>
 	<div class="content_wrapper">
 		<div class="heading">
             <div class="left">
@@ -28,6 +59,7 @@
 		</div>
 
         <div class="frame">
+            <!--
             <div class="featured">
                 <div class="post_content">
                     <h1>Lorem ipsum dolor sit amet</h1> <img src="/static/images/new/magnify.png" />
@@ -41,21 +73,8 @@
                 </div>
                 <div class="clear"></div>
             </div>
+            -->
             <div class="posts">
-                {% for post in posts %}
-                <div class="post" onclick="location.href='/discussion/{{ post.id }}'">
-                    <div class="post_content">
-                        <h1>{{ post.title }}</h1> <img src="/static/images/new/magnify.png" />
-                        <div>Started by {{ post.user }} on {{ post.date }}</div>
-                    </div>
-                    <div class="post_nav">
-                        {% for tag in posts.tags %}
-                        <a class="tag" href="#">{{ tag }}</a>
-                        {% endfor %}
-                    </div>
-                    <div class="clear"></div>
-                </div>
-                {% endfor %}
             </div>
         </div>
 		</div>

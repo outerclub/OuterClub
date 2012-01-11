@@ -1,11 +1,7 @@
 /* --------------------Technology Board--------------------- */
 .content_wrapper{
-	background: url(/static/images/bg.png) repeat 0 0 transparent;
     padding: 30px 10px 30px 10px;
-	box-shadow: 0 0 10px #000000;
-	-webkit-border-radius:10px 10px 10px 10px;
-	-moz-border-radius:10px 10px 10px 10px;
-	border-radius:10px 10px 10px 10px;
+    background-color: #333;
 }
 .content_wrapper .heading .left {
     float: left;
@@ -41,9 +37,8 @@
     margin: 0;
     text-transform: uppercase;
 }
-.heading .left a {
-    border: 0;
-    text-decoration: underline;
+.heading .left a:hover {
+    text-decoration: none;
 }
 .heading .right a{
     display: inline-block;
@@ -101,6 +96,7 @@
 
 .featured{
 	background:#fff;
+    margin-bottom: 50px;
 }
 .post_content{
     float: left;
@@ -140,7 +136,6 @@ a.tag{
  * Posts
  */
 .posts {
-    margin-top: 50px;
 }
 .posts .post_content {
     padding: 3px 10px 3px 10px;

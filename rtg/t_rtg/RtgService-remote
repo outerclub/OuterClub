@@ -24,6 +24,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print ''
   print 'Functions:'
   print '  void newResponse(TResponse response)'
+  print '  void newPost(TPost post)'
   print ''
   sys.exit(0)
 
@@ -80,6 +81,12 @@ if cmd == 'newResponse':
     print 'newResponse requires 1 args'
     sys.exit(1)
   pp.pprint(client.newResponse(eval(args[0]),))
+
+elif cmd == 'newPost':
+  if len(args) != 1:
+    print 'newPost requires 1 args'
+    sys.exit(1)
+  pp.pprint(client.newPost(eval(args[0]),))
 
 else:
   print 'Unrecognized method %s' % cmd

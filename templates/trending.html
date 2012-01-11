@@ -2,10 +2,10 @@
 {% block title %}
 Trending
 {% endblock %}
+{% block headers %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/trending.css') }}" />
+{% endblock %}
 {% block inner %}
-<style type="text/css">
-@import url(/static/css/trending.css);
-</style>
 <a>
 <img src="{{ url_for('static',filename='images/trending/discussions_hover.png') }}" />
 </a>

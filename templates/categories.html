@@ -2,10 +2,10 @@
 {% block title %}
 Categories
 {% endblock %}
+{% block headers %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/categories.css') }}" />
+{% endblock %}
 {% block inner %}
-<style type="text/css">
-@import url(/static/css/categories.css);
-</style>
 <div align="center">
 <ul id="nav">
 {% for c in categories %}

@@ -95,9 +95,11 @@ def category(category):
                       'date': config.dateFormat(discussion[3]), \
                       'tags': tags})
     popular_tags = db.fetchPopularTags(cur,cat_id)
+    
+    category = ' '.join(c.capitalize() for c in category.split())
 
     g = globals()
-    g.update({'popular':popular_tags,'posts':posts,'category_name':category,'category_url':category.replace(' ','+')})
+    g.update({'popular':popular_tags,'posts':posts,'category_id': cat_id,'category_name':category,'category_url':category.replace(' ','+')})
 
 
     return render_template('category.html',**g)
@@ -123,7 +125,6 @@ def discussion(id):
                    'tags': tags, \
                   }
     responses = db.fetchResponses(cur,id)
-    print responses
 
     g = globals()
     g.update({'discussion':discussion,'popular':popular_tags,'responses':responses,'category_name':categoryName,'category_url':categoryName.replace(' ','+')})
@@ -132,13 +133,37 @@ def discussion(id):
     return render_template('discussion.html',**g)
 @app.route('/post',methods=['POST'])
 def post():
-    cur.execute('select cat_id from category where name=%s', (request.form['area'],))
-    cat_id = cur.fetchone()[0]
+    # fetch the category information
+    cur.execute('select cat_id,image from category where name=%s', (request.form['area'],))
+    res = cur.fetchone()
+    cat_id = res[0]
+    cat_image = res[1]
+
+    # insert the post
     cur.execute('insert into discussion (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,session['user_id'],request.form['title'],request.form['content']))
     conn.commit()
 
-    newUrl = request.form['area'].replace(' ','+')
-    return flask.redirect(flask.url_for('category',category=newUrl))
+    d_id = cur.lastrowid
+    # fetch the inserted postdate
+    cur.execute('select postDate from discussion where d_id=%s', (d_id,))
+    date = cur.fetchone()[0]
+
+    # push the new post
+    push = TPost()
+    push.d_id = d_id
+    push.user_id = session['user_id']
+    push.username = session['username']
+    push.avatar = session['avatar']
+    push.date = config.dateFormat(date)
+    push.content = request.form['content']
+    push.category_id = cat_id
+    push.category_image = cat_image
+    push.title = request.form['title']
+    transport.open()
+    client.newPost(push)
+    transport.close()
+    
+    return ''
 
 @app.route('/reply',methods=['POST'])
 def reply():

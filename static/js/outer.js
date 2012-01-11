@@ -5,6 +5,14 @@ function init(user_id) {
         socket.emit('register','/happening');
     });
     socket.on('happening',function(data) {
-        $('.slide_show_content').append(data.type);
+        var p = data.data;
+        if (data.type == 'response' || data.type == 'post')
+        {
+            var element = jQuery('<div class="item"><img src="/static/images/categories/'+p.category_image+'" /><div class="text"><span class="user">'+p.user+'</span> <span class="date">'+p.date+'</span> <span class="content">'+p.content+'</span></div></div>');
+            element.css('margin-right','-150px');
+ 
+            $('.slide_show .scroll').append(element);
+            element.animate({'margin-right':0});
+        }
     });
 }

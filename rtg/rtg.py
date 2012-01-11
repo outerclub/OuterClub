@@ -15,56 +15,24 @@ import tornadio2
 import tornadio2.router
 import tornadio2.server
 import tornadio2.conn
-import Queue
+import MySQLdb
 import event
+from proc import QueueProc
+from connection import EventConnection
 
 ROOT = op.normpath(op.dirname(__file__))
 
 
-class IndexHandler(tornado.web.RequestHandler):
-    """Regular HTTP handler to serve the chatroom page"""
-    def get(self):
-        self.render('index.html')
-
-
-class SocketIOHandler(tornado.web.RequestHandler):
-    def get(self):
-        self.render('socket.io.js')
-
-class ChatConnection(tornadio2.conn.SocketConnection):
-    def on_open(self, info):
-        QueueProc.put(event.Open(self,info.arguments['key'][0]))
-
-    def on_message(self,message):
-        pass
-
-    @tornadio2.event
-    def register(self, path):
-        QueueProc.put(event.Register(path,self))
-
-    def on_close(self):
-        QueueProc.put(event.Close(self))
-
 # Create tornadio server
-ChatRouter = tornadio2.router.TornadioRouter(ChatConnection)
+EventRouter = tornadio2.router.TornadioRouter(EventConnection)
 
 # Create socket application
 sock_app = tornado.web.Application(
-    ChatRouter.urls,
-    socket_io_port = 8002
+    EventRouter.urls,
+    socket_io_port = 8002,
+    #flash_policy_port = 843,
+    #flash_policy_file = op.join(ROOT, 'flashpolicy.xml')
 )
-#flash_policy_port = 843,
-#flash_policy_file = op.join(ROOT, 'flashpolicy.xml'),
-
-# Create HTTP application
-http_app = tornado.web.Application(
-    [(r"/", IndexHandler), (r"/socket.io.js", SocketIOHandler)]
-)
-
-# Create http server on port 8001
-http_server = tornado.httpserver.HTTPServer(http_app)
-http_server.listen(8001)
-
 tornadio2.server.SocketServer(sock_app, auto_start=False)
 
 ioloop = tornado.ioloop.IOLoop.instance()
@@ -74,83 +42,18 @@ class External(threading.Thread):
     def run(self):
         ioloop.start()
 
-class QueueProc(threading.Thread):
-    keyToConn = dict()
-    conns = dict()
-    paths = dict() 
-    queue = Queue.Queue()
-    
-    def connsToKeys(self,arr):
-        ret = set()
-        for c in arr:
-            ret.add(self.conns[c]['key'])
-        return list(ret)
-
-    def updateViewers(self,path,viewers):
-        for conn in self.paths[path]['conns']:
-            conn.emit('viewers',viewers)
-
-    def run(self):
-        while True:
-            msg = self.queue.get(True)
-            if isinstance(msg,event.Open):
-                self.conns[msg.conn] = {'key':msg.key,'paths':set()}
-                if not msg.key in self.keyToConn:
-                    self.keyToConn[msg.key] = []
-                
-                self.keyToConn[msg.key].append(msg.conn)
-            elif isinstance(msg,event.Register):
-                # add connection and path
-                self.conns[msg.conn]['paths'].add(msg.path)
-                if not msg.path in self.paths:
-                    self.paths[msg.path] = {'conns':set()}
-                self.paths[msg.path]['conns'].add(msg.conn)
-                
-                if (msg.path.startswith('/discussion/')):
-                    self.updateViewers(msg.path,self.connsToKeys(self.paths[msg.path]['conns']))
-            elif isinstance(msg,event.Close):
-                # remove connection from all paths
-                for path in self.conns[msg.conn]['paths']:
-                    if msg.conn in self.paths[path]['conns']:
-                        self.paths[path]['conns'].remove(msg.conn)
-                        if (path.startswith('/discussion/')):
-                            self.updateViewers(path,self.connsToKeys(self.paths[path]['conns']))
-
-                    # cleanup path?
-                    if not self.paths[path]['conns']:
-                        del self.paths[path]
-                 
-                # cleanup connection
-                self.keyToConn[self.conns[msg.conn]['key']].remove(msg.conn)
-                del self.conns[msg.conn]
-            elif isinstance(msg,event.Message):
-                # distribute to path
-                if (msg.path in self.paths):
-                    for conn in self.paths[msg.path]['conns']: 
-                        if msg.etype == 'response':
-                            p = msg.payload
-                            conn.emit(msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar':p.avatar})
-                            
-                            reply_data = {'user':p.username,'user_id':p.user_id,'date':p.date,'content':p.content,'avatar':p.avatar,'category_image':p.category_image,'category_id':p.category_id,'d_id':p.d_id}
-                            self.queue.put(event.Message('/happening','happening',{'type':'reply','data':reply_data}))
-                        elif msg.etype == 'happening':
-                            p = msg.payload
-                            conn.emit(msg.etype,{'type':p['type'],'data':p['data']})
-                    
-            if msg == event.QueueKill:
-                break
-    @staticmethod
-    def put(msg):
-        QueueProc.queue.put(msg)
-
-    @staticmethod
-    def stop():
-        QueueProc.put(event.QueueKill)
 
 class TRtgHandler:
     def newResponse(self,response):
-        print response
         QueueProc.put(event.Message('/discussion/%d' % (response.d_id), 'response',response))
+        happening_data = {'user':response.username,'user_id':response.user_id,'date':response.date,'content':response.content,'avatar':response.avatar,'category_image':response.category_image,'category_id':response.category_id,'d_id':response.d_id}
+        QueueProc.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
+    def newPost(self,post):
+        QueueProc.put(event.Message('/category/%d' % (post.category_id),'discussion',post))
+
+        post_data = {'user':post.username,'user_id':post.user_id,'date':post.date,'content':post.content,'avatar':post.avatar,'category_image':post.category_image,'d_id':post.d_id}
+        QueueProc.put(event.Message('/happening','happening',{'type':'post','data':post_data}))
+        
 
 handler = TRtgHandler()
 processor = RtgService.Processor(handler)

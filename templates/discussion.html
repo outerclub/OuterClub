@@ -2,13 +2,13 @@
 {% block title %}
 {{ discussion.title }}
 {% endblock %}
-{% block content %}
-    <style type="text/css">
-    @import url(/static/css/category.css);
-    @import url(/static/css/discussion.css);
-    </style>
+{% block headers %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/category.css') }}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/discussion.css') }}" />
+{% endblock %}
+{% block footers %}
     <script type="text/javascript">
-        function createDiscussion(fadeIn,user,date,content,avatar) {
+        function createResponse(fadeIn,user,date,content,avatar) {
             var previousD = $(".discussion");
             // get last full date
             var lastDateSplit;
@@ -52,37 +52,35 @@
             }
         };
         var socket;
-        var currentViewers = [];
+        var currentViewers = {};
         $(document).ready(function() {
             socket.on('connect',function() {
                 socket.emit('register','/discussion/{{ discussion.id}}');
             });
             socket.on('response',function(data) {
-                createDiscussion(true,data.user,data.date,data.content,data.avatar);
+                createResponse(true,data.user,data.date,data.content,data.avatar);
             });
             socket.on('viewers',function(data) {
                 // scan for removals
                 var toRemove = [];
-                for (var i=0; i < currentViewers.length; i++)
+                for (var v in currentViewers)
                 {
-                    var v = currentViewers[i];
                     if (!(v in data))
                     {
                         $("#v_"+v).fadeOut(function() {
                             $(this).remove();
                         });
-                        currentViewers = currentViewers.splice(i,1);
-                        i--;
+                        delete currentViewers[v];
                     }
                 }
                 // scan for insertions
                 for (v in data) {
                     if (!(v in currentViewers)) {
-                        user = jQuery('<img id="v_'+v+'"src="/static/images/new/avatars/user_1.png" />');
+                        user = jQuery('<img id="v_'+v+'"src="/static/images/new/avatars/'+data[v]+'" />');
                         user.hide();
                         $(".discussion_frame .users").append(user);
                         user.fadeIn();
-                        currentViewers.push(v);
+                        currentViewers[v] = '';
                     }
                 }
             });
@@ -93,11 +91,13 @@
                 });
             });
             {% for response in responses %}
-            createDiscussion(false,'{{ response.user }}', '{{ response.date }}','{{ response.content }}','{{ response.avatar }}');
+            createResponse(false,'{{ response.user }}', '{{ response.date }}','{{ response.content }}','{{ response.avatar }}');
             
             {% endfor %}
         });
     </script>
+{% endblock %}
+{% block content %}
 	<div class="content_wrapper">
 		<div class="heading">
             <div class="left">

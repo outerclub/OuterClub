@@ -3,9 +3,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>The Outer Club</title>
-<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/footer.css') }}" />
 <style type="text/css">
-@import url(/static/css/footer.css);
 body {
     font-family: Helvetica, Arial, Sans-serif;
     font-size: 12px;
@@ -61,38 +61,6 @@ button:hover {
     clear: both;
 }
 </style>
-<script type="text/javascript">
-$(document).ready(function() {
-    $("input[name='username']").focusin(function() {
-        if ($(this).val() == 'USERNAME')
-            $(this).val('');
-    });
-    $("input[name='username']").focusout(function() {
-        if ($(this).val() == '')
-            $(this).val('USERNAME');
-    });
-    $("input[name='email']").focusin(function() {
-        if ($(this).val() == 'E-MAIL')
-            $(this).val('');
-    });
-    $("input[name='email']").focusout(function() {
-        if ($(this).val() == '')
-            $(this).val('E-MAIL');
-    });
-    $("input[name='fakepw']").focusin(function() {
-        $(this).hide();
-        $("input[name='password']").show().focus();
-              
-    });
-    $("input[name='password']").focusout(function() {
-        if ($(this).val() == '')
-         {
-            $(this).hide();
-            $("input[name='fakepw']").show();
-         }
-    });
-});
-</script>
 </head>
 <body>
 <div id="grayBg">
@@ -128,5 +96,39 @@ $(document).ready(function() {
     <div class="clear"></div>
 </div>
 {% include 'partials/footer.html' %}
+
+<script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    $("input[name='username']").focusin(function() {
+        if ($(this).val() == 'USERNAME')
+            $(this).val('');
+    });
+    $("input[name='username']").focusout(function() {
+        if ($(this).val() == '')
+            $(this).val('USERNAME');
+    });
+    $("input[name='email']").focusin(function() {
+        if ($(this).val() == 'E-MAIL')
+            $(this).val('');
+    });
+    $("input[name='email']").focusout(function() {
+        if ($(this).val() == '')
+            $(this).val('E-MAIL');
+    });
+    $("input[name='fakepw']").focusin(function() {
+        $(this).hide();
+        $("input[name='password']").show().focus();
+              
+    });
+    $("input[name='password']").focusout(function() {
+        if ($(this).val() == '')
+         {
+            $(this).hide();
+            $("input[name='fakepw']").show();
+         }
+    });
+});
+</script>
 </body>
 </html>
