@@ -21,7 +21,7 @@
                 }
             }
             
-            var currentDateSplit = date.split(' ');
+            var currentDateSplit = date.replace('  ',' ').split(' ');
 
             // same date as before?
             if (currentDateSplit[0] == lastDateSplit[0] && currentDateSplit[1] == lastDateSplit[1] &&

@@ -28,6 +28,7 @@ class TResponse(object):
    - content
    - category_image
    - category_id
+   - title
   """
 
   thrift_spec = (
@@ -40,9 +41,10 @@ class TResponse(object):
     (6, TType.STRING, 'content', None, None, ), # 6
     (7, TType.STRING, 'category_image', None, None, ), # 7
     (8, TType.I32, 'category_id', None, None, ), # 8
+    (9, TType.STRING, 'title', None, None, ), # 9
   )
 
-  def __init__(self, d_id=None, user_id=None, username=None, avatar=None, date=None, content=None, category_image=None, category_id=None,):
+  def __init__(self, d_id=None, user_id=None, username=None, avatar=None, date=None, content=None, category_image=None, category_id=None, title=None,):
     self.d_id = d_id
     self.user_id = user_id
     self.username = username
@@ -51,6 +53,7 @@ class TResponse(object):
     self.content = content
     self.category_image = category_image
     self.category_id = category_id
+    self.title = title
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -101,6 +104,11 @@ class TResponse(object):
           self.category_id = iprot.readI32();
         else:
           iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.STRING:
+          self.title = iprot.readString();
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -142,6 +150,10 @@ class TResponse(object):
     if self.category_id is not None:
       oprot.writeFieldBegin('category_id', TType.I32, 8)
       oprot.writeI32(self.category_id)
+      oprot.writeFieldEnd()
+    if self.title is not None:
+      oprot.writeFieldBegin('title', TType.STRING, 9)
+      oprot.writeString(self.title)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()

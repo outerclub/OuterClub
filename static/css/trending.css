@@ -32,12 +32,13 @@
     position: absolute;
     right:0;
     top: 10px;
+    font-weight:bold;
 }
 .text {
     float: left;
     padding: 5px 10px 5px 10px;
     position: relative;
-    width: 600px; 
+    width: 680px; 
 }
 .entry .number {
     font: 50px BebasRegular;

@@ -46,13 +46,13 @@ class External(threading.Thread):
 class TRtgHandler:
     def newResponse(self,response):
         QueueProc.put(event.Message('/discussion/%d' % (response.d_id), 'response',response))
-        happening_data = {'user':response.username,'user_id':response.user_id,'date':response.date,'content':response.content,'avatar':response.avatar,'category_image':response.category_image,'category_id':response.category_id,'d_id':response.d_id}
+        happening_data = {'user':response.username,'user_id':response.user_id,'date':response.date,'avatar':response.avatar,'category_image':response.category_image,'category_id':response.category_id,'d_id':response.d_id,'title': response.title}
         QueueProc.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
     def newPost(self,post):
         QueueProc.put(event.Message('/category/%d' % (post.category_id),'discussion',post))
 
-        post_data = {'user':post.username,'user_id':post.user_id,'date':post.date,'content':post.content,'avatar':post.avatar,'category_image':post.category_image,'d_id':post.d_id}
-        QueueProc.put(event.Message('/happening','happening',{'type':'post','data':post_data}))
+        happening_data = {'user':post.username,'user_id':post.user_id,'date':post.date,'avatar':post.avatar,'category_image':post.category_image,'d_id':post.d_id,'title':post.title}
+        QueueProc.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
         
 
 handler = TRtgHandler()

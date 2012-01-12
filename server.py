@@ -186,11 +186,12 @@ def reply():
     push.date = config.dateFormat(myRow[0])
     push.content = data
 
-    cur.execute('select cat_id,category.image from discussion inner join category using (cat_id) where d_id=%s',(d_id,))
+    cur.execute('select cat_id,category.image,title from discussion inner join category using (cat_id) where d_id=%s',(d_id,))
     myRow = cur.fetchone()
 
     push.category_id = myRow[0]
     push.category_image = myRow[1]
+    push.title = myRow[2]
     transport.open()
     client.newResponse(push)
     transport.close()
