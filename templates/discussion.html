@@ -8,50 +8,7 @@
 {% endblock %}
 {% block footers %}
     <script type="text/javascript">
-        function createResponse(fadeIn,user,date,content,avatar) {
-            var previousD = $(".discussion");
-            // get last full date
-            var lastDateSplit;
-            for (var x=previousD.size()-1; x >= 0; x--)
-            {
-                lastDateSplit = $(previousD.get(x)).find('.date').text().split(' ');
-                if (lastDateSplit.length == 4)
-                {
-                    break;
-                }
-            }
-            
-            var currentDateSplit = date.replace('  ',' ').split(' ');
-
-            // same date as before?
-            if (currentDateSplit[0] == lastDateSplit[0] && currentDateSplit[1] == lastDateSplit[1] &&
-                currentDateSplit[2] == lastDateSplit[2])
-            {
-                date = currentDateSplit[3];
-            }
-            var str ='<div class="discussion" style="display: none">';
-            str += '<div class="user">'+
-                    '<div class="description">'+
-                        '<h2>'+user+'</h2>'+
-                        '<div>Prestige: 67</div>'+
-                    '</div>'+
-                    '<img src="/static/images/new/avatars/'+avatar+'" />'+
-                '</div>'+
-                '<div class="content">'+
-                    content+
-                    '<br />'+
-                    '<div class="date">'+date+'</div>'+
-                '</div>';
-            str += '</div>';
-
-            $(".reply").before(str);
-            if (fadeIn) {
-                $(".discussion:last").fadeIn();
-            } else {
-                $(".discussion:last").show();
-            }
-        };
-        var socket;
+              var socket;
         var currentViewers = {};
         $(document).ready(function() {
             socket.on('connect',function() {

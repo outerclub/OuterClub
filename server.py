@@ -45,7 +45,18 @@ def globals():
 def index():
     if not isLoggedIn():
         return displaySignup()
+    res = cur.execute('select name,image from category order by cat_id asc') 
+    categories = []
+    for c in cur.fetchall():
+        cat = c[0]
+        sanitized = cat.lower().replace(' ','+')
+        categories.append({'name':cat,'url':sanitized,'image':c[1]})
+    
     g = globals()
+    g.update({'categories':categories,'tab':'categories'})
+
+    d = db.fetchTrendingDiscussions(cur)
+    g.update({'entries':d})
 
     return render_template('index.html',**g)
 
@@ -56,23 +67,6 @@ def about():
     g = globals()
 
     return render_template('about.html',**g)
-
-@app.route('/categories')
-def categories():
-    if not isLoggedIn():
-        return displaySignup()
-
-    res = cur.execute('select name,image from category order by cat_id asc') 
-    categories = []
-    for c in cur.fetchall():
-        cat = c[0]
-        sanitized = cat.lower().replace(' ','+')
-        categories.append({'url':sanitized,'image':c[1]})
-    
-    g = globals()
-    g.update({'categories':categories,'tab':'categories'})
-
-    return render_template('categories.html',**g)
 
 @app.route('/category/<category>')
 def category(category):
@@ -98,11 +92,7 @@ def category(category):
     
     category = ' '.join(c.capitalize() for c in category.split())
 
-    g = globals()
-    g.update({'popular':popular_tags,'posts':posts,'category_id': cat_id,'category_name':category,'category_url':category.replace(' ','+')})
-
-
-    return render_template('category.html',**g)
+    return flask.jsonify(popular=popular_tags,posts=posts)
 @app.route('/discussion/<id>')
 def discussion(id):
     if not isLoggedIn():
@@ -111,7 +101,8 @@ def discussion(id):
     # fetch the main discussion metadata
     res = cur.execute('select user.name,title,postDate,content,cat_id,avatar_image from (discussion inner join user using (user_id)) where d_id=%s',(id,))
     discussion = cur.fetchone()
-    cur.execute('select name from category where cat_id=%s',(discussion[4],))
+    cat_id = discussion[4]
+    cur.execute('select name from category where cat_id=%s',(cat_id,))
     categoryName = cur.fetchone()[0]
     tags = db.fetchDiscussionTags(cur,id)
     popular_tags = db.fetchPopularTags(cur,discussion[4])
@@ -126,11 +117,7 @@ def discussion(id):
                   }
     responses = db.fetchResponses(cur,id)
 
-    g = globals()
-    g.update({'discussion':discussion,'popular':popular_tags,'responses':responses,'category_name':categoryName,'category_url':categoryName.replace(' ','+')})
-
-
-    return render_template('discussion.html',**g)
+    return flask.jsonify(discussion=discussion,popular=popular_tags,responses=responses,category_name=categoryName,category_id=cat_id)
 @app.route('/post',methods=['POST'])
 def post():
     # fetch the category information
@@ -245,16 +232,6 @@ def logout():
     session.pop('username',None)
     session.pop('user_id',None)
     return flask.redirect(flask.url_for('signup'))
-
-@app.route('/trending')
-def trending():
-    if not isLoggedIn():
-        return displaySignup()
-    d = db.fetchTrendingDiscussions(cur)
-
-    g = globals()
-    g.update({'entries':d})
-    return render_template('trending.html',**g)
 
 app.debug = True
 app.secret_key = 'hello, how are you today?'

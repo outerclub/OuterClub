@@ -1,8 +1,5 @@
 /* --------------------Technology Board--------------------- */
-.content_wrapper{
-    padding: 30px 10px 30px 10px;
-    background-color: #333;
-}
+
 .content_wrapper .heading .left {
     float: left;
     padding-left: 20px;
@@ -14,12 +11,9 @@
 .content_wrapper .right {
     float: right;
 }
-.content_wrapper .frame {
-    background-color: #e7e7e7;
-    padding: 20px;
-    margin: 5px;
-}
+
 .heading{
+    margin-top: 20px;
 }
 .content_wrapper .heading h2{
     color: #FFFFFF;

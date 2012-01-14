@@ -1,6 +1,103 @@
-{% extends 'layouts/tabbed.html' %}
+{% extends 'layouts/default.html' %}
 {% block title %}
-Home
+Welcome
 {% endblock %}
-{% block inner %}
+{% block headers %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/categories.css') }}" />
+   <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/trending.css') }}" />
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/category.css') }}" />
+   <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/discussion.css') }}" />
+{% endblock %}
+{% block content %}
+	<div class="menu_tab">
+		<ul>
+			<li class="
+                {% if request.path == '/' %}
+                    active
+                {% endif %}
+                first">
+				<a href="#welcome">Welcome</a>
+			</li>
+			<li class="
+                {% if request.path == '/categories' %}
+                    active
+                {% endif %}
+                ">
+				<a href="#categories">Categories</a>
+			</li>
+			<li class="
+                {% if request.path == '/trending' %}
+                    active
+                {% endif %}
+                   ">
+				<a href="#trending">Trending Now</a>
+			</li>
+		</ul>
+    </div>
+<div class="content_wrapper">
+    <div id="category_head" style="display: none">
+		<div class="heading">
+            <div class="left">
+                <a href="#">
+			    <img src="/static/images/technology_icon.png" /><h2></h2></a>
+            </div>
+            <div class="right">
+			    <h3>Show Newest First</h3><img src="/static/images/show_new_bg.png" />
+			    <a href="">Start a Thread</a>
+            </div>
+		</div>	
+        <div class="clear"></div>
+		<div class="populer_tag">
+			<span>Populer Tags:</span>
+            <ul>
+			<li><a href="">tag</a></li>
+            </ul>
+		</div>
+    </div>
+    <div class="frame">
+        <div id="welcome" title="Welcome">
+        </div>
+        <div id="categories" style="display: none" title="Categories">
+            <div align="center">
+            <ul id="nav">
+            {% for c in categories %}
+            <li><a title="{{ c.name }}" href="{{ url_for('category',category=c.url) }}"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a></li>
+            {% endfor %}
+            </ul>
+            </div>
+        </div>
+        <div id="trending" style="display: none" title="Trending">
+            <a>
+            <img src="{{ url_for('static',filename='images/trending/discussions_hover.png') }}" />
+            </a>
+            <a>
+            <img src="{{ url_for('static',filename='images/trending/tags.png') }}" />
+            </a>
+            <a>
+            <img src="{{ url_for('static',filename='images/trending/upvotes.png') }}" />
+            </a>
+            <a>
+            <img src="{{ url_for('static',filename='images/trending/gifts.png') }}" />
+            </a>
+            <div class="clear">&nbsp;
+            </div>
+            {% for e in entries %}
+            <a href="{{ url_for('discussion',id=e.d_id) }}" id="{{ e.d_id }}" class="entry">
+                <div class="number">
+                    <span>{{ e.rank }}</span>
+                </div>
+                <img src="{{ url_for('static',filename='images/categories/'+e.image) }}" height="90" width="130" />
+                <div class="text">
+                    <h2>{{ e.title }}</h2>
+                    <div class="date">{{ e.date }}</div>
+                    <p>{{ e.content }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div id="dynamic" style="display: none">
+        </div>
+        <div id="
+    </div>
+</div>
 {% endblock %}

@@ -21,6 +21,15 @@ body{
 #newthread {
     padding: 5px;
 }
+#wrapper990 {
+    width: 1007px;
+    margin: 0 auto 0 auto;
+}
+
+
+/**
+ * Tab nav
+ */
 .menu_tab ul {
     margin: 0;
     list-style-type: none;
@@ -43,6 +52,10 @@ body{
     background-color: #333;
     color: white;
 }
+
+/**
+ * slide show.
+ */
 .slide_show{
     background-color: #333;
     padding: 10px;
@@ -91,17 +104,21 @@ body{
     left: 0;
     bottom: 0;
 }
-#content{
-    
-}
-#content_top{
+
+/**
+ * Frames
+ */
+.content_wrapper{
+    padding: 10px 10px 10px 10px;
     background-color: #333;
-	padding-top: 17px;
-    padding-bottom: 17px;
-    clear: both
+    clear: both;
 }
 
- 
+ .content_wrapper .frame {
+    background-color: #e7e7e7;
+    padding: 10px;
+    margin: 5px;
+}
 
 /**
  * Miscellaneous
