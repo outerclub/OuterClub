@@ -1,0 +1,35 @@
+Python Packages
+    python-setuptools - provides easy_install.
+    python-mysqldb: 'easy_install MySQL-python'
+    thrift: see below
+        A combination of code generation and libraries for doing easy, efficient, type-safe cross-language RPC.
+    tornado: 'easy_install tornado'
+        Tornado is another web application framework designed to handle 10K>> concurrent connnections.
+        http://www.tornadoweb.org/
+    sockjs-tornado: (included in git repository, and separate installation unnecessary)
+        sockjs implementation - built off of tornado 
+        https://github.com/MrJoes/sockjs-tornado
+    flask: 'easy_install flask'
+        Flask is the web application framework servicing most requests.
+
+Tools
+    git:
+        repo is at ssh://YOURUSER@ec2-50-16-18-32.compute-1.amazonaws.com/home/TheOuterClub.git
+    thrift: http://thrift.apache.org/download/
+        Both compiler and platform-specific libraries are required. The tar.gz compile/make process provides both.
+        For python libraries only (i.e. this project currently), 'easy_install thrift' should work fine.
+    mysql:
+        Setup and create a new database. Bootstrap SQL is in the documentation folder. 
+        
+javascript stuff (included with repository/project, no need to download separately)
+    sockjs
+        This takes care of all the websockets connect, routing, teardown, reconnections, etc., browser-agnostic.
+        https://github.com/sockjs/sockjs-client
+    jquery
+        DOM manipulation, AJAX stuff.
+    jquery.tools
+        For overlay capabilities.
+        http://flowplayer.org/tools/index.html
+    underscore.js
+        Adds functional programming concepts to javascript
+        http://documentcloud.github.com/underscore

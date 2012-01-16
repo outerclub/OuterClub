@@ -3,6 +3,7 @@ import MySQLdb
 from flask import Flask,request,session
 import flask
 import database as db,config
+from config import DefaultConfig
 from datetime import datetime
 import hashlib
 import random
@@ -14,9 +15,10 @@ from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
+import os
 
 # setup rtg
-transport = TSocket.TSocket('localhost',9090)
+transport = TSocket.TSocket(DefaultConfig.rtg_server,DefaultConfig.rtg_server_port)
 transport = TTransport.TBufferedTransport(transport)
 protocol = TBinaryProtocol.TBinaryProtocol(transport)
 
@@ -26,7 +28,7 @@ client = RtgService.Client(protocol)
 app = Flask(__name__)
 
 conn = None
-conn = MySQLdb.connect('localhost','root','asdfgh','oc')
+conn = MySQLdb.connect(DefaultConfig.mysql_server,DefaultConfig.mysql_user,DefaultConfig.mysql_password,DefaultConfig.mysql_database)
 cur = conn.cursor()
 
 def isLoggedIn():
@@ -36,8 +38,10 @@ def initSession(id,name,avatar):
     session['user_id'] = id
     session['username'] = name
     session['avatar'] = avatar
+
 def displaySignup():
     return flask.redirect(flask.url_for('signup'))
+
 def globals():
     return {'username':session['username'],'user_id':session['user_id'],'avatar':session['avatar']}
 
@@ -45,12 +49,12 @@ def globals():
 def index():
     if not isLoggedIn():
         return displaySignup()
-    res = cur.execute('select name,image from category order by cat_id asc') 
+    res = cur.execute('select name,image,cat_id from category order by cat_id asc') 
     categories = []
     for c in cur.fetchall():
         cat = c[0]
         sanitized = cat.lower().replace(' ','+')
-        categories.append({'name':cat,'url':sanitized,'image':c[1]})
+        categories.append({'name':cat,'url':sanitized,'image':c[1],'id':c[2]})
     
     g = globals()
     g.update({'categories':categories,'tab':'categories'})
@@ -93,6 +97,7 @@ def category(category):
     category = ' '.join(c.capitalize() for c in category.split())
 
     return flask.jsonify(popular=popular_tags,posts=posts)
+
 @app.route('/discussion/<id>')
 def discussion(id):
     if not isLoggedIn():
@@ -117,7 +122,9 @@ def discussion(id):
                   }
     responses = db.fetchResponses(cur,id)
 
-    return flask.jsonify(discussion=discussion,popular=popular_tags,responses=responses,category_name=categoryName,category_id=cat_id)
+    c_url = '/category/'+categoryName.lower().replace(' ','+')
+    return flask.jsonify(discussion=discussion,popular=popular_tags,responses=responses,category_name=categoryName,category_id=cat_id,category_url=c_url)
+
 @app.route('/post',methods=['POST'])
 def post():
     # fetch the category information
@@ -233,6 +240,6 @@ def logout():
     session.pop('user_id',None)
     return flask.redirect(flask.url_for('signup'))
 
-app.debug = True
-app.secret_key = 'hello, how are you today?'
-app.run(host='0.0.0.0')
+app.debug = DefaultConfig.debug
+app.secret_key = os.urandom(32)
+app.run(host=DefaultConfig.bind_address,port=DefaultConfig.port)

@@ -1,0 +1,5 @@
+Install required dependencies. Configure config.py as appropriate.
+
+Run the server using 'python server.py'.
+Run the real-time component in rtg/ using 'python rtg.py'
+Access web server with browser using the address and port configured in config.py.

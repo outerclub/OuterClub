@@ -1,16 +1,16 @@
 from proc import QueueProc
-import tornadio2
 import event
-class EventConnection(tornadio2.conn.SocketConnection):
+import json
+from sockjs.tornado import SockJSConnection
+class EventConnection(SockJSConnection):
     def on_open(self, info):
-        QueueProc.put(event.Open(self,info.arguments['key'][0]))
+        # temporary session hack (need to replace with unique user secret key probably)
+        QueueProc.put(event.Open(self,info.cookies['session'].value[:9]))
 
     def on_message(self,message):
-        pass
-
-    @tornadio2.event
-    def register(self, path):
-        QueueProc.put(event.Register(path,self))
+        message = json.loads(message)
+        if message[0] == 'register':
+            QueueProc.put(event.Register(message[1:],self))
 
     def on_close(self):
         QueueProc.put(event.Close(self))

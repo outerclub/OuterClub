@@ -11,30 +11,18 @@ from os import path as op
 import tornado
 import tornado.web
 import tornado.httpserver
-import tornadio2
-import tornadio2.router
-import tornadio2.server
-import tornadio2.conn
 import MySQLdb
 import event
 from proc import QueueProc
 from connection import EventConnection
+from sockjs.tornado import SockJSRouter,SockJSConnection
 
 ROOT = op.normpath(op.dirname(__file__))
 
+EventRouter = SockJSRouter(EventConnection,'/sock')
 
-# Create tornadio server
-EventRouter = tornadio2.router.TornadioRouter(EventConnection)
-
-# Create socket application
-sock_app = tornado.web.Application(
-    EventRouter.urls,
-    socket_io_port = 8002,
-    #flash_policy_port = 843,
-    #flash_policy_file = op.join(ROOT, 'flashpolicy.xml')
-)
-tornadio2.server.SocketServer(sock_app, auto_start=False)
-
+app = tornado.web.Application(EventRouter.urls)
+app.listen(8002)
 ioloop = tornado.ioloop.IOLoop.instance()
 
 # Run the ioloop in a new thread
@@ -61,7 +49,7 @@ transport = TSocket.TServerSocket(port=9090)
 tfactory = TTransport.TBufferedTransportFactory()
 pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
-server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+server = TServer.TThreadPoolServer(processor, transport, tfactory, pfactory,daemon=True)
 
 ext = External()
 ext.start()

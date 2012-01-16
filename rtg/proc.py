@@ -1,6 +1,7 @@
 import event
 import threading
 import Queue
+import json
 
 class QueueProc(threading.Thread):
     userKeys = dict()
@@ -13,7 +14,10 @@ class QueueProc(threading.Thread):
     def connsToKeys(self,arr):
         h = set()
         for c in arr:
-            h.add(self.conns[c]['key'])
+            if (c in self.conns):
+                h.add(self.conns[c]['key'])
+            else:
+                print 'lost connid %s' %c
         return h
     def keysToUsers(self,h):
         ret = dict()
@@ -26,13 +30,14 @@ class QueueProc(threading.Thread):
         for conn in self.paths[path]['conns']:
             # ignore this connection
             if conn != conn_id:
-                self.conns[conn]['conn'].emit('viewers',viewers)
+                self.conns[conn]['conn'].send(json.dumps(['viewers',viewers]))
 
     def run(self):
         while True:
             msg = self.queue.get(True)
             if isinstance(msg,event.Open):
                 conn_id = msg.conn.session.session_id
+                print '%s, open' % (conn_id)
                 self.conns[conn_id] = {'key':msg.key,'paths':set(),'conn': msg.conn}
                 if not msg.key in self.userKeys:
                     self.userKeys[msg.key] = {'sessions':[],'avatar': 'user_1.png' }
@@ -40,26 +45,47 @@ class QueueProc(threading.Thread):
                 self.userKeys[msg.key]['sessions'].append(conn_id)
             elif isinstance(msg,event.Register):
                 conn_id = msg.conn.session.session_id
-                # add connection and path
-                self.conns[conn_id]['paths'].add(msg.path)
-                if not msg.path in self.paths:
-                    self.paths[msg.path] = {'conns':set(),'keys':set()}
+                print '%s, register: %s' % (conn_id,msg.paths)
 
-                before = self.paths[msg.path]['keys']
-                self.paths[msg.path]['conns'].add(conn_id)
-                self.paths[msg.path]['keys'] = self.connsToKeys(self.paths[msg.path]['conns'])
+                reg=[]
+                for p in msg.paths:
+                    if not p in self.conns[conn_id]['paths']:
+                        reg.append(['ins',p])
+                for p in self.conns[conn_id]['paths']:
+                    if not p in msg.paths:
+                        reg.append(['del',p])
+                    
+                # Process path adjustments
+                for pathAdjustment in reg:
+                    path = pathAdjustment[1]
+                    if not path in self.paths:
+                        self.paths[path] = {'conns':set(),'keys':set()}
+
+                    before = self.paths[path]['keys']
+                    if pathAdjustment[0] == 'ins':
+                        # add connection and path
+                        self.conns[conn_id]['paths'].add(path)
+                        self.paths[path]['conns'].add(conn_id)
+                    else:
+                        # delete connection from path
+                        self.conns[conn_id]['paths'].remove(path)
+                        self.paths[path]['conns'].remove(conn_id)
+
+                    self.paths[path]['keys'] = self.connsToKeys(self.paths[path]['conns'])
+                    
+                    if (path.startswith('/discussion/')):
+                        # send the current list of viewers
+                        msg.conn.send(json.dumps(['viewers',self.keysToUsers(self.paths[path]['keys'])]))
+                        # send to others if viewers has changed
+                        diff = before ^ self.paths[path]['keys']
+                        if len(diff) > 0:
+                            self.updateViewers(path,conn_id)
+                    elif (path.startswith('/happening')):
+                        msg.conn.send(json.dumps(['happening_init',self.happening]))
                 
-                if (msg.path.startswith('/discussion/')):
-                    # send the current list of viewers
-                    msg.conn.emit('viewers',self.keysToUsers(self.paths[msg.path]['keys']))
-                    # send to others if viewers has changed
-                    diff = before ^ self.paths[msg.path]['keys']
-                    if len(diff) > 0:
-                        self.updateViewers(msg.path,msg.conn)
-                elif (msg.path.startswith('/happening')):
-                    msg.conn.emit('happening_init',self.happening);
             elif isinstance(msg,event.Close):
                 conn_id = msg.conn.session.session_id
+                print '%s, close' % (conn_id)
                 # remove connection from all paths
                 for path in self.conns[conn_id]['paths']:
                     if conn_id in self.paths[path]['conns']:
@@ -86,16 +112,16 @@ class QueueProc(threading.Thread):
                         # new response
                         if msg.etype == 'response':
                             p = msg.payload
-                            self.conns[conn]['conn'].emit(msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar':p.avatar})
+                            self.conns[conn]['conn'].send(json.dumps([msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar':p.avatar}]))
                         # new discussion
                         elif msg.etype == 'discussion':
                             p = msg.payload
-                            self.conns[conn]['conn'].emit(msg.etype,{'d_id':p.d_id,'user':p.username,'date':p.date,'title':p.title,'user_id':p.user_id})
+                            self.conns[conn]['conn'].send(json.dumps([msg.etype,{'d_id':p.d_id,'user':p.username,'date':p.date,'title':p.title,'user_id':p.user_id}]))
                         # new happening now event
                         elif msg.etype == 'happening':
                             p = msg.payload
                             happening_data = {'type':p['type'],'data':p['data']}
-                            self.conns[conn]['conn'].emit(msg.etype,happening_data)
+                            self.conns[conn]['conn'].send(json.dumps([msg.etype,happening_data]))
                             self.happening.append(happening_data)
                             if (len(self.happening) > 6):
                                 self.happening = self.happening[1:]

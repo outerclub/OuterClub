@@ -42,17 +42,20 @@ Welcome
 			    <img src="/static/images/technology_icon.png" /><h2></h2></a>
             </div>
             <div class="right">
-			    <h3>Show Newest First</h3><img src="/static/images/show_new_bg.png" />
-			    <a href="">Start a Thread</a>
+			    <h3>Show Newest First</h3>
+                <img src="/static/images/show_new_bg.png" />
+                <button rel="#facebox">Start a Thread</button>
             </div>
 		</div>	
         <div class="clear"></div>
+<!--
 		<div class="populer_tag">
 			<span>Populer Tags:</span>
             <ul>
 			<li><a href="">tag</a></li>
             </ul>
 		</div>
+-->
     </div>
     <div class="frame">
         <div id="welcome" title="Welcome">
@@ -61,7 +64,7 @@ Welcome
             <div align="center">
             <ul id="nav">
             {% for c in categories %}
-            <li><a title="{{ c.name }}" href="{{ url_for('category',category=c.url) }}"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a></li>
+            <li><a title="{{ c.name }}" href="{{ url_for('category',category=c.url) }}" id="{{ c.id }}"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a></li>
             {% endfor %}
             </ul>
             </div>
@@ -97,7 +100,30 @@ Welcome
         </div>
         <div id="dynamic" style="display: none">
         </div>
-        <div id="
+        <div id="discussion" style="display: none">
+            <div class="discussion_frame">
+                <div class="room">
+                    <h2></h2>
+                    <div class="users">
+                    </div>
+                </div>
+                <!-- 
+                        <br />
+                        <img src="/static/images/nav_icon.png">
+                        <a class="tag" href="#">Latin</a>
+                -->
+
+                <div class="reply">
+                    <span class="info">Write a comment</span><br />
+                    <textarea rows="6" cols="80"></textarea>
+                    <button>Post</button>
+
+                </div>
+                <div class="clear"></div>
+                
+            </div>
+
+        </div>
     </div>
 </div>
 {% endblock %}

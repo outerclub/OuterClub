@@ -3,8 +3,8 @@ class Open:
         self.conn = conn
         self.key = key
 class Register:
-    def __init__(self,path,conn):
-        self.path = path
+    def __init__(self,paths,conn):
+        self.paths = paths
         self.conn = conn
 class Close:
     def __init__(self,conn):
