@@ -12,5 +12,5 @@ class DefaultConfig:
     debug = True
 
 def dateFormat(dt):
-    s = dt.strftime('%d %B %Y, %l:%M%p')
+    s = dt.strftime('%d %B %Y, %I:%M%p')
     return s
