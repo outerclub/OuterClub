@@ -65,6 +65,9 @@ def index():
     u = db.fetchLeaderboard(cur)
     g.update({'leaderboard':u})
 
+    g.update({'announcements':db.fetchAnnouncements(cur)})
+    g.update({'tasks':db.fetchTasks(cur,session['user_id'])})
+
     return render_template('index.html',**g)
 
 @app.route('/about')
@@ -232,7 +235,7 @@ def signup():
     else:
         avatar = 'user_%s.png' % random.randrange(1,6)
         # process the form submission
-        res = cur.execute('insert into user (name,email,password,avatar_image) values (%s,%s,%s,%s)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar))
+        res = cur.execute('insert into user (name,email,password,avatar_image,prestige) values (%s,%s,%s,%s,0)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar))
         conn.commit()
         initSession(cur.lastrowid,request.form['username'],avatar)
     

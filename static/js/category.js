@@ -1,4 +1,4 @@
-define(['sock','nav','underscore'],function(socket,nav,_) {
+define(['socket','nav','underscore'],function(socket,nav,_) {
     return {
         goCategory: function(name,id,href) {
             $('title').html(name+' - OuterClub');

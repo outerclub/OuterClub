@@ -6,7 +6,7 @@ require.config({
         'jquery-tools':'deps/jquery.tools.min'
     }
 });
-require(['sock','underscore','category','nav','jquery-tools'],
+require(['socket','underscore','category','nav','jquery-tools'],
   function(socket,_,category,nav) {
     socket.init('http://'+window.location.hostname+':8002/sock',
         {'register':'happening'});

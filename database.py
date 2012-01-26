@@ -1,4 +1,5 @@
 import config
+import datetime
 
 def fetchConversationTags(cursor,d_id):
     cursor.execute('select tag.name from link_conversation_tag inner join tag using (tag_id) where d_id=%s',(d_id,))
@@ -43,3 +44,18 @@ def fetchLeaderboard(cursor):
         i += 1
     return  users
         
+def fetchAnnouncements(cursor):
+    cursor.execute('select a_id,title,content,postDate,user_id from announcement order by postDate desc');
+    
+    announcements = [{'a_id':0,'title':'test announcement','content':'test Content','postDate':datetime.datetime.now(),'user_id':0}]
+    for a in cursor.fetchall():
+        announcements.append({'a_id':a[0],'title':a[1],'content':a[2],'postDate':a[3],'user_id':a[4]})
+    return announcements
+
+def fetchTasks(cursor,user_id):
+    cursor.execute('select task_id,type,done,external_id from task where user_id=%s',(user_id,))
+    
+    tasks = [{'task_id':0,'type':'read tutorial','done':False,'external_id':0}]
+    for t in cursor.fetchall():
+        tasks.append({'task_id':t[0],'type':t[1],'done':t[2],'external_id':t[3]})
+    return tasks
