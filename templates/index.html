@@ -6,7 +6,7 @@ Welcome
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/categories.css') }}" />
    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/trending.css') }}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/category.css') }}" />
-   <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/discussion.css') }}" />
+   <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/conversation.css') }}" />
 {% endblock %}
 {% block content %}
 	<div class="menu_tab">
@@ -31,6 +31,13 @@ Welcome
                 {% endif %}
                    ">
 				<a href="#trending">Trending Now</a>
+			</li>
+			<li class="
+                {% if request.path == '/leaderboard' %}
+                    active
+                {% endif %}
+                   ">
+				<a href="#leaderboard">Leaderboard</a>
 			</li>
 		</ul>
     </div>
@@ -84,8 +91,8 @@ Welcome
             </a>
             <div class="clear">&nbsp;
             </div>
-            {% for e in entries %}
-            <a href="{{ url_for('discussion',id=e.d_id) }}" id="{{ e.d_id }}" class="entry">
+            {% for e in trending %}
+            <a href="{{ url_for('conversation',id=e.d_id) }}" id="{{ e.d_id }}" class="entry">
                 <div class="number">
                     <span>{{ e.rank }}</span>
                 </div>
@@ -98,10 +105,24 @@ Welcome
             </a>
             {% endfor %}
         </div>
+        <div id="leaderboard" style="display: none" title="Leaderboard">
+            {% for u in leaderboard %}
+            <a href="#" id="{{ u.user_id }}" class="entry">
+                <div class="number">
+                    <span>{{ u.rank }}</span>
+                </div>
+                <img src="{{ url_for('static',filename='images/new/avatars/'+u.avatar_image) }}" height="58" width="58" />
+                <div class="text">
+                    <h2>{{ u.name }}</h2>
+                    <p>{{ u.prestige }} prestige</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
         <div id="dynamic" style="display: none">
         </div>
-        <div id="discussion" style="display: none">
-            <div class="discussion_frame">
+        <div id="conversation" style="display: none">
+            <div class="conversation_frame">
                 <div class="room">
                     <h2></h2>
                     <div class="users">

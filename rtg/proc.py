@@ -112,7 +112,7 @@ class QueueProc(threading.Thread):
                         # new response
                         if msg.etype == 'response':
                             p = msg.payload
-                            self.conns[conn]['conn'].send(json.dumps([msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar':p.avatar}]))
+                            self.conns[conn]['conn'].send(json.dumps([msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar_image':p.avatar}]))
                         # new conversation
                         elif msg.etype == 'conversation':
                             p = msg.payload

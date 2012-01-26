@@ -59,8 +59,11 @@ def index():
     g = globals()
     g.update({'categories':categories,'tab':'categories'})
 
-    d = db.fetchTrendingDiscussions(cur)
-    g.update({'entries':d})
+    d = db.fetchTrendingConversations(cur)
+    g.update({'trending':d})
+
+    u = db.fetchLeaderboard(cur)
+    g.update({'leaderboard':u})
 
     return render_template('index.html',**g)
 
@@ -82,15 +85,15 @@ def category(category):
     cur.execute('select cat_id from category where name=%s', (category,))
     cat_id = cur.fetchone()[0]
 
-    # fetch the discussions for this category
-    res = cur.execute('select d_id,user.name,title,postDate,content from discussion inner join user using (user_id) where cat_id=%s order by postDate desc',(cat_id,))
+    # fetch the conversations for this category
+    res = cur.execute('select d_id,user.name,title,postDate,content from conversation inner join user using (user_id) where cat_id=%s order by postDate desc',(cat_id,))
     posts = []
     cur2 = conn.cursor()
-    for discussion in cur.fetchall():
-        tags = db.fetchDiscussionTags(cur2,discussion[0])
-        posts.append({'id':discussion[0], 'title':discussion[2],  \
-                      'user':discussion[1], \
-                      'date': config.dateFormat(discussion[3]), \
+    for conversation in cur.fetchall():
+        tags = db.fetchConversationTags(cur2,conversation[0])
+        posts.append({'id':conversation[0], 'title':conversation[2],  \
+                      'user':conversation[1], \
+                      'date': config.dateFormat(conversation[3]), \
                       'tags': tags})
     popular_tags = db.fetchPopularTags(cur,cat_id)
     
@@ -99,31 +102,32 @@ def category(category):
     return flask.jsonify(popular=popular_tags,posts=posts)
 
 @app.route('/conversation/<id>')
-def discussion(id):
+def conversation(id):
     if not isLoggedIn():
         return displaySignup()
 
-    # fetch the main discussion metadata
-    res = cur.execute('select user.name,title,postDate,content,cat_id,avatar_image from (discussion inner join user using (user_id)) where d_id=%s',(id,))
-    discussion = cur.fetchone()
-    cat_id = discussion[4]
+    # fetch the main conversation metadata
+    res = cur.execute('select user.name,title,postDate,content,cat_id,avatar_image,user.prestige from (conversation inner join user using (user_id)) where d_id=%s',(id,))
+    conversation = cur.fetchone()
+    cat_id = conversation[4]
     cur.execute('select name from category where cat_id=%s',(cat_id,))
     categoryName = cur.fetchone()[0]
-    tags = db.fetchDiscussionTags(cur,id)
-    popular_tags = db.fetchPopularTags(cur,discussion[4])
+    tags = db.fetchConversationTags(cur,id)
+    popular_tags = db.fetchPopularTags(cur,conversation[4])
 
     # populate the data object 
-    discussion = {'id': id, 'title':discussion[1], \
-                  'user':discussion[0], \
-                   'date': config.dateFormat(discussion[2]), \
-                   'content': discussion[3], \
-                    'avatar': discussion[5], \
+    conversation = {'id': id, 'title':conversation[1], \
+                  'user':conversation[0], \
+                   'prestige':conversation[6], \
+                   'date': config.dateFormat(conversation[2]), \
+                   'content': conversation[3], \
+                    'avatar_image': conversation[5], \
                    'tags': tags, \
                   }
     responses = db.fetchResponses(cur,id)
 
     c_url = '/category/'+categoryName.lower().replace(' ','+')
-    return flask.jsonify(discussion=discussion,popular=popular_tags,responses=responses,category_name=categoryName,category_id=cat_id,category_url=c_url)
+    return flask.jsonify(conversation=conversation,popular=popular_tags,responses=responses,category_name=categoryName,category_id=cat_id,category_url=c_url)
 
 @app.route('/post',methods=['POST'])
 def post():
@@ -134,12 +138,12 @@ def post():
     cat_image = res[1]
 
     # insert the post
-    cur.execute('insert into discussion (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,session['user_id'],request.form['title'],request.form['content']))
+    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,session['user_id'],request.form['title'],request.form['content']))
     conn.commit()
 
     d_id = cur.lastrowid
     # fetch the inserted postdate
-    cur.execute('select postDate from discussion where d_id=%s', (d_id,))
+    cur.execute('select postDate from conversation where d_id=%s', (d_id,))
     date = cur.fetchone()[0]
 
     # push the new post
@@ -180,7 +184,7 @@ def reply():
     push.date = config.dateFormat(myRow[0])
     push.content = data
 
-    cur.execute('select cat_id,category.image,title from discussion inner join category using (cat_id) where d_id=%s',(d_id,))
+    cur.execute('select cat_id,category.image,title from conversation inner join category using (cat_id) where d_id=%s',(d_id,))
     myRow = cur.fetchone()
 
     push.category_id = myRow[0]

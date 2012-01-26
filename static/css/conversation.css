@@ -11,41 +11,41 @@
     background-color: rgba(50,50,50,0.5);
     margin: 0 auto 0 auto;
 }
-.discussion_frame {
+.conversation_frame {
     background-color: #f5f5f5;
     width: 934px;
     margin: 0 auto;
 }
-.discussion {
+.conversation {
     width: 100%;
     overflow: auto;
     margin: 0 30px 5px 30px;
 }
-.discussion_frame .users {
+.conversation_frame .users {
     position: absolute;
     bottom: 0;
     left: 0;
 }
-.discussion_frame .user {
+.conversation_frame .user {
     background-color: #4376ce;
     color: white;
     float: left;
     width: 240px;
    }
 
-.discussion_frame .user img {
+.conversation_frame .user img {
     float: right;
 }
-.discussion_frame .description {
+.conversation_frame .description {
     padding: 10px;
     float: left;
 }
 .description div {
 }
-.discussion_frame .user h2 {
+.conversation_frame .user h2 {
     margin: 0;
 }
-.discussion_frame .content {
+.conversation_frame .content {
     padding: 10px 15px 10px 15px;
     background-color: #fff;
     float: left;
@@ -54,7 +54,7 @@
     font-size: 16px;
     min-height: 40px;
 }
-.discussion_frame .content .date {
+.conversation_frame .content .date {
     float: right;
     font-size: 12px;
     font-weight: bold;
