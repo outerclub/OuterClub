@@ -73,7 +73,7 @@ class QueueProc(threading.Thread):
 
                     self.paths[path]['keys'] = self.connsToKeys(self.paths[path]['conns'])
                     
-                    if (path.startswith('/discussion/')):
+                    if (path.startswith('/conversation/')):
                         # send the current list of viewers
                         msg.conn.send(json.dumps(['viewers',self.keysToUsers(self.paths[path]['keys'])]))
                         # send to others if viewers has changed
@@ -93,7 +93,7 @@ class QueueProc(threading.Thread):
                         self.paths[path]['conns'].remove(conn_id)
                         self.paths[path]['keys'] = self.connsToKeys(self.paths[path]['conns'])
                         diff = before ^ self.paths[path]['keys']
-                        if (path.startswith('/discussion/') and len(diff) > 0):
+                        if (path.startswith('/conversation/') and len(diff) > 0):
                             self.updateViewers(path,conn_id)
 
                     # no more connections? delete listening path
@@ -113,8 +113,8 @@ class QueueProc(threading.Thread):
                         if msg.etype == 'response':
                             p = msg.payload
                             self.conns[conn]['conn'].send(json.dumps([msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar':p.avatar}]))
-                        # new discussion
-                        elif msg.etype == 'discussion':
+                        # new conversation
+                        elif msg.etype == 'conversation':
                             p = msg.payload
                             self.conns[conn]['conn'].send(json.dumps([msg.etype,{'d_id':p.d_id,'user':p.username,'date':p.date,'title':p.title,'user_id':p.user_id}]))
                         # new happening now event

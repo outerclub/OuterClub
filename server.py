@@ -98,7 +98,7 @@ def category(category):
 
     return flask.jsonify(popular=popular_tags,posts=posts)
 
-@app.route('/discussion/<id>')
+@app.route('/conversation/<id>')
 def discussion(id):
     if not isLoggedIn():
         return displaySignup()

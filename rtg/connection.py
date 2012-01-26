@@ -9,8 +9,8 @@ class EventConnection(SockJSConnection):
 
     def on_message(self,message):
         message = json.loads(message)
-        if message[0] == 'register':
-            QueueProc.put(event.Register(message[1:],self))
+        if 'register' in message:
+            QueueProc.put(event.Register(message['register'],self))
 
     def on_close(self):
         QueueProc.put(event.Close(self))
