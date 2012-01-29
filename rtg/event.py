@@ -1,7 +1,6 @@
 class Open:
-    def __init__(self,conn,key):
+    def __init__(self,conn):
         self.conn = conn
-        self.key = key
 class Register:
     def __init__(self,paths,conn):
         self.paths = paths
@@ -14,5 +13,14 @@ class Message:
         self.path = path
         self.etype = etype
         self.payload = payload
+class NewAuthKey:
+    def __init__(self,uid,key):
+        self.uid = uid
+        self.key = key
+class Auth:
+    def __init__(self,conn,uid,key):
+        self.conn = conn
+        self.uid = uid
+        self.key = key
 class QueueKill:
     pass

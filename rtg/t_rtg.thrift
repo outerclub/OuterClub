@@ -22,8 +22,14 @@ struct TPost
     8:i32 category_id
     9:string title
 }
+struct TAuth
+{
+    1:i32 user_id;
+    2:string key;
+}
 service RtgService
 {
     void newResponse(1:TResponse response);
     void newPost(1:TPost post);
+    void auth(1:TAuth auth);
 }

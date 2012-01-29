@@ -8,8 +8,19 @@ require.config({
 });
 require(['socket','underscore','category','nav','jquery-tools'],
   function(socket,_,category,nav) {
+    var uid,key;
+    _.each(document.cookie.split("; "),function(cookie) {
+        var spl = cookie.split('=');
+        if (spl[0] == 'uid')
+            uid = spl[1];
+        else if (spl[0] == 'key')
+            key = spl[1];
+    });
     socket.init('http://'+window.location.hostname+':8002/sock',
-        {'register':'happening'});
+        function() {
+            socket.send({'uid':uid,'key':key});
+            socket.send({'register':'/happening'});
+    });
 
     var createHappening = function(data,animate) {
         var p = data.data;

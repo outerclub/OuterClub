@@ -1,12 +1,10 @@
 define(['underscore','sockjs'],function(_) {
     return {
         conn: undefined,
-        init: function(loc,initData) {
+        init: function(loc,fopen) {
             self = this;
             this.conn = new SockJS(loc);
-            this.conn.onopen = function() {
-                self.send(initData);
-            }; 
+            this.conn.onopen = fopen;
             this.conn.onmessage = function(message) {
                 data = JSON.parse(message.data);
                 if (data[0] in self.callbacks)

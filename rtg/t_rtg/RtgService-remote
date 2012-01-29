@@ -25,6 +25,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print 'Functions:'
   print '  void newResponse(TResponse response)'
   print '  void newPost(TPost post)'
+  print '  void auth(TAuth auth)'
   print ''
   sys.exit(0)
 
@@ -87,6 +88,12 @@ elif cmd == 'newPost':
     print 'newPost requires 1 args'
     sys.exit(1)
   pp.pprint(client.newPost(eval(args[0]),))
+
+elif cmd == 'auth':
+  if len(args) != 1:
+    print 'auth requires 1 args'
+    sys.exit(1)
+  pp.pprint(client.auth(eval(args[0]),))
 
 else:
   print 'Unrecognized method %s' % cmd

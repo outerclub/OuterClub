@@ -59,3 +59,9 @@ def fetchTasks(cursor,user_id):
     for t in cursor.fetchall():
         tasks.append({'task_id':t[0],'type':t[1],'done':t[2],'external_id':t[3]})
     return tasks
+
+def fetchUser(cursor,user_id):
+    res = cursor.execute('select name,avatar_image from user where user_id=%s',(user_id,))
+    user = cursor.fetchone()
+    return {'name':user[0],'avatar_image':user[1],'user_id':user_id}
+

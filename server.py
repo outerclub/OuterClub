@@ -1,12 +1,13 @@
 from flask import render_template
 import MySQLdb
-from flask import Flask,request,session
+from flask import Flask,request
 import flask
 import database as db,config
 from config import DefaultConfig
 from datetime import datetime
 import hashlib
 import random
+import uuid
 
 from rtg.t_rtg import RtgService
 from rtg.t_rtg.ttypes import *
@@ -27,23 +28,18 @@ client = RtgService.Client(protocol)
 # setup app
 app = Flask(__name__)
 
-conn = None
 conn = MySQLdb.connect(DefaultConfig.mysql_server,DefaultConfig.mysql_user,DefaultConfig.mysql_password,DefaultConfig.mysql_database)
 cur = conn.cursor()
 
+globalAuths = {}
 def isLoggedIn():
-    return  'username' in session
-
-def initSession(id,name,avatar):
-    session['user_id'] = id
-    session['username'] = name
-    session['avatar'] = avatar
+    return 'uid' in request.cookies and 'key' in request.cookies and int(request.cookies['uid']) in globalAuths and globalAuths[int(request.cookies['uid'])] == request.cookies['key']
 
 def displaySignup():
     return flask.redirect(flask.url_for('signup'))
 
-def globals():
-    return {'username':session['username'],'user_id':session['user_id'],'avatar':session['avatar']}
+def getUid():
+    return int(request.cookies['uid'])
 
 @app.route('/')
 def index():
@@ -56,7 +52,9 @@ def index():
         sanitized = cat.lower().replace(' ','+')
         categories.append({'name':cat,'url':sanitized,'image':c[1],'id':c[2]})
     
-    g = globals()
+    g = {}
+    user = db.fetchUser(cur,getUid())
+    g.update({'username':user['name'],'avatar':user['avatar_image']})
     g.update({'categories':categories,'tab':'categories'})
 
     d = db.fetchTrendingConversations(cur)
@@ -66,7 +64,7 @@ def index():
     g.update({'leaderboard':u})
 
     g.update({'announcements':db.fetchAnnouncements(cur)})
-    g.update({'tasks':db.fetchTasks(cur,session['user_id'])})
+    g.update({'tasks':db.fetchTasks(cur,user['user_id'])})
 
     return render_template('index.html',**g)
 
@@ -74,9 +72,8 @@ def index():
 def about():
     if not isLoggedIn():
         return displaySignup()
-    g = globals()
 
-    return render_template('about.html',**g)
+    return render_template('about.html')
 
 @app.route('/category/<category>')
 def category(category):
@@ -134,14 +131,18 @@ def conversation(id):
 
 @app.route('/post',methods=['POST'])
 def post():
+    if not isLoggedIn():
+        return displaySignup()
+
     # fetch the category information
     cur.execute('select cat_id,image from category where name=%s', (request.form['area'],))
     res = cur.fetchone()
     cat_id = res[0]
     cat_image = res[1]
 
+    user = db.fetchUser(cur,getUid())
     # insert the post
-    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,session['user_id'],request.form['title'],request.form['content']))
+    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,user['user_id'],request.form['title'],request.form['content']))
     conn.commit()
 
     d_id = cur.lastrowid
@@ -152,9 +153,9 @@ def post():
     # push the new post
     push = TPost()
     push.d_id = d_id
-    push.user_id = session['user_id']
-    push.username = session['username']
-    push.avatar = session['avatar']
+    push.user_id = user['user_id']
+    push.username = user['name']
+    push.avatar = user['avatar_image']
     push.date = config.dateFormat(date)
     push.content = request.form['content']
     push.category_id = cat_id
@@ -173,7 +174,8 @@ def reply():
     d_id = int(request.form['d_id'])
     data = request.form['data']
 
-    cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,session['user_id'],data))
+    user = db.fetchUser(cur,getUid())
+    cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,user['user_id'],data))
     conn.commit()
     
     cur.execute('select replyDate from response where r_id=%s', (cur.lastrowid,))
@@ -181,9 +183,9 @@ def reply():
 
     push = TResponse()
     push.d_id = d_id
-    push.user_id = session['user_id']
-    push.username = session['username']
-    push.avatar = session['avatar']
+    push.user_id = user['user_id']
+    push.username = user['name']
+    push.avatar = user['avatar_image']
     push.date = config.dateFormat(myRow[0])
     push.content = data
 
@@ -199,6 +201,21 @@ def reply():
 
     return ''
 
+def initAuth(id):
+    auth = TAuth()
+    auth.user_id = id
+    auth.key = str(uuid.uuid4())
+    transport.open()
+    client.auth(auth)
+    transport.close()
+
+    redir = flask.redirect(flask.url_for('index'))
+    response = app.make_response(redir)
+    response.set_cookie('uid',value=id)
+    response.set_cookie('key',value=auth.key)
+    globalAuths[id] = auth.key
+    return response
+
 @app.route('/login',methods=['POST'])
 def login():
     if isLoggedIn():
@@ -209,8 +226,7 @@ def login():
     test = cur.fetchone()
 
     if test != None:
-        initSession(test[0],request.form['l_username'],test[1])
-        return flask.redirect(flask.url_for('index'))
+        return initAuth(test[0])
     # user doesn't exist!
     else:
         return displaySignup()
@@ -237,15 +253,16 @@ def signup():
         # process the form submission
         res = cur.execute('insert into user (name,email,password,avatar_image,prestige) values (%s,%s,%s,%s,0)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar))
         conn.commit()
-        initSession(cur.lastrowid,request.form['username'],avatar)
     
-    return flask.redirect(flask.url_for('index'))
+    return initAuth(test[0])
     
 @app.route('/logout')
 def logout():
-    session.pop('username',None)
-    session.pop('user_id',None)
-    return flask.redirect(flask.url_for('signup'))
+    redir = flask.redirect(flask.url_for('signup'))
+    resp = app.make_response(redir)
+    resp.set_cookie('uid',expires=datetime.now())
+    resp.set_cookie('key',expires=datetime.now())
+    return resp
 
 app.debug = DefaultConfig.debug
 app.secret_key = os.urandom(32)

@@ -41,6 +41,8 @@ class TRtgHandler:
 
         happening_data = {'user':post.username,'user_id':post.user_id,'date':post.date,'avatar_image':post.avatar,'category_image':post.category_image,'d_id':post.d_id,'title':post.title}
         QueueProc.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
+    def auth(self,auth):
+        QueueProc.put(event.NewAuthKey(auth.user_id,auth.key))
         
 
 handler = TRtgHandler()
