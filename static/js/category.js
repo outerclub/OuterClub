@@ -1,7 +1,16 @@
 define(['socket','nav','underscore'],function(socket,nav,_) {
     return {
+        currentCategory: {
+            name: undefined,
+            id: undefined,
+            href: undefined
+        },
         goCategory: function(name,id,href) {
             $('title').html(name+' - OuterClub');
+            this.currentCategory.name = name;
+            this.currentCategory.id = id;
+            this.currentCategory.href = href;
+
             var self = this;
             $.getJSON(href,function(data) {
                 $("#dynamic").html('');
@@ -56,9 +65,11 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
         currentViewers: [],
         goConversation: function(id) {
             var self = this;
+            $("#conversation .users").html('');
+           this.currentViewers = [];
            $.getJSON('/conversation/'+id,function(data) {
                 nav.hideAll();
-                $('title').html(data.conversation.title+' - TheOuterClub');
+                $('title').html(data.conversation.title+' - OuterClub');
 
                 // show category head
                 self.showCategoryHead(data.category_name,data.category_id,data.category_url);

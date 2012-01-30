@@ -1,11 +1,59 @@
-{% extends 'layouts/frame.html' %}
-{% block frame %}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>{% block title %} Unknown {% endblock %} - OuterClub</title>
+<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/layout.css') }}"/>
+{% block headers %} {% endblock %}
+</head>
+<body>
+<div id="facebox">
+    <div>
+    <h2>New Conversation</h2>
+    <p>
+            Title: <input type="text" name="title" />
+            <br />
+            <span style="vertical-align:top"> Content:</span> <textarea name="content"></textarea>
+    </p>
+    <p><button name="post" class="close">Post</button></p>
+    <p><button class="close">Close</button></p>
+    </div>
+</div>
+<div id="menu">
+<ul>
+<li class="active"><a href="#welcome">WELCOME</a></li>
+<li><a href="#community">COMMUNITY</a></li>
+<li><a href="#categories">CATEGORIES</a></li>
+<li><a href="#trending">TRENDING NOW</a></li>
+<li><a href="#leaderboard">LEADERBOARD</a></li>
+</ul>
+<div class="right">
+<span style="float:left">Welcome <strong>{{ username }}</strong> <a href="{{ url_for('logout') }}">Log out</a></span>
+<div class="search">
+<input type="text" name="search" />
+<span>Search</span>
+<button />
+</div>
+</div>
+</div>
 <div class="slide_show">
 		<h2>Happening Right Now</h2>
         <div class="scroll">
         </div>
 	</div>
+<div id="outer">
 {% block content %} {% endblock %}
-{% endblock %}
+</div>
+{% include 'partials/footer.html' %}
 
+<script type="text/javascript" src="{{ url_for('static',filename='js/require.js') }}"></script>
+<script type="text/javascript">
+require({
+    baseUrl: 'static/js',
+    priority: ['jquery-1.7.1.min']
+},['main']);
+</script>
+{% block footers %} {% endblock %}
+</body>
+</html>
 

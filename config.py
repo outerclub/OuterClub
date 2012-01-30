@@ -11,6 +11,3 @@ class DefaultConfig:
     port = 5000
     debug = True
 
-def dateFormat(dt):
-    s = dt.strftime('%d %B %Y, %I:%M%p')
-    return s

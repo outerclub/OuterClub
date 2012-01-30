@@ -10,38 +10,6 @@ Welcome
    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/welcome.css') }}" />
 {% endblock %}
 {% block content %}
-	<div class="menu_tab">
-		<ul>
-			<li class="
-                {% if request.path == '/' %}
-                    active
-                {% endif %}
-                first">
-				<a href="#welcome">Welcome</a>
-			</li>
-			<li class="
-                {% if request.path == '/categories' %}
-                    active
-                {% endif %}
-                ">
-				<a href="#categories">Categories</a>
-			</li>
-			<li class="
-                {% if request.path == '/trending' %}
-                    active
-                {% endif %}
-                   ">
-				<a href="#trending">Trending Now</a>
-			</li>
-			<li class="
-                {% if request.path == '/leaderboard' %}
-                    active
-                {% endif %}
-                   ">
-				<a href="#leaderboard">Leaderboard</a>
-			</li>
-		</ul>
-    </div>
 <div class="content_wrapper">
     <div id="category_head" style="display: none">
 		<div class="heading">

@@ -2,12 +2,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Outer Club</title>
+<title>OuterClub</title>
 
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/footer.css') }}" />
 <style type="text/css">
-body {
+input,body {
     font-family: Helvetica, Arial, Sans-serif;
+}
+body {
     font-size: 12px;
     background-color: #333;
     margin: 0;
@@ -18,16 +20,35 @@ body {
 #grayBg .footer {
     color: #ccc;
 }
-#grayBg .footer_menu {
-    padding-top: 20px;
-    padding-bottom: 40px;
-}
 #center {
     margin: 0 auto 0 auto;
     width: 1500px;
     height: 830px;
-    background: url('/static/images/new/signup_bg.png') repeat;
+    background: url('/static/images/new/signup_bg.png') repeat-x top center;
     text-align: center;
+}
+#center .error {
+    color: #c33;
+    position: relative;
+    top: 600px;
+    display: none;
+    margin-top: 10px;
+    font-size: 16px;
+}
+.footer .error {
+    display: inline;
+    color: #c33;
+    margin-left: 5px;
+}
+.footer input {
+    font-size: 14px;
+    padding: 1px;
+}
+.footer input[type='text'],.footer input[type='password'] {
+    border: 1px solid #444;
+    background-color: #111;
+    color: #efefef;
+    padding: 4px;
 }
 .wrap {
     position: relative;
@@ -37,25 +58,38 @@ body {
     margin: 0 auto;
     background: url('/static/images/new/signup_bubble.png') no-repeat;
     display: inline-block;
+    color: #494949;
 }
-button {
-    position: relative;
-    top: 650px;
-    height: 127px;
-    width: 251px;
-    background: url('/static/images/new/signup_submit.png') no-repeat;
-    border: 0;
-    opacity: 0.85;
+.wrap span {
+    position: absolute;
+    top: 13px;
+    left: 22px;
+    z-index: 1;
+    font-size: 16px;
 }
-button:hover {
-    opacity: 1;
+.wrap span.light {
+    color: #777;
 }
-#center input {
+.wrap input {
     background: url('/static/images/new/transparent.png') repeat;
     border: 0;
     font-size: 16px;
     color: #494949;
-    margin: 10px 0 0 10px;
+    margin: 12px 0 0 0px;
+    z-index: 99;
+}
+
+button {
+    position: relative;
+    top: 640px;
+    height: 127px;
+    width: 251px;
+    background: url('/static/images/new/signup_submit.png') no-repeat;
+    border: 0;
+    opacity: 1;
+}
+button:hover {
+    opacity: 0.7;
 }
 .clear {
     clear: both;
@@ -68,30 +102,37 @@ button:hover {
      <div class="footer_menu">
         <div class="footer_menu_left">
             <form action="/login" method="post">
-            Username: <input type="text" name="l_username" /> &nbsp;Password: <input type="password" name="l_password" />
-            <input type="submit" name="submit" value="Log In" />
+            Username <input type="text" name="l_username" size="16" /> &nbsp;Password <input type="password" name="l_password" size="16" />
+            <input type="submit" name="submit" value="Log In" /><div class="error">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {{ messages[0] }}
+            {% endif %}
+            {% endwith %}</div>
             </form>
         </div>
      </div>
     </div>
     <div class="clear"></div>
     <div id="center">
-        <form action="/signup" method="post">
         <div class="wrap">
-            <input type="text" name='username' value="USERNAME" />
+            <input type="text" name='username' />
+            <span>User name</span>
         </div>
         <div class="wrap">
-            <input type="text" name='email' value="E-MAIL" />
+            <input type="text" name='email' />
+            <span>E-mail</span>
         </div>
         <div class="wrap">
-            <input type="text" name="fakepw" value="PASSWORD" />
-            <input style="display: none" type="password" name='password' value="" />
+            <input type="password" name='password'/>
+            <span>Password</span>
+        </div>
+        <div class="error">
         </div>
         <div class="clear"></div>
         <div id="button">
         <button type="submit"></button>
         </div>
-        </form>
     </div>
     <div class="clear"></div>
 </div>
@@ -99,34 +140,48 @@ button:hover {
 
 <script type="text/javascript" src="/static/js/jquery-1.7.1.min.js"></script>
 <script type="text/javascript">
+function showError(msg) {
+    $("#center .error").html(msg);
+    if ($("#center .error").css('display') == 'none')
+    {
+        $("#center .error").fadeIn();
+        $("button").css('top', '612px');
+    }
+}
 $(document).ready(function() {
-    $("input[name='username']").focusin(function() {
-        if ($(this).val() == 'USERNAME')
-            $(this).val('');
+    $("span").mousedown(function() {
+        $(this).prev('input').focus();
+        return false;
     });
-    $("input[name='username']").focusout(function() {
+    $("input[name='username'],input[name='email'],input[name='password']").focusin(function() {
+        $(this).next('span').addClass('light');
+    });
+    $("input[name='username'],input[name='password'],input[name='email']").focusout(function() {
         if ($(this).val() == '')
-            $(this).val('USERNAME');
+            $(this).next('span').show();
+         $(this).next('span').removeClass('light');
     });
-    $("input[name='email']").focusin(function() {
-        if ($(this).val() == 'E-MAIL')
-            $(this).val('');
+    $("input[name='username'],input[name='email'],input[name='password']").keypress(function() {
+        $(this).next('span').hide();
     });
-    $("input[name='email']").focusout(function() {
-        if ($(this).val() == '')
-            $(this).val('E-MAIL');
-    });
-    $("input[name='fakepw']").focusin(function() {
-        $(this).hide();
-        $("input[name='password']").show().focus();
-              
-    });
-    $("input[name='password']").focusout(function() {
-        if ($(this).val() == '')
-         {
-            $(this).hide();
-            $("input[name='fakepw']").show();
-         }
+    $("button").click(function() {
+        $.ajax({
+            type:'POST',
+            url:'/signup',
+            data: { username: $("input[name='username']").val(), email: $("input[name='email']").val(),
+                password: $("input[name='password']").val() },
+            success:function(data) {
+                if ('error' in data) {
+                    showError(data['error']);
+                }
+                if ('uid' in data && 'key' in data) {
+                    document.cookie = 'uid='+data['uid']+';';
+                    document.cookie = 'key='+data['key']+';';
+                    window.location = '/';
+                }
+            },
+            dataType: 'json'
+        });
     });
 });
 </script>

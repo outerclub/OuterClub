@@ -1,4 +1,4 @@
-import config
+import util
 import datetime
 
 def fetchConversationTags(cursor,d_id):
@@ -13,7 +13,7 @@ def fetchResponses(cursor,d_id):
     responses = []
     for resp in cursor.fetchall():
         responses.append({'r_id':resp[0],'user':resp[1], \
-                          'date': config.dateFormat(resp[2]), 'content': resp[3], \
+                          'date': util.dateFormat(resp[2]), 'content': resp[3], \
                           'avatar_image': resp[4],'prestige':resp[5]})
     return responses
 

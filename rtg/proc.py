@@ -40,7 +40,10 @@ class QueueProc(threading.Thread):
         for conn in self.paths[path]['conns']:
             # ignore this connection
             if conn != conn_id:
-                self.conns[conn]['conn'].send(json.dumps(['viewers',viewers]))
+                self.send(conn,['viewers',viewers])
+
+    def send(self,conn_id,payload):
+        self.conns[conn_id]['conn'].send(json.dumps(payload))
 
     def run(self):
         while True:
@@ -62,6 +65,9 @@ class QueueProc(threading.Thread):
                         self.uid_sessions[msg.uid] = []
                     
                     self.uid_sessions[msg.uid].append(conn_id)
+                else:
+                    self.send(conn_id,['authRejected']);
+                    pass
             elif isinstance(msg,event.Register):
                 conn_id = msg.conn.session.session_id
                 if 'uid' in self.conns[conn_id]:
@@ -93,14 +99,15 @@ class QueueProc(threading.Thread):
                         self.paths[path]['uids'] = self.connsToUids(self.paths[path]['conns'])
                         
                         if (path.startswith('/conversation/')):
-                            # send the current list of viewers
-                            msg.conn.send(json.dumps(['viewers',self.fetchViewerInfo(self.paths[path]['uids'])]))
+                            # send the current list of viewers if requested
+                            if (path in msg.paths):
+                                self.send(conn_id, ['viewers',self.fetchViewerInfo(self.paths[path]['uids'])])
                             # send to others if viewers has changed
                             diff = before ^ self.paths[path]['uids']
                             if len(diff) > 0:
                                 self.updateViewers(path,conn_id)
                         elif (path.startswith('/happening')):
-                            msg.conn.send(json.dumps(['happening_init',self.happening]))
+                            self.send(conn_id,['happening_init',self.happening])
                 
             elif isinstance(msg,event.Close):
                 conn_id = msg.conn.session.session_id
@@ -111,7 +118,7 @@ class QueueProc(threading.Thread):
                         if conn_id in self.paths[path]['conns']:
                             before = self.paths[path]['uids']
                             self.paths[path]['conns'].remove(conn_id)
-                            self.paths[path]['keys'] = self.connsToUids(self.paths[path]['conns'])
+                            self.paths[path]['uids'] = self.connsToUids(self.paths[path]['conns'])
                             diff = before ^ self.paths[path]['uids']
                             if (path.startswith('/conversation/') and len(diff) > 0):
                                 self.updateViewers(path,conn_id)
@@ -121,7 +128,7 @@ class QueueProc(threading.Thread):
                             del self.paths[path]
                      
                     # cleanup connection
-                    myConn = self.conns[conn_Id]
+                    myConn = self.conns[conn_id]
                     self.uid_sessions[myConn['uid']].remove(conn_id)
                     if len(self.uid_sessions[myConn['uid']]) == 0:
                         del self.uid_sessions[myConn['uid']]
@@ -133,16 +140,16 @@ class QueueProc(threading.Thread):
                         # new response
                         if msg.etype == 'response':
                             p = msg.payload
-                            self.conns[conn]['conn'].send(json.dumps([msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar_image':p.avatar}]))
+                            self.send(conn,[msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar_image':p.avatar}])
                         # new conversation
                         elif msg.etype == 'conversation':
                             p = msg.payload
-                            self.conns[conn]['conn'].send(json.dumps([msg.etype,{'d_id':p.d_id,'user':p.username,'date':p.date,'title':p.title,'user_id':p.user_id}]))
+                            self.send(conn,[msg.etype,{'d_id':p.d_id,'user':p.username,'date':p.date,'title':p.title,'user_id':p.user_id}])
                         # new happening now event
                         elif msg.etype == 'happening':
                             p = msg.payload
                             happening_data = {'type':p['type'],'data':p['data']}
-                            self.conns[conn]['conn'].send(json.dumps([msg.etype,happening_data]))
+                            self.send(conn,[msg.etype,happening_data])
                             self.happening.append(happening_data)
                             print happening_data
                             if (len(self.happening) > 6):

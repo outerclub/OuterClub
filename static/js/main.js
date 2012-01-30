@@ -8,6 +8,7 @@ require.config({
 });
 require(['socket','underscore','category','nav','jquery-tools'],
   function(socket,_,category,nav) {
+    // extract the uid and key from the cookies
     var uid,key;
     _.each(document.cookie.split("; "),function(cookie) {
         var spl = cookie.split('=');
@@ -19,7 +20,10 @@ require(['socket','underscore','category','nav','jquery-tools'],
     socket.init('http://'+window.location.hostname+':8002/sock',
         function() {
             socket.send({'uid':uid,'key':key});
-            socket.send({'register':'/happening'});
+            socket.send({'register':['/happening']});
+    });
+    socket.addCallback('authRejected',function() {
+        window.location = '/logout';
     });
 
     var createHappening = function(data,animate) {
@@ -30,15 +34,15 @@ require(['socket','underscore','category','nav','jquery-tools'],
             if (data.type == 'post')
                 verb = 'posted'; 
             var element = jQuery('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category_image+'" /><img class="avatar" src="/static/images/new/avatars/'+p.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user+'</span> '+verb+' <span class="content">'+p.title+'</span></div></div>');
+            element.hide();
             if (animate)
             {
-                element.css('margin-right','-150px');
      
                 $('.slide_show .scroll').append(element);
-                element.animate({'margin-right':0});
             } else {
                 $('.slide_show .scroll').append(element);
             }
+            element.fadeIn();
         }
     }
 
@@ -62,14 +66,30 @@ require(['socket','underscore','category','nav','jquery-tools'],
         category.goCategory(name,cat_id,$(this).attr('href'));
         return false; 
     });
-    $('.menu_tab a').click(function() {
+    // navigate to another section
+    $('#menu ul a').click(function() {
+        socket.send({'register':['/happening']});
         nav.go($(this).attr('href'));
         return false;
     });
-    $(".header h1 a").click(function() {
-        nav.go('#welcome');
+
+    // search box
+    $("#menu input").focusin(function() {
+        $(this).next('span').addClass('light');
+    });
+    $("#menu input").focusout(function() {
+        if ($(this).val() == '')
+            $(this).next('span').show();
+        $(this).next('span').removeClass('light');
+    });
+    $("#menu input").keypress(function() {
+        $(this).next('span').hide();
+    });
+    $("#menu .search span").mousedown(function() {
+        $(this).prev('input').focus();
         return false;
     });
+
     $("#category_head .right button").overlay({
         mask: {
             color: '#000',
@@ -78,6 +98,6 @@ require(['socket','underscore','category','nav','jquery-tools'],
         }
     });
     $("#facebox button[name='post']").click(function() {
-        $.post('/post',{ area: $("#category_head .left h2").html(),title:$("input[name='title']").val(),content:$("#facebox textarea").val() });
+        $.post('/post',{ area: category.currentCategory.name,title:$("input[name='title']").val(),content:$("#facebox textarea").val() });
     });
 });
