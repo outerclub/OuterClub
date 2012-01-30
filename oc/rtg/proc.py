@@ -137,21 +137,17 @@ class QueueProc(threading.Thread):
                 # distribute to path
                 if (msg.path in self.paths):
                     for conn in self.paths[msg.path]['conns']: 
-                        # new response
-                        if msg.etype == 'response':
+                        # new response or conversation
+                        if msg.etype == 'response' or msg.etype == 'conversation':
                             p = msg.payload
-                            self.send(conn,[msg.etype,{'user':p.username,'date':p.date,'content':p.content,'avatar_image':p.avatar}])
-                        # new conversation
-                        elif msg.etype == 'conversation':
-                            p = msg.payload
-                            self.send(conn,[msg.etype,{'d_id':p.d_id,'user':p.username,'date':p.date,'title':p.title,'user_id':p.user_id}])
+                            self.send(conn,[msg.etype,p])
                         # new happening now event
                         elif msg.etype == 'happening':
                             p = msg.payload
                             happening_data = {'type':p['type'],'data':p['data']}
                             self.send(conn,[msg.etype,happening_data])
                             self.happening.append(happening_data)
-                            print happening_data
+                            # limit the stored happening nows
                             if (len(self.happening) > 6):
                                 self.happening = self.happening[1:]
                     

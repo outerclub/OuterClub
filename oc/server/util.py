@@ -22,6 +22,28 @@ def formatCategoryName(c):
     return ' '.join([spl.capitalize() if len(spl) > 2 else spl.upper() for spl in c.split(' ')])
 
 def dateFormat(dt):
-    s = dt.strftime('%d %B %Y, %I:%M%p')
+    s = dt.strftime('%d %B %Y, '+str(dt.hour if dt.hour <= 12 else dt.hour-12)+':%M%p')
     return s
+
+def replaceMentions(cur,data):
+    users = findMentions(cur,data)
+    accum = data
+    for name in users:
+        accum = accum.replace('@'+name,'<a href="/user/%s">@%s</a>' % (users[name],name))
+    return accum
+
+def findMentions(cur,data):
+    mentions = re.findall('@(\w+)',data)
+    users = dict()
+    if (len(mentions) > 0):
+        replacements = map(lambda x:'%s',mentions)
+        cur.execute('select name,user_id from user where name in (%s)' % ','.join(replacements),tuple(mentions))
+        for u in cur.fetchall():
+            users[u[0]] = u[1]
+        for n in mentions:
+            if not (n in users):
+                users[n] = None
+    
+    return users
+                
 

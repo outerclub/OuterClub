@@ -9,12 +9,11 @@ def fetchConversationTags(cursor,d_id):
     return tags
     
 def fetchResponses(cursor,d_id):
-    cursor.execute('select r_id,user.name,replyDate,content,avatar_image,prestige from response inner join user using (user_id) where d_id=%s order by replyDate asc', (d_id,))
+    cursor.execute('select r_id,user_id,replyDate,content from response where d_id=%s order by replyDate asc', (d_id,))
     responses = []
     for resp in cursor.fetchall():
-        responses.append({'r_id':resp[0],'user':resp[1], \
-                          'date': util.dateFormat(resp[2]), 'content': resp[3], \
-                          'avatar_image': resp[4],'prestige':resp[5]})
+        responses.append({'r_id':resp[0],'user':fetchUser(cursor,resp[1]), \
+                          'date': util.dateFormat(resp[2]), 'content': util.replaceMentions(cursor,resp[3])})
     return responses
 
 def fetchPopularTags(cursor,cat_id):
@@ -61,7 +60,7 @@ def fetchTasks(cursor,user_id):
     return tasks
 
 def fetchUser(cursor,user_id):
-    res = cursor.execute('select name,avatar_image from user where user_id=%s',(user_id,))
+    res = cursor.execute('select name,avatar_image,prestige from user where user_id=%s',(user_id,))
     user = cursor.fetchone()
-    return {'name':user[0],'avatar_image':user[1],'user_id':user_id}
+    return {'name':user[0],'avatar_image':user[1],'user_id':user_id,'prestige':user[2]}
 

@@ -11,8 +11,8 @@ import random
 import uuid
 import re
 
-from rtg.t_rtg import RtgService
-from rtg.t_rtg.ttypes import *
+from ..rtg.t_rtg import RtgService
+from ..rtg.t_rtg.ttypes import *
 
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -34,13 +34,13 @@ conn = MySQLdb.connect(DefaultConfig.mysql_server,DefaultConfig.mysql_user,Defau
 
 globalAuths = {}
 def isLoggedIn():
-    return 'uid' in request.cookies and 'key' in request.cookies and int(request.cookies['uid']) in globalAuths and globalAuths[int(request.cookies['uid'])] == request.cookies['key']
+    return 'user_id' in request.cookies and 'key' in request.cookies and int(request.cookies['user_id']) in globalAuths and globalAuths[int(request.cookies['user_id'])] == request.cookies['key']
 
 def displaySignup():
     return flask.redirect(flask.url_for('signup'))
 
 def getUid():
-    return int(request.cookies['uid'])
+    return int(request.cookies['user_id'])
 
 @app.route('/')
 def index():
@@ -81,7 +81,7 @@ def about():
 @app.route('/category/<category>')
 def category(category):
     if not isLoggedIn():
-        return displaySignup()
+        return ''
 
     # fetch the category id from the name
     category = category.replace('+',' ')
@@ -90,14 +90,14 @@ def category(category):
     cat_id = cur.fetchone()[0]
 
     # fetch the conversations for this category
-    res = cur.execute('select d_id,user.name,title,postDate,content from conversation inner join user using (user_id) where cat_id=%s order by postDate desc',(cat_id,))
+    res = cur.execute('select d_id,title,postDate,user_id from conversation where cat_id=%s order by postDate desc',(cat_id,))
     posts = []
     cur2 = conn.cursor()
     for conversation in cur.fetchall():
         tags = db.fetchConversationTags(cur2,conversation[0])
-        posts.append({'id':conversation[0], 'title':conversation[2],  \
-                      'user':conversation[1], \
-                      'date': util.dateFormat(conversation[3]), \
+        posts.append({'id':conversation[0], 'title':conversation[1],  \
+                      'user':db.fetchUser(cur,conversation[3]), \
+                      'date': util.dateFormat(conversation[2]), \
                       'tags': tags})
     popular_tags = db.fetchPopularTags(cur,cat_id)
     cur2.close()
@@ -110,25 +110,23 @@ def category(category):
 @app.route('/conversation/<id>')
 def conversation(id):
     if not isLoggedIn():
-        return displaySignup()
+        return ''
 
     # fetch the main conversation metadata
     cur = conn.cursor()
-    res = cur.execute('select user.name,title,postDate,content,cat_id,avatar_image,user.prestige from (conversation inner join user using (user_id)) where d_id=%s',(id,))
+    res = cur.execute('select title,postDate,content,cat_id,user_id from conversation where d_id=%s',(id,))
     conversation = cur.fetchone()
-    cat_id = conversation[4]
+    cat_id = conversation[3]
     cur.execute('select name from category where cat_id=%s',(cat_id,))
     categoryName = cur.fetchone()[0]
     tags = db.fetchConversationTags(cur,id)
-    popular_tags = db.fetchPopularTags(cur,conversation[4])
+    popular_tags = db.fetchPopularTags(cur,conversation[3])
 
     # populate the data object 
-    conversation = {'id': id, 'title':conversation[1], \
-                  'user':conversation[0], \
-                   'prestige':conversation[6], \
-                   'date': util.dateFormat(conversation[2]), \
-                   'content': conversation[3], \
-                    'avatar_image': conversation[5], \
+    conversation = {'id': id, 'title':conversation[0], \
+                  'user':db.fetchUser(cur,conversation[4]), \
+                   'date': util.dateFormat(conversation[1]), \
+                   'content': util.replaceMentions(cur,conversation[2]), \
                    'tags': tags, \
                   }
     responses = db.fetchResponses(cur,id)
@@ -142,7 +140,7 @@ def conversation(id):
 @app.route('/post',methods=['POST'])
 def post():
     if not isLoggedIn():
-        return displaySignup()
+        return ''
 
     # fetch the category information
     cur = conn.cursor()
@@ -160,16 +158,16 @@ def post():
     # fetch the inserted postdate
     cur.execute('select postDate from conversation where d_id=%s', (d_id,))
     date = cur.fetchone()[0]
-    cur.close()
 
     # push the new post
     push = TPost()
+    push.content = util.replaceMentions(cur,request.form['content'])
+
+    cur.close()
+
     push.d_id = d_id
     push.user_id = user['user_id']
-    push.username = user['name']
-    push.avatar = user['avatar_image']
     push.date = util.dateFormat(date)
-    push.content = request.form['content']
     push.category_id = cat_id
     push.category_image = cat_image
     push.title = request.form['title']
@@ -187,25 +185,30 @@ def reply():
     data = request.form['data']
 
     cur = conn.cursor()
+
+    # ensure that any mentions are valid
+    mentions = util.findMentions(cur,data)
+    for name in mentions:
+        if mentions[name] == None:
+            return flask.jsonify(error="@%s didn't match to a user." % name) 
+    
+    # insert the response
     user = db.fetchUser(cur,getUid())
-    cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,user['user_id'],data))
+    now = datetime.now()
+    cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,%s,%s)',(d_id,user['user_id'],now,data))
     conn.commit()
     
-    cur.execute('select replyDate from response where r_id=%s', (cur.lastrowid,))
-    myRow = cur.fetchone()
-
-    push = TResponse()
-    push.d_id = d_id
-    push.user_id = user['user_id']
-    push.username = user['name']
-    push.avatar = user['avatar_image']
-    push.date = util.dateFormat(myRow[0])
-    push.content = data
-
     cur.execute('select cat_id,category.image,title from conversation inner join category using (cat_id) where d_id=%s',(d_id,))
     myRow = cur.fetchone()
+
+    # build the response to push to RTG
+    push = TResponse()
+    push.content = util.replaceMentions(cur,data)
     cur.close()
 
+    push.d_id = d_id
+    push.user_id = user['user_id']
+    push.date = util.dateFormat(now)
     push.category_id = myRow[0]
     push.category_image = myRow[1]
     push.title = myRow[2]
@@ -213,7 +216,7 @@ def reply():
     client.newResponse(push)
     transport.close()
 
-    return ''
+    return '{}'
 
 def initAuth(id,redir):
     auth = TAuth()
@@ -227,7 +230,7 @@ def initAuth(id,redir):
     if (redir):
         redir = flask.redirect(flask.url_for('index'))
         response = app.make_response(redir)
-        response.set_cookie('uid',value=id)
+        response.set_cookie('user_id',value=id)
         response.set_cookie('key',value=auth.key)
         return response
     else:
@@ -290,16 +293,18 @@ def signup():
     else:
         key = initAuth(cur.lastrowid,False)
         cur.close()
-        return flask.jsonify(success=True,uid=cur.lastrowid,key=key)
+        return flask.jsonify(success=True,user_id=cur.lastrowid,key=key)
     
 @app.route('/logout')
 def logout():
     redir = flask.redirect(flask.url_for('signup'))
     resp = app.make_response(redir)
-    resp.set_cookie('uid',expires=datetime.now())
+    resp.set_cookie('user_id',expires=datetime.now())
     resp.set_cookie('key',expires=datetime.now())
     return resp
 
 app.debug = DefaultConfig.debug
 app.secret_key = os.urandom(32)
-app.run(host=DefaultConfig.bind_address,port=DefaultConfig.port)
+
+def start():
+    app.run(host=DefaultConfig.bind_address,port=DefaultConfig.port)

@@ -15,6 +15,7 @@
     background-color: #f5f5f5;
     width: 934px;
     margin: 0 auto;
+    overflow: hidden;
 }
 .conversation {
     width: 100%;
@@ -40,8 +41,6 @@
     padding: 10px;
     float: left;
 }
-.description div {
-}
 .conversation_frame .user h2 {
     margin: 0;
 }
@@ -59,11 +58,30 @@
     font-size: 12px;
     font-weight: bold;
 }
+.posts {
+    margin-bottom: 15px;
+}
+
+/**
+ * Reply
+ */
+.help {
+    float: right;
+    margin: 20px 5px 0 15px;
+    color: gray;
+}
+.help span {
+    color: lightblue;
+}
+.reply .error {
+    color: #c33;
+    font-weight: bold;
+    display: none
+}
 
 .reply {
     float: right;
     margin-right: 30px;
-    margin-top: 15px;
 }
 .reply .info {
     color: white;
@@ -71,6 +89,7 @@
     display: inline-block;
     background-color: #a9a9a9;
     padding: 3px;
+    margin-right: 5px;
 }
 .reply textarea {
     border: 0;

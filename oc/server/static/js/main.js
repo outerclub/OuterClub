@@ -8,18 +8,18 @@ require.config({
 });
 require(['socket','underscore','category','nav','jquery-tools'],
   function(socket,_,category,nav) {
-    // extract the uid and key from the cookies
-    var uid,key;
+    // extract the user_id and key from the cookies
+    var user_id,key;
     _.each(document.cookie.split("; "),function(cookie) {
         var spl = cookie.split('=');
-        if (spl[0] == 'uid')
-            uid = spl[1];
+        if (spl[0] == 'user_id')
+            user_id = spl[1];
         else if (spl[0] == 'key')
             key = spl[1];
     });
     socket.init('http://'+window.location.hostname+':8002/sock',
         function() {
-            socket.send({'uid':uid,'key':key});
+            socket.send({'user_id':user_id,'key':key});
             socket.send({'register':['/happening']});
     });
     socket.addCallback('authRejected',function() {
@@ -33,7 +33,7 @@ require(['socket','underscore','category','nav','jquery-tools'],
             var verb = 'replied in';
             if (data.type == 'post')
                 verb = 'posted'; 
-            var element = jQuery('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category_image+'" /><img class="avatar" src="/static/images/new/avatars/'+p.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user+'</span> '+verb+' <span class="content">'+p.title+'</span></div></div>');
+            var element = jQuery('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category_image+'" /><img class="avatar" src="/static/images/new/avatars/'+p.user.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user.name+'</span> '+verb+' <span class="content">'+p.title+'</span></div></div>');
             element.hide();
             if (animate)
             {

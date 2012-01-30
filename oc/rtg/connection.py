@@ -10,8 +10,8 @@ class EventConnection(SockJSConnection):
         message = json.loads(message)
         if 'register' in message:
             QueueProc.put(event.Register(message['register'],self))
-        if 'uid' in message:
-            QueueProc.put(event.Auth(self,int(message['uid']),message['key']))
+        if 'user_id' in message:
+            QueueProc.put(event.Auth(self,int(message['user_id']),message['key']))
 
     def on_close(self):
         QueueProc.put(event.Close(self))

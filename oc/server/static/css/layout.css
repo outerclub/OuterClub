@@ -21,12 +21,8 @@ a:hover{
 
 body{
 	font-family:Helvetica,Arial,Sans-Serif;
-    font-size: 12px;
+    font-size: 80%;
     background: black url(/static/images/new/background.png) repeat-x top center;
-}
-
-#newthread {
-    padding: 5px;
 }
 #outer {
     width: 1007px;
@@ -60,7 +56,7 @@ body{
 }
 .search {
     float: left;
-    margin-top: 9px;
+    margin: 9px 10px 0 0;
     overflow: hidden;
     position: relative;
    }
@@ -100,14 +96,47 @@ body{
 	line-height: 27px;
 }
 
+
+/**
+ * Profile card.
+ */
+#profile, .slide_show {
+    right: 0px;
+    width: 302px;
+}
+#profile, .slide_show .text {
+    background-color: rgba(0,0,0,0.65);
+    color: white;
+}
+#profile {
+    position: absolute;
+    top: 45px;
+    overflow: hidden;
+}
+#profile h2 {
+    font-weight: bold;
+    font-family: 'BebasRegular';
+    font-size: 16px;
+    display: inline-block;
+
+}
+#profile img {
+    float: left;
+}
+#profile div {
+    padding: 5px;
+    float: left;
+}
+#profile p {
+    margin-top: 5px;
+}
+
 /**
  * slide show.
  */
 .slide_show{
     position: absolute;
-    top: 50px;
-    right: 5px;
-    width: 302px;
+    top: 120px;
 }
 .slide_show .scroll {
 }
@@ -121,7 +150,7 @@ body{
 .slide_show .item {
     overflow: hidden;
     border: 1px solid #555;
-    margin-bottom: 3px;
+    margin-bottom: 1px;
 }
 .slide_show img.bg {
     display: block;
@@ -131,8 +160,6 @@ body{
 .slide_show  .text {
     height: 80px;
     width: 160px;
-    background-color: rgba(0,0,0,0.65);
-    color: white;
     padding: 10px;
     float: left;
 }

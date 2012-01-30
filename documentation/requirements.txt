@@ -14,7 +14,7 @@ Python Packages
 
 Tools
     git:
-        repo is at ssh://YOURUSER@ec2-50-16-18-32.compute-1.amazonaws.com/home/TheOuterClub.git
+        repo is at ssh://YOURUSER@ec2-50-16-18-32.compute-1.amazonaws.com/home/OuterClub.git
     thrift: http://thrift.apache.org/download/
         Both compiler and platform-specific libraries are required. The tar.gz compile/make process provides both.
         For python libraries only (i.e. this project currently), 'easy_install thrift' should work fine.
