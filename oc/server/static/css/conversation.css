@@ -53,10 +53,15 @@
     font-size: 16px;
     min-height: 40px;
 }
+.content .section {
+    clear: both;
+}
 .conversation_frame .content .date {
-    float: right;
     font-size: 12px;
     font-weight: bold;
+}
+.conversation_frame .right img {
+    vertical-align: bottom
 }
 .posts {
     margin-bottom: 15px;

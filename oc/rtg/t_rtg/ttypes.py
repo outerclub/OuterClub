@@ -22,38 +22,35 @@ class TResponse(object):
   Attributes:
    - d_id
    - user_id
-   - username
-   - avatar
    - date
    - content
    - category_image
    - category_id
    - title
+   - r_id
   """
 
   thrift_spec = (
     None, # 0
     (1, TType.I32, 'd_id', None, None, ), # 1
     (2, TType.I32, 'user_id', None, None, ), # 2
-    (3, TType.STRING, 'username', None, None, ), # 3
-    (4, TType.STRING, 'avatar', None, None, ), # 4
-    (5, TType.STRING, 'date', None, None, ), # 5
-    (6, TType.STRING, 'content', None, None, ), # 6
-    (7, TType.STRING, 'category_image', None, None, ), # 7
-    (8, TType.I32, 'category_id', None, None, ), # 8
-    (9, TType.STRING, 'title', None, None, ), # 9
+    (3, TType.STRING, 'date', None, None, ), # 3
+    (4, TType.STRING, 'content', None, None, ), # 4
+    (5, TType.STRING, 'category_image', None, None, ), # 5
+    (6, TType.I32, 'category_id', None, None, ), # 6
+    (7, TType.STRING, 'title', None, None, ), # 7
+    (8, TType.I32, 'r_id', None, None, ), # 8
   )
 
-  def __init__(self, d_id=None, user_id=None, username=None, avatar=None, date=None, content=None, category_image=None, category_id=None, title=None,):
+  def __init__(self, d_id=None, user_id=None, date=None, content=None, category_image=None, category_id=None, title=None, r_id=None,):
     self.d_id = d_id
     self.user_id = user_id
-    self.username = username
-    self.avatar = avatar
     self.date = date
     self.content = content
     self.category_image = category_image
     self.category_id = category_id
     self.title = title
+    self.r_id = r_id
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -76,37 +73,32 @@ class TResponse(object):
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRING:
-          self.username = iprot.readString();
+          self.date = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.STRING:
-          self.avatar = iprot.readString();
+          self.content = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.STRING:
-          self.date = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 6:
-        if ftype == TType.STRING:
-          self.content = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 7:
-        if ftype == TType.STRING:
           self.category_image = iprot.readString();
         else:
           iprot.skip(ftype)
-      elif fid == 8:
+      elif fid == 6:
         if ftype == TType.I32:
           self.category_id = iprot.readI32();
         else:
           iprot.skip(ftype)
-      elif fid == 9:
+      elif fid == 7:
         if ftype == TType.STRING:
           self.title = iprot.readString();
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.I32:
+          self.r_id = iprot.readI32();
         else:
           iprot.skip(ftype)
       else:
@@ -127,33 +119,29 @@ class TResponse(object):
       oprot.writeFieldBegin('user_id', TType.I32, 2)
       oprot.writeI32(self.user_id)
       oprot.writeFieldEnd()
-    if self.username is not None:
-      oprot.writeFieldBegin('username', TType.STRING, 3)
-      oprot.writeString(self.username)
-      oprot.writeFieldEnd()
-    if self.avatar is not None:
-      oprot.writeFieldBegin('avatar', TType.STRING, 4)
-      oprot.writeString(self.avatar)
-      oprot.writeFieldEnd()
     if self.date is not None:
-      oprot.writeFieldBegin('date', TType.STRING, 5)
+      oprot.writeFieldBegin('date', TType.STRING, 3)
       oprot.writeString(self.date)
       oprot.writeFieldEnd()
     if self.content is not None:
-      oprot.writeFieldBegin('content', TType.STRING, 6)
+      oprot.writeFieldBegin('content', TType.STRING, 4)
       oprot.writeString(self.content)
       oprot.writeFieldEnd()
     if self.category_image is not None:
-      oprot.writeFieldBegin('category_image', TType.STRING, 7)
+      oprot.writeFieldBegin('category_image', TType.STRING, 5)
       oprot.writeString(self.category_image)
       oprot.writeFieldEnd()
     if self.category_id is not None:
-      oprot.writeFieldBegin('category_id', TType.I32, 8)
+      oprot.writeFieldBegin('category_id', TType.I32, 6)
       oprot.writeI32(self.category_id)
       oprot.writeFieldEnd()
     if self.title is not None:
-      oprot.writeFieldBegin('title', TType.STRING, 9)
+      oprot.writeFieldBegin('title', TType.STRING, 7)
       oprot.writeString(self.title)
+      oprot.writeFieldEnd()
+    if self.r_id is not None:
+      oprot.writeFieldBegin('r_id', TType.I32, 8)
+      oprot.writeI32(self.r_id)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -178,8 +166,6 @@ class TPost(object):
   Attributes:
    - d_id
    - user_id
-   - username
-   - avatar
    - date
    - content
    - category_image
@@ -191,20 +177,16 @@ class TPost(object):
     None, # 0
     (1, TType.I32, 'd_id', None, None, ), # 1
     (2, TType.I32, 'user_id', None, None, ), # 2
-    (3, TType.STRING, 'username', None, None, ), # 3
-    (4, TType.STRING, 'avatar', None, None, ), # 4
-    (5, TType.STRING, 'date', None, None, ), # 5
-    (6, TType.STRING, 'content', None, None, ), # 6
-    (7, TType.STRING, 'category_image', None, None, ), # 7
-    (8, TType.I32, 'category_id', None, None, ), # 8
-    (9, TType.STRING, 'title', None, None, ), # 9
+    (3, TType.STRING, 'date', None, None, ), # 3
+    (4, TType.STRING, 'content', None, None, ), # 4
+    (5, TType.STRING, 'category_image', None, None, ), # 5
+    (6, TType.I32, 'category_id', None, None, ), # 6
+    (7, TType.STRING, 'title', None, None, ), # 7
   )
 
-  def __init__(self, d_id=None, user_id=None, username=None, avatar=None, date=None, content=None, category_image=None, category_id=None, title=None,):
+  def __init__(self, d_id=None, user_id=None, date=None, content=None, category_image=None, category_id=None, title=None,):
     self.d_id = d_id
     self.user_id = user_id
-    self.username = username
-    self.avatar = avatar
     self.date = date
     self.content = content
     self.category_image = category_image
@@ -232,35 +214,25 @@ class TPost(object):
           iprot.skip(ftype)
       elif fid == 3:
         if ftype == TType.STRING:
-          self.username = iprot.readString();
+          self.date = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.STRING:
-          self.avatar = iprot.readString();
+          self.content = iprot.readString();
         else:
           iprot.skip(ftype)
       elif fid == 5:
         if ftype == TType.STRING:
-          self.date = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 6:
-        if ftype == TType.STRING:
-          self.content = iprot.readString();
-        else:
-          iprot.skip(ftype)
-      elif fid == 7:
-        if ftype == TType.STRING:
           self.category_image = iprot.readString();
         else:
           iprot.skip(ftype)
-      elif fid == 8:
+      elif fid == 6:
         if ftype == TType.I32:
           self.category_id = iprot.readI32();
         else:
           iprot.skip(ftype)
-      elif fid == 9:
+      elif fid == 7:
         if ftype == TType.STRING:
           self.title = iprot.readString();
         else:
@@ -283,32 +255,24 @@ class TPost(object):
       oprot.writeFieldBegin('user_id', TType.I32, 2)
       oprot.writeI32(self.user_id)
       oprot.writeFieldEnd()
-    if self.username is not None:
-      oprot.writeFieldBegin('username', TType.STRING, 3)
-      oprot.writeString(self.username)
-      oprot.writeFieldEnd()
-    if self.avatar is not None:
-      oprot.writeFieldBegin('avatar', TType.STRING, 4)
-      oprot.writeString(self.avatar)
-      oprot.writeFieldEnd()
     if self.date is not None:
-      oprot.writeFieldBegin('date', TType.STRING, 5)
+      oprot.writeFieldBegin('date', TType.STRING, 3)
       oprot.writeString(self.date)
       oprot.writeFieldEnd()
     if self.content is not None:
-      oprot.writeFieldBegin('content', TType.STRING, 6)
+      oprot.writeFieldBegin('content', TType.STRING, 4)
       oprot.writeString(self.content)
       oprot.writeFieldEnd()
     if self.category_image is not None:
-      oprot.writeFieldBegin('category_image', TType.STRING, 7)
+      oprot.writeFieldBegin('category_image', TType.STRING, 5)
       oprot.writeString(self.category_image)
       oprot.writeFieldEnd()
     if self.category_id is not None:
-      oprot.writeFieldBegin('category_id', TType.I32, 8)
+      oprot.writeFieldBegin('category_id', TType.I32, 6)
       oprot.writeI32(self.category_id)
       oprot.writeFieldEnd()
     if self.title is not None:
-      oprot.writeFieldBegin('title', TType.STRING, 9)
+      oprot.writeFieldBegin('title', TType.STRING, 7)
       oprot.writeString(self.title)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()

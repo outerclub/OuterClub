@@ -34,10 +34,10 @@ class TRtgHandler:
         cur = self.db.cursor()
         user = database.fetchUser(cur,response.user_id)
         cur.close()
-        payload = {'date':response.date,'content':response.content,'user':user}
+        payload = {'date':response.date,'content':response.content,'user':user,'r_id':response.r_id}
         QueueProc.put(event.Message('/conversation/%d' % (response.d_id), 'response',payload))
 
-        happening_data = {'user':user,'date':response.date,'category_image':response.category_image,'category_id':response.category_id,'d_id':response.d_id,'title': response.title}
+        happening_data = {'user':user,'date':response.date,'category_image':response.category_image,'category_id':response.category_id,'d_id':response.d_id,'title': response.title,'r_id':response.r_id}
         QueueProc.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
 
     def newPost(self,post):

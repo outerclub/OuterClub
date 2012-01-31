@@ -76,7 +76,7 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
 
                 socket.send({'register':['/happening','/conversation/'+id]});
                 socket.addCallback('response',function(data) {
-                    self.createResponse(true,data.user,data.date,data.content);
+                    self.createResponse(true,data.r_id,data.user,data.date,data.content);
                 });
                 socket.addCallback('viewers',function(viewers) {
                     // scan for removals
@@ -105,7 +105,7 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                 
                 $("#conversation .room h2").html(data.conversation.title);
                 $("#conversation .conversation").remove();
-                self.createResponse(false,data.conversation.user,data.conversation.date,data.conversation.content);
+                self.createResponse(false,0,data.conversation.user,data.conversation.date,data.conversation.content);
 
                 /**
                  * Reply
@@ -129,13 +129,13 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                     });
                 });
                 _.each(data.responses,function(r) {
-                    self.createResponse(false,r.user,r.date,r.content);
+                    self.createResponse(false,r.r_id,r.user,r.date,r.content);
                 });
                 $("#conversation").show();
 
             }); 
         },
-        createResponse: function(fadeIn,user,date,content) {
+        createResponse: function(fadeIn,r_id,user,date,content) {
                 var previousD = $(".conversation");
                 // get last full date
                 var lastDateSplit;
@@ -169,10 +169,11 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                 }
 
                 var lastDiscussion = $(".conversation:last");
+                var dateHtml ='<div class="right date">'+date+'<a href="/upvote"><img width="20" height="20" src="/static/images/coffee.png" /></a></div>';
                 // combine the postings or create new one?
                 if (lastDiscussion.find('.user h2 a').html() == user.name)
                 {
-                    lastDiscussion.find('.content').append('<br />'+content+'<div class="date">'+date+'</div><br />');
+                    lastDiscussion.find('.content').append('<div class="section">'+content+dateHtml+"</div>");
                 } else {
                     var str ='<div class="conversation" style="display: none">';
                     str += '<div class="user">'+
@@ -182,10 +183,9 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                             '</div>'+
                             '<img src="/static/images/new/avatars/'+user.avatar_image+'" />'+
                         '</div>'+
-                        '<div class="content">'+
-                            content+
-                            '<div class="date">'+date+'</div><br />'+
-                        '</div>';
+                        '<div class="content"><div class="section">'+
+                            content+dateHtml+
+                        '</div></div>';
                     str += '</div>';
                     $(".responses").append(str);
                     if (fadeIn) {
@@ -194,6 +194,10 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                         $(".conversation:last").show();
                     }
                 }
+                $(".conversation:last .section:last a").click(function() {
+                    alert(r_id);
+                    return false;
+                });
 
          }
 

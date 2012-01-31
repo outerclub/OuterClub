@@ -197,6 +197,7 @@ def reply():
     now = datetime.now()
     cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,%s,%s)',(d_id,user['user_id'],now,data))
     conn.commit()
+    r_id = cur.lastrowid
     
     cur.execute('select cat_id,category.image,title from conversation inner join category using (cat_id) where d_id=%s',(d_id,))
     myRow = cur.fetchone()
@@ -212,6 +213,7 @@ def reply():
     push.category_id = myRow[0]
     push.category_image = myRow[1]
     push.title = myRow[2]
+    push.r_id = r_id
     transport.open()
     client.newResponse(push)
     transport.close()

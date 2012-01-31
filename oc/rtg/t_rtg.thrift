@@ -6,7 +6,8 @@ struct TResponse
     4:optional string content
     5:string category_image
     6:i32 category_id
-    7:string title
+    7:string title,
+    8:i32 r_id
 }
 struct TPost
 {
