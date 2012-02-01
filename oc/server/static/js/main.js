@@ -6,22 +6,14 @@ require.config({
         'jquery-tools':'deps/jquery.tools.min'
     }
 });
-require(['socket','underscore','category','nav','jquery-tools'],
-  function(socket,_,category,nav) {
-    // extract the user_id and key from the cookies
-    var user_id,key;
-    _.each(document.cookie.split("; "),function(cookie) {
-        var spl = cookie.split('=');
-        if (spl[0] == 'user_id')
-            user_id = spl[1];
-        else if (spl[0] == 'key')
-            key = spl[1];
-    });
+require(['socket','underscore','category','nav','jquery-tools','user'],
+  function(socket,_,category,nav,__,user) {
+    user.init();
     socket.init('http://'+window.location.hostname+':8002/sock',
         function() {
-            socket.send({'user_id':user_id,'key':key});
-            socket.send({'register':['/happening']});
+            socket.send({'user_id':user.user_id,'key':user.key});
     });
+    socket.send({'register':['/happening','/user/'+user.user_id]});
     socket.addCallback('authRejected',function() {
         window.location = '/logout';
     });
@@ -38,11 +30,14 @@ require(['socket','underscore','category','nav','jquery-tools'],
             if (animate)
             {
      
-                $('.slide_show .scroll').append(element);
+                $('.slide_show .scroll').prepend(element);
             } else {
-                $('.slide_show .scroll').append(element);
+                $('.slide_show .scroll').prepend(element);
             }
             element.fadeIn();
+            element.click(function() {
+                category.goConversation(p.d_id);
+            });
         }
     }
 
@@ -68,7 +63,7 @@ require(['socket','underscore','category','nav','jquery-tools'],
     });
     // navigate to another section
     $('#menu ul a').click(function() {
-        socket.send({'register':['/happening']});
+        socket.send({'register':['/happening','/user/'+user.user_id]});
         nav.go($(this).attr('href'));
         return false;
     });

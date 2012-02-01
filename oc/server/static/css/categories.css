@@ -1,19 +1,12 @@
 #nav {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
+    border-collapse: separate;
+    border-spacing: 5px;
 }
-#nav li {
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-}
-#nav li a {
+#nav a {
     color: white;
-    margin: 1px;
 }
-#nav li a:hover {
+#nav a:hover {
     text-decoration: none;
-    opacity: 0.6;
+    opacity: 0.7;
 }
 

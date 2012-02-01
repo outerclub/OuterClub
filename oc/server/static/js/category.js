@@ -1,9 +1,13 @@
-define(['socket','nav','underscore'],function(socket,nav,_) {
+define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
     return {
         currentCategory: {
             name: undefined,
             id: undefined,
             href: undefined
+        },
+        currentConversation: {
+            id: undefined,
+            viewers: []
         },
         goCategory: function(name,id,href) {
             $('title').html(name+' - OuterClub');
@@ -21,7 +25,7 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                 $("#dynamic").show();
 
                 self.showCategoryHead(name,id,href);
-                socket.send({'register':['/happening','/category/'+id]});
+                socket.send({'register':['/happening','/user/'+user.user_id,'/category/'+id]});
             });
             socket.addCallback('conversation',function(data) {
                 var d = self.createConversations(true,[{id:data.d_id,title:data.title,user:data.user,date:data.date}]);
@@ -34,7 +38,7 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
             var html = '';
             _.each(d_list,function(d) {
               html += '<div title="'+d.title+'" class="post" '+(hide ? 'style="display: none"' : '')+ ' id="'+d.id+'">'
-                + '<div class="post_content">'
+                + '<div class="post_content"><img src="/static/images/icons/conversation.png" /> '
                 + '<h1>'+d.title+'</h1>'
                 + '<div>Started by <a href="/user/'+d.user.user_id+'">'+d.user.name+'</a> on '+d.date+'</div>'
                 + '</div>'
@@ -62,80 +66,84 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                 return false;
             });
         },
-        currentViewers: [],
         goConversation: function(id) {
-            var self = this;
-            $("#conversation .users").html('');
-           this.currentViewers = [];
-           $.getJSON('/conversation/'+id,function(data) {
-                nav.hideAll();
-                $('title').html(data.conversation.title+' - OuterClub');
+           var self = this;
+            // only proceed if changing conversation or not displayed
+           if (this.currentConversation.id != id || !$("#conversation").is(':visible')) 
+            {
+                $("#conversation .users").html('');
+               this.currentConversation.viewers = [];
+               this.currentConversation.id = id;
+               $.getJSON('/conversation/'+id,function(data) {
+                    nav.hideAll();
+                    $('title').html(data.conversation.title+' - OuterClub');
 
-                // show category head
-                self.showCategoryHead(data.category_name,data.category_id,data.category_url);
+                    // show category head
+                    self.showCategoryHead(data.category_name,data.category_id,data.category_url);
 
-                socket.send({'register':['/happening','/conversation/'+id]});
-                socket.addCallback('response',function(data) {
-                    self.createResponse(true,data.r_id,data.user,data.date,data.content);
-                });
-                socket.addCallback('viewers',function(viewers) {
-                    // scan for removals
-                    var toRemove = [];
-                    for (var v in self.currentViewers)
-                    {
-                        if (!(v in viewers))
-                        {
-                            $("#v_"+v).fadeOut(function() {
-                                $(this).remove();
-                            });
-                            delete self.currentViewers[v];
-                        }
-                    }
-                    // scan for insertions
-                    for (v in viewers) {
-                        if (!(v in self.currentViewers)) {
-                            user = jQuery('<img id="v_'+v+'"src="/static/images/new/avatars/'+viewers[v]+'" />');
-                            user.hide();
-                            $(".conversation_frame .users").append(user);
-                            user.fadeIn();
-                            self.currentViewers[v] = '';
-                        }
-                    }
-                });
-                
-                $("#conversation .room h2").html(data.conversation.title);
-                $("#conversation .conversation").remove();
-                self.createResponse(false,0,data.conversation.user,data.conversation.date,data.conversation.content);
-
-                /**
-                 * Reply
-                 */
-                $(".reply button").unbind();
-                $(".reply button").click(function() {
-                    $.ajax({
-                        type:'POST',
-                        url:'/reply',
-                        data: { d_id:data.conversation.id, data: $(".reply textarea").val()},
-                        success: function(data) {
-                            if ('error' in data) {
-                                $(".reply .error").html(data['error']);
-                                $(".reply .error").fadeIn();
-                            } else {
-                                $(".reply .error").fadeOut();
-                                $("textarea").val('');
-                            }
-                        },
-                        dataType: 'json'
+                    socket.send({'register':['/happening','/user/'+user.user_id,'/conversation/'+id]});
+                    socket.addCallback('response',function(data) {
+                        self.createResponse(true,data.r_id,data.user,data.date,data.content,data.user.user_id != user.user_id);
                     });
-                });
-                _.each(data.responses,function(r) {
-                    self.createResponse(false,r.r_id,r.user,r.date,r.content);
-                });
-                $("#conversation").show();
+                    socket.addCallback('viewers',function(viewers) {
+                        // scan for removals
+                        var toRemove = [];
+                        for (var v in self.currentConversation.viewers)
+                        {
+                            if (!(v in viewers))
+                            {
+                                $("#v_"+v).fadeOut(function() {
+                                    $(this).remove();
+                                });
+                                delete self.currentConversation.viewers[v];
+                            }
+                        }
+                        // scan for insertions
+                        for (v in viewers) {
+                            if (!(v in self.currentConversation.viewers)) {
+                                var userView = jQuery('<img id="v_'+v+'"src="/static/images/new/avatars/'+viewers[v]+'" />');
+                                userView.hide();
+                                $(".conversation_frame .users").append(userView);
+                                userView.fadeIn();
+                                self.currentConversation.viewers[v] = '';
+                            }
+                        }
+                    });
+                    
+                    $("#conversation .room h2").html(data.conversation.title);
+                    $("#conversation .conversation").remove();
+                    self.createResponse(false,0,data.conversation.user,data.conversation.date,data.conversation.content,false);
 
-            }); 
+                    /**
+                     * Reply
+                     */
+                    $(".reply button").unbind();
+                    $(".reply button").click(function() {
+                        $.ajax({
+                            type:'POST',
+                            url:'/reply',
+                            data: { d_id:data.conversation.id, data: $(".reply textarea").val()},
+                            success: function(data) {
+                                if ('error' in data) {
+                                    $(".reply .error").html(data['error']);
+                                    $(".reply .error").fadeIn();
+                                } else {
+                                    $(".reply .error").fadeOut();
+                                    $("textarea").val('');
+                                }
+                            },
+                            dataType: 'json'
+                        });
+                    });
+                    _.each(data.responses,function(r) {
+                        self.createResponse(false,r.r_id,r.user,r.date,r.content,r.canVote);
+                    });
+                    $("#conversation").show();
+
+                }); 
+            }
         },
-        createResponse: function(fadeIn,r_id,user,date,content) {
+        createResponse: function(fadeIn,r_id,r_user,date,content,canVote) {
                 var previousD = $(".conversation");
                 // get last full date
                 var lastDateSplit;
@@ -169,19 +177,26 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                 }
 
                 var lastDiscussion = $(".conversation:last");
-                var dateHtml ='<div class="right date">'+date+'<a href="/upvote"><img width="20" height="20" src="/static/images/coffee.png" /></a></div>';
+                // create right float
+                var dateHtml ='<div class="right date">'+date;
+                if (canVote)
+                {
+                    dateHtml +='<a href="/upvote"><img width="20" height="20" src="/static/images/coffee.png" /></a>';
+                }
+                dateHtml += '</div>';
+
                 // combine the postings or create new one?
-                if (lastDiscussion.find('.user h2 a').html() == user.name)
+                if (lastDiscussion.find('.user h2 a').html() == r_user.name)
                 {
                     lastDiscussion.find('.content').append('<div class="section">'+content+dateHtml+"</div>");
                 } else {
                     var str ='<div class="conversation" style="display: none">';
                     str += '<div class="user">'+
                             '<div class="description">'+
-                                '<h2><a href="/user/'+user.user_id+'">'+user.name+'</a></h2>'+
-                                '<div>Prestige: '+user.prestige+'</div>'+
+                                '<h2><a href="/user/'+r_user.user_id+'">'+r_user.name+'</a></h2>'+
+                                '<div>Prestige: '+r_user.prestige+'</div>'+
                             '</div>'+
-                            '<img src="/static/images/new/avatars/'+user.avatar_image+'" />'+
+                            '<img src="/static/images/new/avatars/'+r_user.avatar_image+'" />'+
                         '</div>'+
                         '<div class="content"><div class="section">'+
                             content+dateHtml+
@@ -194,10 +209,23 @@ define(['socket','nav','underscore'],function(socket,nav,_) {
                         $(".conversation:last").show();
                     }
                 }
-                $(".conversation:last .section:last a").click(function() {
-                    alert(r_id);
-                    return false;
-                });
+
+                if (canVote)
+                {
+                    $(".conversation:last .section:last a").click(function() {
+                        var self = this;
+                        $.ajax({
+                            type:'POST',
+                            url:'/upvote',
+                            data: { r_id:r_id },
+                            success: function(data) {
+                                $(self).fadeOut(); 
+                            },
+                            dataType: 'json'
+                        });
+                        return false;
+                    });
+                }
 
          }
 

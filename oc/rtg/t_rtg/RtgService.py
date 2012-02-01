@@ -39,6 +39,13 @@ class Iface(object):
     """
     pass
 
+  def userModified(self, user_id):
+    """
+    Parameters:
+     - user_id
+    """
+    pass
+
 
 class Client(Iface):
   def __init__(self, iprot, oprot=None):
@@ -131,6 +138,34 @@ class Client(Iface):
     self._iprot.readMessageEnd()
     return
 
+  def userModified(self, user_id):
+    """
+    Parameters:
+     - user_id
+    """
+    self.send_userModified(user_id)
+    self.recv_userModified()
+
+  def send_userModified(self, user_id):
+    self._oprot.writeMessageBegin('userModified', TMessageType.CALL, self._seqid)
+    args = userModified_args()
+    args.user_id = user_id
+    args.write(self._oprot)
+    self._oprot.writeMessageEnd()
+    self._oprot.trans.flush()
+
+  def recv_userModified(self, ):
+    (fname, mtype, rseqid) = self._iprot.readMessageBegin()
+    if mtype == TMessageType.EXCEPTION:
+      x = TApplicationException()
+      x.read(self._iprot)
+      self._iprot.readMessageEnd()
+      raise x
+    result = userModified_result()
+    result.read(self._iprot)
+    self._iprot.readMessageEnd()
+    return
+
 
 class Processor(Iface, TProcessor):
   def __init__(self, handler):
@@ -139,6 +174,7 @@ class Processor(Iface, TProcessor):
     self._processMap["newResponse"] = Processor.process_newResponse
     self._processMap["newPost"] = Processor.process_newPost
     self._processMap["auth"] = Processor.process_auth
+    self._processMap["userModified"] = Processor.process_userModified
 
   def process(self, iprot, oprot):
     (name, type, seqid) = iprot.readMessageBegin()
@@ -184,6 +220,17 @@ class Processor(Iface, TProcessor):
     result = auth_result()
     self._handler.auth(args.auth)
     oprot.writeMessageBegin("auth", TMessageType.REPLY, seqid)
+    result.write(oprot)
+    oprot.writeMessageEnd()
+    oprot.trans.flush()
+
+  def process_userModified(self, seqid, iprot, oprot):
+    args = userModified_args()
+    args.read(iprot)
+    iprot.readMessageEnd()
+    result = userModified_result()
+    self._handler.userModified(args.user_id)
+    oprot.writeMessageBegin("userModified", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -482,6 +529,108 @@ class auth_result(object):
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
     oprot.writeStructBegin('auth_result')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class userModified_args(object):
+  """
+  Attributes:
+   - user_id
+  """
+
+  thrift_spec = (
+    None, # 0
+    (1, TType.I32, 'user_id', None, None, ), # 1
+  )
+
+  def __init__(self, user_id=None,):
+    self.user_id = user_id
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.user_id = iprot.readI32();
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('userModified_args')
+    if self.user_id is not None:
+      oprot.writeFieldBegin('user_id', TType.I32, 1)
+      oprot.writeI32(self.user_id)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def validate(self):
+    return
+
+
+  def __repr__(self):
+    L = ['%s=%r' % (key, value)
+      for key, value in self.__dict__.iteritems()]
+    return '%s(%s)' % (self.__class__.__name__, ', '.join(L))
+
+  def __eq__(self, other):
+    return isinstance(other, self.__class__) and self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+class userModified_result(object):
+
+  thrift_spec = (
+  )
+
+  def read(self, iprot):
+    if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
+      fastbinary.decode_binary(self, iprot.trans, (self.__class__, self.thrift_spec))
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
+      oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
+      return
+    oprot.writeStructBegin('userModified_result')
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 

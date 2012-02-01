@@ -55,11 +55,18 @@ Welcome
         </div>
         <div id="categories" style="display: none" title="Categories">
             <div align="center">
-            <ul id="nav">
+            <table id="nav">
+            {% set x = 0 %}
             {% for c in categories %}
-            <li><a title="{{ c.name }}" href="{{ url_for('category',category=c.url) }}" id="{{ c.id }}"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a></li>
+                {% if x == 0 or x == 4 or x == 7 or x == 10 %}
+                <tr>
+                {% endif %}
+                <td {% if x == 5 or x == 9 or x == 11 %} colspan="2" {% endif %}>
+                    <a title="{{ c.name }}" href="{{ url_for('category',category=c.url) }}" id="{{ c.id }}"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a>
+                </td>
+                {% set x = x + 1 %}
             {% endfor %}
-            </ul>
+            </table>
             </div>
         </div>
         <div id="trending" style="display: none" title="Trending">

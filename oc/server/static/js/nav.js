@@ -8,8 +8,8 @@ define(function() {
         },
         go: function(loc) {
             this.hideAll();
-            $('#menu ul li').each(function() { $(this).removeClass('active'); });
-            $("#menu ul a[href='"+loc+"']").parent().addClass('active');
+            $('#menu ul li a').each(function() { $(this).removeClass('active'); });
+            $("#menu ul a[href='"+loc+"']").addClass('active');
             var element = $(loc);
             element.show();
             $('title').html(element.attr('title')+' - OuterClub');

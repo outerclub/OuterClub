@@ -52,7 +52,11 @@ class TRtgHandler:
 
     def auth(self,auth):
         QueueProc.put(event.NewAuthKey(auth.user_id,auth.key))
-        
+    def userModified(self,user_id):
+        cur = self.db.cursor()
+        user = database.fetchUser(cur,user_id)
+        cur.close()
+        QueueProc.put(event.Message('/user/%d' % user_id,'user',user))
 
 
 def start():

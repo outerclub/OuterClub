@@ -8,12 +8,27 @@ def fetchConversationTags(cursor,d_id):
         tags.append(tag[0])
     return tags
     
-def fetchResponses(cursor,d_id):
+def fetchResponses(cursor,d_id,user_id):
     cursor.execute('select r_id,user_id,replyDate,content from response where d_id=%s order by replyDate asc', (d_id,))
+    
     responses = []
+    r_ids = []
     for resp in cursor.fetchall():
+        r_ids.append(resp[0])
         responses.append({'r_id':resp[0],'user':fetchUser(cursor,resp[1]), \
-                          'date': util.dateFormat(resp[2]), 'content': util.replaceMentions(cursor,resp[3])})
+                          'date': util.dateFormat(resp[2]), 'content': util.replaceMentions(cursor,resp[3]), \
+                          'canVote':True})
+    if (len(responses) > 0):
+        whereClause = map(lambda x:'object_id=%s',r_ids)
+        sql = 'select object_id from upvote where user_id=%s and type=%s and (' + ' or '.join(whereClause)+')'
+        cursor.execute(sql,(user_id,util.Upvote.ResponseType,)+tuple(r_ids))
+        
+        myVotes = set()
+        for r in cursor.fetchall():
+            myVotes.add(r[0])
+        for r in responses:
+            if r['r_id'] in myVotes or r['user']['user_id'] == user_id:
+                r['canVote'] = False
     return responses
 
 def fetchPopularTags(cursor,cat_id):

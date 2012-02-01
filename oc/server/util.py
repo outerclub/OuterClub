@@ -45,5 +45,8 @@ def findMentions(cur,data):
                 users[n] = None
     
     return users
+
+class Upvote:
+    ResponseType = 0
                 
 

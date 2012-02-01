@@ -21,7 +21,7 @@
 </div>
 <div id="menu">
 <ul>
-<li class="active"><a href="#welcome">WELCOME</a></li>
+<li id="miniLogo"><a href="#welcome" class="active"><img src="/static/images/icons/oc.png" /></a></li>
 <li><a href="#community">COMMUNITY</a></li>
 <li><a href="#categories">CATEGORIES</a></li>
 <li><a href="#trending">TRENDING NOW</a></li>
@@ -39,7 +39,7 @@
 <img src="{{ url_for('static',filename='images/new/avatars/'+avatar) }}" />
 <div>
 <h2>{{ username }}</h2> <a href="{{ url_for('logout') }}">Log out</a><br />
-<p>Prestige: 0</p>
+<p>Prestige: <span class="prestige">{{ prestige }}</span></p>
 </div>
 </div>
 <div class="slide_show">

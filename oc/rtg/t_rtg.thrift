@@ -29,4 +29,5 @@ service RtgService
     void newResponse(1:TResponse response);
     void newPost(1:TPost post);
     void auth(1:TAuth auth);
+    void userModified(1:i32 user_id);
 }

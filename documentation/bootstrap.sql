@@ -18,7 +18,7 @@ CREATE TABLE `category` (
   PRIMARY KEY (`cat_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-INSERT INTO `category` VALUES (2,'lounge','lounge.png'),(3,'current events','currentEvents.png'),(4,'high school','highSchool.png'),(5,'college','college.png'),(6,'love clinic','loveClinic.png'),(7,'sports','sports.png'),(8,'philosophy','philosophy.png'),(9,'adulthood','adulthood.png'),(10,'technology','technology.png'),(11,'video & computer games','videoCG.png'),(12,'fashion','fashion.png'),(13,'tv & movies','tvMovies.png'),(14,'music','music.png');
+INSERT INTO `category` VALUES (2,'general','general.png'),(3,'current events','currentEvents.png'),(4,'high school','highSchool.png'),(5,'college','college.png'),(6,'love clinic','loveClinic.png'),(7,'sports','sports.png'),(8,'philosophy','philosophy.png'),(9,'adulthood','adulthood.png'),(10,'technology','technology.png'),(11,'video & computer games','videoCG.png'),(12,'fashion','fashion.png'),(13,'tv & movies','tvMovies.png'),(14,'music','music.png');
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `conversation` (
@@ -29,7 +29,7 @@ CREATE TABLE `conversation` (
   `postDate` datetime NOT NULL,
   `content` tinytext NOT NULL,
   PRIMARY KEY (`d_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -47,7 +47,7 @@ CREATE TABLE `response` (
   `replyDate` datetime NOT NULL,
   `content` tinytext NOT NULL,
   PRIMARY KEY (`r_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=50 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -71,6 +71,14 @@ CREATE TABLE `task` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `upvote` (
+  `user_id` int(11) NOT NULL,
+  `object_id` int(11) NOT NULL,
+  `type` int(11) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `user` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -79,6 +87,5 @@ CREATE TABLE `user` (
   `avatar_image` varchar(255) DEFAULT NULL,
   `prestige` int(11) NOT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-INSERT INTO `user` VALUES (38,'USERNAME','E-MAIL','d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f','user_2.png',0);

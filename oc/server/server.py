@@ -56,7 +56,7 @@ def index():
     
     g = {}
     user = db.fetchUser(cur,getUid())
-    g.update({'username':user['name'],'avatar':user['avatar_image']})
+    g.update({'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige']})
     g.update({'categories':categories,'tab':'categories'})
 
     d = db.fetchTrendingConversations(cur)
@@ -127,9 +127,9 @@ def conversation(id):
                   'user':db.fetchUser(cur,conversation[4]), \
                    'date': util.dateFormat(conversation[1]), \
                    'content': util.replaceMentions(cur,conversation[2]), \
-                   'tags': tags, \
+                   'tags': tags \
                   }
-    responses = db.fetchResponses(cur,id)
+    responses = db.fetchResponses(cur,id,getUid())
     cur.close()
 
     c_url = '/category/'+categoryName.lower().replace(' ','+')
@@ -180,7 +180,7 @@ def post():
 @app.route('/reply',methods=['POST'])
 def reply():
     if not isLoggedIn():
-        return displaySignup()
+        return ''
     d_id = int(request.form['d_id'])
     data = request.form['data']
 
@@ -219,6 +219,32 @@ def reply():
     transport.close()
 
     return '{}'
+
+@app.route('/upvote',methods=['POST'])
+def upvote():
+    if not isLoggedIn():
+        return ''
+
+    r_id = int(request.form['r_id'])
+    cur = conn.cursor()
+    uid = getUid() 
+    cur.execute('select COUNT(*) from upvote where user_id=%s and object_id=%s and type=%s',(uid,r_id,util.Upvote.ResponseType))
+    
+    # does this current upvote exist?
+    if (cur.fetchone()[0] == 0):
+        cur.execute('insert into upvote (user_id, object_id, type) values (%s,%s,%s)',(uid,r_id,util.Upvote.ResponseType))
+        conn.commit()
+
+        cur.execute('select user_id from response where r_id=%s',(r_id,))
+        dest_user = cur.fetchone()[0]
+        cur.execute('select prestige from user where user_id=%s',(dest_user,))
+        cur.execute('update user set prestige=%s where user_id=%s',(cur.fetchone()[0]+1,dest_user))
+        conn.commit()
+        
+        transport.open()
+        client.userModified(dest_user);
+        transport.close()
+    return ''
 
 def initAuth(id,redir):
     auth = TAuth()
