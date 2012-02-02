@@ -44,7 +44,7 @@ def fetchTrendingConversations(cursor):
     conversations = []
     i=1
     for d in cursor.fetchall():
-        conversations.append({'rank':i,'d_id': d[0],'image':d[1],'title':d[3],'date':d[4],'content':d[5]})
+        conversations.append({'rank':i,'d_id': d[0],'image':d[1],'title':d[3],'date':util.dateFormat(d[4]),'content':d[5]})
         i += 1
     return conversations
 

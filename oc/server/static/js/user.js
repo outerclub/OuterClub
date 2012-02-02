@@ -13,7 +13,13 @@ define(['underscore','socket','jquery'],function(_,socket,__) {
                     self.key = spl[1];
             });
             socket.addCallback('user',function(u) {
-                $("#profile .prestige").html(u.prestige);
+                $("#profile .prestige").fadeOut(function() {
+                    $(this).html(u.prestige);
+                    $(this).css('color','yellow');
+                    $(this).fadeIn(function() {
+                    });
+                    
+                });
             }); 
         }
     }

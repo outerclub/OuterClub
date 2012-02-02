@@ -1,44 +1,41 @@
 .number,div .active {
-    background-color: #5080d1;
+    background-color: #6597CA;
     color: white;
     text-decoration: none;
 }
 .entry h2,.entry .date {
-    color: #5080d1;
+    color: #6597CA
 }
 .entry {
     clear: both;
     margin-bottom: 10px;
-    background-color: #fff;
     overflow: hidden;
-    width: 100%;
-    color: gray;
+    color: #efefef;
     display: block;
 
 }
-.entry:hover {
-    background-color: #ccc;
-}
-.entry:hover .number {
-    color: #ccc;
+.entry:hover h2 {
+    color: white;
 }
 .entry h2 {
     text-transform: uppercase;
     float: left;
     margin: 0 0 7px 0;
-    font-family: BebasRegular
+    font-family: BebasRegular;
+    font-size: 200%;
 }
 .entry .date {
     position: absolute;
-    right:0;
+    right:10px;
     top: 10px;
     font-weight:bold;
 }
 .text {
     float: left;
-    padding: 5px 10px 5px 10px;
+    padding: 10px 10px 10px 10px;
     position: relative;
-    width: 680px; 
+    width: 660px; 
+    background-color: rgba(0,0,0,0.2)
 }
 .entry .number {
     font: 50px BebasRegular;

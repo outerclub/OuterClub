@@ -14,10 +14,6 @@ a{
 	text-decoration:none;
 	color:#ff8211;
 }
-a:hover{
-	text-decoration:underline;
-}
-
 body{
 	font-family:Helvetica,Arial,Sans-Serif;
     font-size: 80%;
@@ -63,6 +59,10 @@ body{
     padding: 15px 10px 15px 10px;
     display: block;
 }
+#menu a:hover{
+	text-decoration:underline;
+}
+
 #menu li {
     display: inline-block;
 }
@@ -141,6 +141,10 @@ body{
 #profile, .slide_show .text {
     background-color: rgba(0,0,0,0.65);
     color: white;
+}
+#profile .prestige {
+    font-weight: bold;
+    font-size: 140%;
 }
 
 /**

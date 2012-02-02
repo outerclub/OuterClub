@@ -9,9 +9,11 @@ from t_rtg import RtgService
 from t_rtg.ttypes import *
 from os import path as op
 import tornado
+import MySQLdb
+from DBUtils.PooledDB import PooledDB
+
 import tornado.web
 import tornado.httpserver
-import MySQLdb
 import event
 from proc import QueueProc
 from connection import EventConnection
@@ -28,12 +30,15 @@ class External(threading.Thread):
 
 class TRtgHandler:
     def __init__(self):
-        self.db = MySQLdb.connect(DefaultConfig.mysql_server,DefaultConfig.mysql_user,DefaultConfig.mysql_password,DefaultConfig.mysql_database)
+        self.pool = PooledDB(creator=MySQLdb,mincached=10,host=DefaultConfig.mysql_server,user=DefaultConfig.mysql_user,passwd=DefaultConfig.mysql_password,db=DefaultConfig.mysql_database)
 
     def newResponse(self,response):
-        cur = self.db.cursor()
+        conn = self.pool.connection()
+        cur = conn.cursor()
         user = database.fetchUser(cur,response.user_id)
         cur.close()
+        conn.close()
+        
         payload = {'date':response.date,'content':response.content,'user':user,'r_id':response.r_id}
         QueueProc.put(event.Message('/conversation/%d' % (response.d_id), 'response',payload))
 
@@ -41,9 +46,12 @@ class TRtgHandler:
         QueueProc.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
 
     def newPost(self,post):
-        cur = self.db.cursor()
+        conn = self.pool.connection()
+        cur = conn.cursor()
         user = database.fetchUser(cur,post.user_id)
         cur.close()
+        conn.close()
+
         payload = {'d_id':post.d_id,'date':post.date,'title':post.title,'user':user}
         QueueProc.put(event.Message('/category/%d' % (post.category_id),'conversation',payload))
 
@@ -52,10 +60,15 @@ class TRtgHandler:
 
     def auth(self,auth):
         QueueProc.put(event.NewAuthKey(auth.user_id,auth.key))
+
     def userModified(self,user_id):
-        cur = self.db.cursor()
+        conn = self.pool.connection()
+        cur = conn.cursor()
         user = database.fetchUser(cur,user_id)
+        print user
         cur.close()
+        conn.close()
+
         QueueProc.put(event.Message('/user/%d' % user_id,'user',user))
 
 

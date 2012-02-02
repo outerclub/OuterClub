@@ -1,8 +1,10 @@
+import MySQLdb
+from DBUtils.PooledDB import PooledDB
+
 import event
 import threading
 import Queue
 import json
-import MySQLdb
 from config import DefaultConfig
 
 class QueueProc(threading.Thread):
@@ -15,7 +17,7 @@ class QueueProc(threading.Thread):
     happening = []
 
     users = dict()
-    db = MySQLdb.connect(DefaultConfig.mysql_server,DefaultConfig.mysql_user,DefaultConfig.mysql_password,DefaultConfig.mysql_database)
+    pool = PooledDB(creator=MySQLdb,mincached=10,host=DefaultConfig.mysql_server,user=DefaultConfig.mysql_user,passwd=DefaultConfig.mysql_password,db=DefaultConfig.mysql_database)
     
     # convert a list of connections to keys
     def connsToUids(self,arr):
@@ -27,12 +29,15 @@ class QueueProc(threading.Thread):
                 print 'lost connid %s' %c
         return h
     def fetchViewerInfo(self,h):
-        cur = self.db.cursor()
+        conn = self.pool.connection()
+        cur = conn.cursor()
         ret = dict()
         for uid in h:
             cur.execute('SELECT avatar_image from user where user_id=%s',(uid,))
             res = cur.fetchone()
             ret[uid] = res[0]
+        cur.close()
+        conn.close()
         return ret
 
     def updateViewers(self,path,conn_id):

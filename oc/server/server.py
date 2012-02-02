@@ -1,8 +1,11 @@
-from flask import render_template
 import MySQLdb
-from flask import Flask,request
-import flask
+from DBUtils.PooledDB import PooledDB
 import database as db
+
+import flask
+from flask import render_template
+from flask import Flask,request
+
 import util
 from config import DefaultConfig
 from datetime import datetime
@@ -30,7 +33,7 @@ client = RtgService.Client(protocol)
 # setup app
 app = Flask(__name__)
 
-conn = MySQLdb.connect(DefaultConfig.mysql_server,DefaultConfig.mysql_user,DefaultConfig.mysql_password,DefaultConfig.mysql_database)
+pool = PooledDB(creator=MySQLdb,mincached=10,host=DefaultConfig.mysql_server,user=DefaultConfig.mysql_user,passwd=DefaultConfig.mysql_password,db=DefaultConfig.mysql_database)
 
 globalAuths = {}
 def isLoggedIn():
@@ -46,6 +49,7 @@ def getUid():
 def index():
     if not isLoggedIn():
         return displaySignup()
+    conn = pool.connection()
     cur = conn.cursor()
     res = cur.execute('select name,image,cat_id from category order by cat_id asc') 
     categories = []
@@ -68,6 +72,7 @@ def index():
     g.update({'announcements':db.fetchAnnouncements(cur)})
     g.update({'tasks':db.fetchTasks(cur,user['user_id'])})
     cur.close()
+    conn.close()
 
     return render_template('index.html',**g)
 
@@ -85,6 +90,7 @@ def category(category):
 
     # fetch the category id from the name
     category = category.replace('+',' ')
+    conn = pool.connection()
     cur = conn.cursor()
     cur.execute('select cat_id from category where name=%s', (category,))
     cat_id = cur.fetchone()[0]
@@ -102,6 +108,7 @@ def category(category):
     popular_tags = db.fetchPopularTags(cur,cat_id)
     cur2.close()
     cur.close()
+    conn.close()
     
     category = ' '.join(c.capitalize() for c in category.split())
 
@@ -113,6 +120,7 @@ def conversation(id):
         return ''
 
     # fetch the main conversation metadata
+    conn = pool.connection()
     cur = conn.cursor()
     res = cur.execute('select title,postDate,content,cat_id,user_id from conversation where d_id=%s',(id,))
     conversation = cur.fetchone()
@@ -131,6 +139,7 @@ def conversation(id):
                   }
     responses = db.fetchResponses(cur,id,getUid())
     cur.close()
+    conn.close()
 
     c_url = '/category/'+categoryName.lower().replace(' ','+')
 
@@ -143,6 +152,7 @@ def post():
         return ''
 
     # fetch the category information
+    conn = pool.connection()
     cur = conn.cursor()
     cur.execute('select cat_id,image from category where name=%s', (request.form['area'],))
     res = cur.fetchone()
@@ -164,6 +174,7 @@ def post():
     push.content = util.replaceMentions(cur,request.form['content'])
 
     cur.close()
+    conn.close()
 
     push.d_id = d_id
     push.user_id = user['user_id']
@@ -184,6 +195,7 @@ def reply():
     d_id = int(request.form['d_id'])
     data = request.form['data']
 
+    conn = pool.connection()
     cur = conn.cursor()
 
     # ensure that any mentions are valid
@@ -206,6 +218,7 @@ def reply():
     push = TResponse()
     push.content = util.replaceMentions(cur,data)
     cur.close()
+    conn.close()
 
     push.d_id = d_id
     push.user_id = user['user_id']
@@ -226,6 +239,7 @@ def upvote():
         return ''
 
     r_id = int(request.form['r_id'])
+    conn = pool.connection()
     cur = conn.cursor()
     uid = getUid() 
     cur.execute('select COUNT(*) from upvote where user_id=%s and object_id=%s and type=%s',(uid,r_id,util.Upvote.ResponseType))
@@ -233,17 +247,17 @@ def upvote():
     # does this current upvote exist?
     if (cur.fetchone()[0] == 0):
         cur.execute('insert into upvote (user_id, object_id, type) values (%s,%s,%s)',(uid,r_id,util.Upvote.ResponseType))
-        conn.commit()
-
         cur.execute('select user_id from response where r_id=%s',(r_id,))
         dest_user = cur.fetchone()[0]
         cur.execute('select prestige from user where user_id=%s',(dest_user,))
         cur.execute('update user set prestige=%s where user_id=%s',(cur.fetchone()[0]+1,dest_user))
         conn.commit()
-        
+
         transport.open()
         client.userModified(dest_user);
         transport.close()
+    cur.close()
+    conn.close()
     return ''
 
 def initAuth(id,redir):
@@ -270,10 +284,12 @@ def login():
         return flask.redirect(flask.url_for('index'))
 
     # check to see if user exists
+    conn = pool.connection()
     cur = conn.cursor()
     cur.execute('select user_id,avatar_image,password from user where name=%s and password=%s', (request.form['l_username'],hashlib.sha224(request.form['l_password']).hexdigest()))
     test = cur.fetchone()
     cur.close()
+    conn.close()
 
     if test != None:
         return initAuth(test[0],True)
@@ -302,6 +318,7 @@ def signup():
     
     # process the signup
     # check to see if user exists
+    conn = pool.connection()
     cur = conn.cursor()
     cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
     test = cur.fetchone()
@@ -317,10 +334,12 @@ def signup():
     
     if (error):
         cur.close()
+        conn.close()
         return flask.jsonify(error=error)
     else:
         key = initAuth(cur.lastrowid,False)
         cur.close()
+        conn.close()
         return flask.jsonify(success=True,user_id=cur.lastrowid,key=key)
     
 @app.route('/logout')

@@ -11,6 +11,7 @@ Python Packages
         https://github.com/MrJoes/sockjs-tornado
     flask: 'easy_install flask'
         Flask is the web application framework servicing most requests.
+    DBUtils: 'easy_install dbutils'
 
 Tools
     git:
