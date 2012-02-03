@@ -95,10 +95,9 @@
     color: #7a7a7a;
 }
 .post_content img {
-    vertical-align: 20%;
+    vertical-align: 40%;
 }
 .featured h1,.post_content h1{
-    color: #6597ca;
     font-family: BebasRegular;
     font-size: 24px;
     display: inline
@@ -129,10 +128,10 @@ a.tag{
 .posts .post_content {
     padding: 3px 10px 3px 10px;
 }
-.posts h1 {
-    font-size: 20px
+.posts h1 a {
+    color: #6597ca;
 }
-.post:hover h1 {
+.post a:hover {
     color: #dd9a7a
 }
 .post{

@@ -42,7 +42,9 @@
     float: left;
 }
 .conversation_frame .user h2 {
-    margin: 0;
+   font-family: BebasRegular; 
+   font-size: 160%;
+    margin-bottom: 2px;
 }
 .conversation_frame .content {
     padding: 10px 15px 10px 15px;

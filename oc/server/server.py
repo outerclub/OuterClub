@@ -59,8 +59,9 @@ def index():
         categories.append({'name':util.formatCategoryName(cat),'url':sanitized,'image':c[1],'id':c[2]})
     
     g = {}
-    user = db.fetchUser(cur,getUid())
-    g.update({'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige']})
+    uid = getUid()
+    user = db.fetchUser(cur,uid)
+    g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige']})
     g.update({'categories':categories,'tab':'categories'})
 
     d = db.fetchTrendingConversations(cur)
@@ -178,7 +179,7 @@ def post():
 
     push.d_id = d_id
     push.user_id = user['user_id']
-    push.date = util.dateFormat(date)
+    push.date = util.hourDateFormat(date)
     push.category_id = cat_id
     push.category_image = cat_image
     push.title = request.form['title']
@@ -222,7 +223,7 @@ def reply():
 
     push.d_id = d_id
     push.user_id = user['user_id']
-    push.date = util.dateFormat(now)
+    push.date = util.hourDateFormat(now)
     push.category_id = myRow[0]
     push.category_image = myRow[1]
     push.title = myRow[2]

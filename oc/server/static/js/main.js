@@ -51,8 +51,8 @@ require(['socket','underscore','category','nav','jquery-tools','user'],
             createHappening(h,false);
         });
     });
-    $("#trending a.entry").click(function() {
-        category.goConversation($(this).attr('id'));
+    $("#trending h2 a").click(function() {
+        category.goConversation($(this).attr('name'));
         return false;
     });
     $("#categories a").click(function() {

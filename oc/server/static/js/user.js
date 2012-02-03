@@ -1,4 +1,4 @@
-define(['underscore','socket','jquery'],function(_,socket,__) {
+define(['underscore','socket','jquery','nav'],function(_,socket,__,nav) {
     return {
         user_id: undefined,
         key: undefined,
@@ -21,6 +21,21 @@ define(['underscore','socket','jquery'],function(_,socket,__) {
                     
                 });
             }); 
-        }
+            $("#profile a:first").hover(function() {
+                $(this).next('div').find('h2').css('color','#ff8211');
+            },function() {
+                $(this).next('div').find('h2').css('color','white');
+            });
+            $("#profile a:first").click(function() {
+                self.go(self.user_id); 
+                return false;
+            });
+        },
+      go: function() {
+        nav.hideAll();
+        nav.setTitle('User Profile');
+        $("#dynamic").show();
+        $("#dynamic").html("hello");
+      }
     }
 });

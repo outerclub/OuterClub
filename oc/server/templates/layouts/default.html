@@ -21,11 +21,11 @@
 </div>
 <div id="menu">
 <ul>
-<li id="miniLogo"><a href="#welcome" class="active"><img src="/static/images/icons/oc.png" /></a></li>
-<li><a href="#community">COMMUNITY</a></li>
-<li><a href="#categories">CATEGORIES</a></li>
-<li><a href="#trending">TRENDING NOW</a></li>
-<li><a href="#leaderboard">LEADERBOARD</a></li>
+<li id="miniLogo"><a class="active" href="#welcome"></a></li>
+<li class="link"><a href="#community">COMMUNITY</a></li>
+<li class="link"><a href="#categories">CATEGORIES</a></li>
+<li class="link"><a href="#trending">TRENDING NOW</a></li>
+<li class="link"><a href="#leaderboard">LEADERBOARD</a></li>
 </ul>
 <div class="right">
 <div class="search">
@@ -36,7 +36,7 @@
 </div>
 </div>
 <div id="profile">
-<img src="{{ url_for('static',filename='images/new/avatars/'+avatar) }}" />
+<a href="/user/{{ user_id }}"><img src="{{ url_for('static',filename='images/new/avatars/'+avatar) }}" /></a>
 <div>
 <h2>{{ username }}</h2> <a href="{{ url_for('logout') }}">Log out</a><br />
 <p>Prestige: <span class="prestige">{{ prestige }}</span></p>

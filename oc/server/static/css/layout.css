@@ -14,27 +14,29 @@ a{
 	text-decoration:none;
 	color:#ff8211;
 }
+a:hover {
+    text-decoration: underline;
+}
 body{
 	font-family:Helvetica,Arial,Sans-Serif;
     font-size: 80%;
-    background: black url(/static/images/new/background.png) repeat-x top center;
+    background: black url(/static/images/background.png) repeat-x top center;
 }
 #outer {
     width: 965px;
-    margin: 20px auto 20px auto;
+    margin: 380px auto 20px auto;
 }
 
 /**
  * Upper menu
  */
 #miniLogo {
-    float: left;
-}
-#miniLogo .active {
-    background-color: white !important;
 }
 #menu #miniLogo a {
-    padding: 5px 20px 5px 20px;
+    background: transparent url(/static/images/icons/oc.png) no-repeat 17px 5px;
+    display: block;
+    height: 43px;
+    width: 60px;
 }
 #miniLogo:hover {
     background-color: white;
@@ -48,23 +50,28 @@ body{
 }
 #menu ul {
     float: left;
+    overflow:hidden;
 }
 #menu .right {
     float: right;
     overflow: hidden;
 }
-#menu li a {
+#menu .link a {
     font-weight: bold;
     color: white;
     padding: 15px 10px 15px 10px;
     display: block;
 }
-#menu a:hover{
-	text-decoration:underline;
+#menu .link .active {
+	color:#ff8211;
+    background-color: transparent;
+}
+#menu .link a:hover {
+	color:#ff8211;
 }
 
 #menu li {
-    display: inline-block;
+    float:left
 }
 .search {
     float: left;
@@ -132,7 +139,7 @@ body{
     float: left;
 }
 #profile div {
-    padding: 5px;
+    padding: 7px;
     float: left;
 }
 #profile p {
@@ -187,7 +194,8 @@ body{
     display: block
 }
 .slide_show .text .date {
-    color: #fdd610
+    color: #fdd610;
+    float:right;
 }
 .slide_show .images {
     position: relative;

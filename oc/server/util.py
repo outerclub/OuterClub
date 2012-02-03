@@ -24,6 +24,9 @@ def formatCategoryName(c):
 def dateFormat(dt):
     s = dt.strftime('%d %B %Y, '+str(dt.hour if dt.hour <= 12 else dt.hour-12)+':%M%p')
     return s
+def hourDateFormat(dt):
+    s = dt.strftime(str(dt.hour if dt.hour <= 12 else dt.hour-12)+':%M%p')
+    return s
 
 def replaceMentions(cur,data):
     users = findMentions(cur,data)

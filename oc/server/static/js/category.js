@@ -10,7 +10,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
             viewers: []
         },
         goCategory: function(name,id,href) {
-            $('title').html(name+' - OuterClub');
+            nav.setTitle(name);
             this.currentCategory.name = name;
             this.currentCategory.id = id;
             this.currentCategory.href = href;
@@ -37,10 +37,10 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
             //id,title,user,date
             var html = '';
             _.each(d_list,function(d) {
-              html += '<div title="'+d.title+'" class="post" '+(hide ? 'style="display: none"' : '')+ ' id="'+d.id+'">'
+              html += '<div title="'+d.title+'" class="post" '+(hide ? 'style="display: none"' : '')+ '>'
                 + '<div class="post_content"><img src="/static/images/icons/conversation.png" /> '
-                + '<h1>'+d.title+'</h1>'
-                + '<div>Started by <a href="/user/'+d.user.user_id+'">'+d.user.name+'</a> on '+d.date+'</div>'
+                + '<h1><a href="/conversation/'+d.id+'" name="'+d.id+'">'+d.title+'</a></h1>'
+                + '<div class="sub">Started by <a href="/user/'+d.user.user_id+'" name="'+d.user.user_id+'">'+d.user.name+'</a> on '+d.date+'</div>'
                 + '</div>'
                 + '<div class="post_nav">'
                 //+ '<a class="tag" href="#">testTag</a>'
@@ -48,8 +48,13 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
             });
             html = jQuery(html);
             var self = this;
-            html.click(function() {
-                self.goConversation($(this).attr('id'));
+            html.find("h1 > a").click(function() {
+                self.goConversation($(this).attr('name'));
+                return false;
+            });
+            html.find(".sub > a").click(function() {
+                user.go($(this).attr('name'));
+                return false;
             });
             return html;
         },
@@ -76,7 +81,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                this.currentConversation.id = id;
                $.getJSON('/conversation/'+id,function(data) {
                     nav.hideAll();
-                    $('title').html(data.conversation.title+' - OuterClub');
+                    nav.setTitle(data.conversation.title); 
 
                     // show category head
                     self.showCategoryHead(data.category_name,data.category_id,data.category_url);
@@ -193,7 +198,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                     var str ='<div class="conversation" style="display: none">';
                     str += '<div class="user">'+
                             '<div class="description">'+
-                                '<h2><a href="/user/'+r_user.user_id+'">'+r_user.name+'</a></h2>'+
+                                '<h2><a href="/user/'+r_user.user_id+'" name="'+r_user.user_id+'">'+r_user.name+'</a></h2>'+
                                 '<div>Prestige: '+r_user.prestige+'</div>'+
                             '</div>'+
                             '<img src="/static/images/new/avatars/'+r_user.avatar_image+'" />'+
@@ -202,12 +207,17 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                             content+dateHtml+
                         '</div></div>';
                     str += '</div>';
-                    $(".responses").append(str);
+                    var element = jQuery(str);
+                    $(".responses").append(element);
                     if (fadeIn) {
-                        $(".conversation:last").fadeIn();
+                        element.fadeIn();
                     } else {
-                        $(".conversation:last").show();
+                        element.show();
                     }
+                    element.find("a").click(function() {
+                        user.go($(this).attr('name'));
+                        return false;
+                    });
                 }
 
                 if (canVote)

@@ -85,17 +85,17 @@ Welcome
             <div class="clear">&nbsp;
             </div>
             {% for e in trending %}
-            <a href="{{ url_for('conversation',id=e.d_id) }}" id="{{ e.d_id }}" class="entry">
+            <div class="entry">
                 <div class="number">
                     <span>{{ e.rank }}</span>
                 </div>
                 <img src="{{ url_for('static',filename='images/categories/'+e.image) }}" height="90" width="130" />
                 <div class="text">
-                    <h2>{{ e.title }}</h2>
+                    <h2><a href="/conversation/{{ e.d_id }}" name="{{ e.d_id }}">{{ e.title }}</a></h2>
                     <div class="date">{{ e.date }}</div>
                     <p>{{ e.content }}</p>
                 </div>
-            </a>
+            </div>
             {% endfor %}
         </div>
         <div id="leaderboard" style="display: none" title="Leaderboard">

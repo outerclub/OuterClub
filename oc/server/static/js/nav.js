@@ -12,7 +12,10 @@ define(function() {
             $("#menu ul a[href='"+loc+"']").addClass('active');
             var element = $(loc);
             element.show();
-            $('title').html(element.attr('title')+' - OuterClub');
+            this.setTitle(element.attr('title'));
+        },
+        setTitle:function(t) {
+            $('title').html(t+' - OuterClub');
         }
     };
 });
