@@ -20,6 +20,7 @@ from connection import EventConnection
 from sockjs.tornado import SockJSRouter,SockJSConnection
 from ..server import database
 from config import DefaultConfig
+from ..server import util
 
 ROOT = op.normpath(op.dirname(__file__))
 # Run the ioloop in a new thread
@@ -32,30 +33,38 @@ class TRtgHandler:
     def __init__(self):
         self.pool = PooledDB(creator=MySQLdb,mincached=10,host=DefaultConfig.mysql_server,user=DefaultConfig.mysql_user,passwd=DefaultConfig.mysql_password,db=DefaultConfig.mysql_database)
 
-    def newResponse(self,response):
+    def response(self,r_id):
         conn = self.pool.connection()
         cur = conn.cursor()
-        user = database.fetchUser(cur,response.user_id)
+        cur.execute('select d_id,response.user_id,replyDate,response.content,cat_id,category.image,conversation.title from response inner join (conversation inner join category using (cat_id)) using(d_id) \
+                    where r_id=%s',(r_id))
+        res = cur.fetchone()
+        user = database.fetchUser(cur,res[1])
+
+        newContent = util.replaceMentions(cur,res[3])
         cur.close()
         conn.close()
         
-        payload = {'date':response.date,'content':response.content,'user':user,'r_id':response.r_id}
-        QueueProc.put(event.Message('/conversation/%d' % (response.d_id), 'response',payload))
+        payload = {'date':util.dateFormat(res[2]),'content':newContent,'user':user,'r_id':r_id}
+        QueueProc.put(event.Message('/conversation/%d' % (res[0]), 'response',payload))
 
-        happening_data = {'user':user,'date':response.date,'category_image':response.category_image,'category_id':response.category_id,'d_id':response.d_id,'title': response.title,'r_id':response.r_id}
+        happening_data = {'user':user,'date':util.hourDateFormat(res[2]),'category_image':res[5],'category_id':res[4],'d_id':res[0],'title': res[6],'r_id':r_id}
         QueueProc.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
 
-    def newPost(self,post):
+    def conversation(self,d_id):
         conn = self.pool.connection()
         cur = conn.cursor()
-        user = database.fetchUser(cur,post.user_id)
+        cur.execute('select user_id,postDate,content,category.image,cat_id,title from conversation inner join category using (cat_id) \
+                     where d_id=%s',(d_id,))
+        convo = cur.fetchone()
+        user = database.fetchUser(cur,convo[0])
         cur.close()
         conn.close()
 
-        payload = {'d_id':post.d_id,'date':post.date,'title':post.title,'user':user}
-        QueueProc.put(event.Message('/category/%d' % (post.category_id),'conversation',payload))
+        payload = {'d_id':d_id,'date':util.dateFormat(convo[1]),'title':convo[5],'user':user}
+        QueueProc.put(event.Message('/category/%d' % (convo[4]),'conversation',payload))
 
-        happening_data = {'user':user,'date':post.date,'category_image':post.category_image,'d_id':post.d_id,'title':post.title}
+        happening_data = {'user':user,'date':util.hourDateFormat(convo[1]),'category_image':convo[3],'d_id':d_id,'title':convo[5]}
         QueueProc.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
 
     def auth(self,auth):
@@ -65,7 +74,6 @@ class TRtgHandler:
         conn = self.pool.connection()
         cur = conn.cursor()
         user = database.fetchUser(cur,user_id)
-        print user
         cur.close()
         conn.close()
 

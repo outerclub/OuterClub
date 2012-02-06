@@ -23,8 +23,8 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print 'Usage: ' + sys.argv[0] + ' [-h host[:port]] [-u url] [-f[ramed]] function [arg1 [arg2...]]'
   print ''
   print 'Functions:'
-  print '  void newResponse(TResponse response)'
-  print '  void newPost(TPost post)'
+  print '  void response(i32 r_id)'
+  print '  void conversation(i32 d_id)'
   print '  void auth(TAuth auth)'
   print '  void userModified(i32 user_id)'
   print ''
@@ -78,17 +78,17 @@ protocol = TBinaryProtocol.TBinaryProtocol(transport)
 client = RtgService.Client(protocol)
 transport.open()
 
-if cmd == 'newResponse':
+if cmd == 'response':
   if len(args) != 1:
-    print 'newResponse requires 1 args'
+    print 'response requires 1 args'
     sys.exit(1)
-  pp.pprint(client.newResponse(eval(args[0]),))
+  pp.pprint(client.response(eval(args[0]),))
 
-elif cmd == 'newPost':
+elif cmd == 'conversation':
   if len(args) != 1:
-    print 'newPost requires 1 args'
+    print 'conversation requires 1 args'
     sys.exit(1)
-  pp.pprint(client.newPost(eval(args[0]),))
+  pp.pprint(client.conversation(eval(args[0]),))
 
 elif cmd == 'auth':
   if len(args) != 1:

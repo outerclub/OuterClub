@@ -1,0 +1,12 @@
+#avatar .hover, #avatar .active{
+    opacity: 1;
+}
+#avatar img {
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.profile h2 {
+    font-family: BebasRegular;
+    font-size: 200%;
+}

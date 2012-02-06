@@ -6,8 +6,8 @@ require.config({
         'jquery-tools':'deps/jquery.tools.min'
     }
 });
-require(['socket','underscore','category','nav','jquery-tools','user'],
-  function(socket,_,category,nav,__,user) {
+require(['socket','underscore','category','nav','jquery-tools','user','trending','leaderboard'],
+  function(socket,_,category,nav,__,user,trending,leaderboard) {
     user.init();
     socket.init('http://'+window.location.hostname+':8002/sock',
         function() {
@@ -25,7 +25,7 @@ require(['socket','underscore','category','nav','jquery-tools','user'],
             var verb = 'replied in';
             if (data.type == 'post')
                 verb = 'posted'; 
-            var element = jQuery('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category_image+'" /><img class="avatar" src="/static/images/new/avatars/'+p.user.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user.name+'</span> '+verb+' <span class="content">'+p.title+'</span></div></div>');
+            var element = jQuery('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category_image+'" /><img class="avatar" src="/static/images/avatars/'+p.user.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user.name+'</span> '+verb+' <span class="content">'+p.title+'</span></div></div>');
             element.hide();
             if (animate)
             {
@@ -51,10 +51,7 @@ require(['socket','underscore','category','nav','jquery-tools','user'],
             createHappening(h,false);
         });
     });
-    $("#trending h2 a").click(function() {
-        category.goConversation($(this).attr('name'));
-        return false;
-    });
+
     $("#categories a").click(function() {
             var name = $(this).attr('title');
             var cat_id = $(this).attr('id');
@@ -63,8 +60,22 @@ require(['socket','underscore','category','nav','jquery-tools','user'],
     });
     // navigate to another section
     $('#menu ul a').click(function() {
+         $('#menu ul li a').each(function() { $(this).removeClass('active'); });
+         $(this).addClass('active');
+
         socket.send({'register':['/happening','/user/'+user.user_id]});
-        nav.go($(this).attr('href'));
+        if ($(this).attr('href') == '#trending')
+           trending.go(); 
+        else if ($(this).attr('href') == '#leaderboard')
+            leaderboard.go();
+        else
+        {
+            nav.hideAll();
+            var element = $($(this).attr('href'));
+            element.show();
+            nav.setTitle(element.attr('title'));
+        }
+
         return false;
     });
 

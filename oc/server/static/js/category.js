@@ -106,7 +106,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                         // scan for insertions
                         for (v in viewers) {
                             if (!(v in self.currentConversation.viewers)) {
-                                var userView = jQuery('<img id="v_'+v+'"src="/static/images/new/avatars/'+viewers[v]+'" />');
+                                var userView = jQuery('<img id="v_'+v+'"src="/static/images/avatars/'+viewers[v]+'" />');
                                 userView.hide();
                                 $(".conversation_frame .users").append(userView);
                                 userView.fadeIn();
@@ -201,7 +201,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                                 '<h2><a href="/user/'+r_user.user_id+'" name="'+r_user.user_id+'">'+r_user.name+'</a></h2>'+
                                 '<div>Prestige: '+r_user.prestige+'</div>'+
                             '</div>'+
-                            '<img src="/static/images/new/avatars/'+r_user.avatar_image+'" />'+
+                            '<img src="/static/images/avatars/'+r_user.avatar_image+'" />'+
                         '</div>'+
                         '<div class="content"><div class="section">'+
                             content+dateHtml+

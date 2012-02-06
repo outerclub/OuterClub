@@ -64,12 +64,6 @@ def index():
     g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige']})
     g.update({'categories':categories,'tab':'categories'})
 
-    d = db.fetchTrendingConversations(cur)
-    g.update({'trending':d})
-
-    u = db.fetchLeaderboard(cur)
-    g.update({'leaderboard':u})
-
     g.update({'announcements':db.fetchAnnouncements(cur)})
     g.update({'tasks':db.fetchTasks(cur,user['user_id'])})
     cur.close()
@@ -147,6 +141,65 @@ def conversation(id):
     categoryName = util.formatCategoryName(categoryName)
     return flask.jsonify(conversation=conversation,popular=popular_tags,responses=responses,category_name=categoryName,category_id=cat_id,category_url=c_url)
 
+@app.route('/trending')
+def trending():
+    if not isLoggedIn():
+        return ''
+    conn = pool.connection()
+    cur = conn.cursor()
+
+    d = db.fetchTrendingConversations(cur)
+    cur.close()
+    conn.close()
+    return flask.jsonify(conversations=d)
+
+@app.route('/leaderboard')
+def leaderboard():
+    if not isLoggedIn():
+        return ''
+    conn = pool.connection()
+    cur = conn.cursor()
+
+    d = db.fetchLeaderboard(cur)
+    cur.close()
+    conn.close()
+    return flask.jsonify(users=d)
+
+@app.route('/avatars',methods=['GET','POST'])
+def avatars():
+    if not isLoggedIn():
+        return ''
+    # display the page?
+    if request.method == 'GET':
+        avatars = []
+        for f in os.listdir(app.root_path+'/static/images/avatars'):
+            avatars.append(f)
+        return flask.jsonify(avatars=avatars)
+    else:
+        conn = pool.connection()
+        cur = conn.cursor()
+        cur.execute('update user set avatar_image=%s where user_id=%s',(request.form['avatar'],getUid()))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        transport.open()
+        client.userModified(getUid())
+        transport.close()
+        
+        return ''
+    
+@app.route('/user/<id>')
+def user(id):
+    if not isLoggedIn():
+        return ''
+    conn = pool.connection()
+    cur = conn.cursor()
+    user = db.fetchUser(cur,id)
+    cur.close()
+    conn.close()
+    return flask.jsonify(user=user)
+
 @app.route('/post',methods=['POST'])
 def post():
     if not isLoggedIn():
@@ -166,25 +219,11 @@ def post():
     conn.commit()
 
     d_id = cur.lastrowid
-    # fetch the inserted postdate
-    cur.execute('select postDate from conversation where d_id=%s', (d_id,))
-    date = cur.fetchone()[0]
-
-    # push the new post
-    push = TPost()
-    push.content = util.replaceMentions(cur,request.form['content'])
-
     cur.close()
     conn.close()
 
-    push.d_id = d_id
-    push.user_id = user['user_id']
-    push.date = util.hourDateFormat(date)
-    push.category_id = cat_id
-    push.category_image = cat_image
-    push.title = request.form['title']
     transport.open()
-    client.newPost(push)
+    client.conversation(d_id)
     transport.close()
     
     return ''
@@ -206,30 +245,15 @@ def reply():
             return flask.jsonify(error="@%s didn't match to a user." % name) 
     
     # insert the response
-    user = db.fetchUser(cur,getUid())
-    now = datetime.now()
-    cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,%s,%s)',(d_id,user['user_id'],now,data))
+    cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,getUid(),data))
     conn.commit()
     r_id = cur.lastrowid
     
-    cur.execute('select cat_id,category.image,title from conversation inner join category using (cat_id) where d_id=%s',(d_id,))
-    myRow = cur.fetchone()
-
-    # build the response to push to RTG
-    push = TResponse()
-    push.content = util.replaceMentions(cur,data)
     cur.close()
     conn.close()
 
-    push.d_id = d_id
-    push.user_id = user['user_id']
-    push.date = util.hourDateFormat(now)
-    push.category_id = myRow[0]
-    push.category_image = myRow[1]
-    push.title = myRow[2]
-    push.r_id = r_id
     transport.open()
-    client.newResponse(push)
+    client.response(r_id)
     transport.close()
 
     return '{}'
@@ -312,36 +336,36 @@ def signup():
     error = None
     if len(request.form['username']) <= 2:
         error = "Username must be greater than 2 characters long."
-    if not util.emailValid(request.form['email']):
+    elif not util.emailValid(request.form['email']):
         error = "E-mail was not valid."
-    if len(request.form['password']) == 0:
+    elif len(request.form['password']) == 0:
         error = "Password cannot be empty."
-    
-    # process the signup
-    # check to see if user exists
-    conn = pool.connection()
-    cur = conn.cursor()
-    cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
-    test = cur.fetchone()
-
-    # if the user exists
-    if (test != None):
-        error = "Username already in use."
     else:
-        avatar = 'user_%s.png' % random.randrange(1,6)
-        # process the form submission
-        res = cur.execute('insert into user (name,email,password,avatar_image,prestige) values (%s,%s,%s,%s,0)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar))
-        conn.commit()
+        
+        # process the signup
+        # check to see if user exists
+        conn = pool.connection()
+        cur = conn.cursor()
+        cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
+        test = cur.fetchone()
+
+        # if the user exists
+        if (test != None):
+            error = "Username already in use."
+            cur.close()
+            conn.close()
+        else:
+            avatar = 'user_%s.png' % random.randrange(1,6)
+            # process the form submission
+            res = cur.execute('insert into user (name,email,password,avatar_image,prestige) values (%s,%s,%s,%s,0)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar))
+            conn.commit()
+            key = initAuth(cur.lastrowid,False)
+            cur.close()
+            conn.close()
+            return flask.jsonify(success=True,user_id=cur.lastrowid,key=key)
     
     if (error):
-        cur.close()
-        conn.close()
         return flask.jsonify(error=error)
-    else:
-        key = initAuth(cur.lastrowid,False)
-        cur.close()
-        conn.close()
-        return flask.jsonify(success=True,user_id=cur.lastrowid,key=key)
     
 @app.route('/logout')
 def logout():

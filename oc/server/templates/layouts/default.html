@@ -7,8 +7,8 @@
 {% block headers %} {% endblock %}
 </head>
 <body>
-<div id="facebox">
-    <div>
+<div id="facebox" class="overlay">
+    <div class="border">
     <h2>New Conversation</h2>
     <p>
             Title: <input type="text" name="title" />
@@ -35,8 +35,8 @@
 </div>
 </div>
 </div>
-<div id="profile">
-<a href="/user/{{ user_id }}"><img src="{{ url_for('static',filename='images/new/avatars/'+avatar) }}" /></a>
+<div id="miniProfile">
+<a href="/user/{{ user_id }}"><img src="{{ url_for('static',filename='images/avatars/'+avatar) }}" /></a>
 <div>
 <h2>{{ username }}</h2> <a href="{{ url_for('logout') }}">Log out</a><br />
 <p>Prestige: <span class="prestige">{{ prestige }}</span></p>

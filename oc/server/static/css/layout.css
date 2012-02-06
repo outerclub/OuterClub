@@ -119,37 +119,37 @@ body{
 /**
  * Profile card.
  */
-#profile, .slide_show {
+#miniProfile, .slide_show {
     right: 0px;
     width: 302px;
 }
-#profile {
+#miniProfile {
     position: absolute;
     top: 45px;
     overflow: hidden;
 }
-#profile h2 {
+#miniProfile h2 {
     font-weight: bold;
     font-family: 'BebasRegular';
     font-size: 16px;
     display: inline-block;
 
 }
-#profile img {
+#miniProfile img {
     float: left;
 }
-#profile div {
+#miniProfile div {
     padding: 7px;
     float: left;
 }
-#profile p {
+#miniProfile p {
     margin-top: 5px;
 }
-#profile, .slide_show .text {
+#miniProfile, .slide_show .text {
     background-color: rgba(0,0,0,0.65);
     color: white;
 }
-#profile .prestige {
+#miniProfile .prestige {
     font-weight: bold;
     font-size: 140%;
 }
@@ -261,19 +261,21 @@ clear: both;
 	height:35px;
 	width:35px;
 }
-#facebox {
+.overlay {
     display: none;
-    width: 400px;
+    width: 500px;
     border: 10px solid #666;
     border: 10px solid rgba(82,82,82,0.7);
-    z-index: 9999
+    z-index: 9999;
+    color: black;
+    margin-bottom: 20px;
   }
-#facebox div {
+.overlay div.border {
     padding: 10px;
     border: 1px solid #3b5998;
     background-color: #fff;
 }
-#facebox h2 {
+.overlay h2 {
     margin: -11px;
     margin-bottom: 0;
     color: #fff;
@@ -282,5 +284,6 @@ clear: both;
     padding: 5px 10px;
     /*border: 1px solid #3b5998;*/
     font-size: 20px;
+    font-family: BebasRegular;
 }
 

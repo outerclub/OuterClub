@@ -18,17 +18,17 @@ except:
 
 
 class Iface(object):
-  def newResponse(self, response):
+  def response(self, r_id):
     """
     Parameters:
-     - response
+     - r_id
     """
     pass
 
-  def newPost(self, post):
+  def conversation(self, d_id):
     """
     Parameters:
-     - post
+     - d_id
     """
     pass
 
@@ -54,58 +54,58 @@ class Client(Iface):
       self._oprot = oprot
     self._seqid = 0
 
-  def newResponse(self, response):
+  def response(self, r_id):
     """
     Parameters:
-     - response
+     - r_id
     """
-    self.send_newResponse(response)
-    self.recv_newResponse()
+    self.send_response(r_id)
+    self.recv_response()
 
-  def send_newResponse(self, response):
-    self._oprot.writeMessageBegin('newResponse', TMessageType.CALL, self._seqid)
-    args = newResponse_args()
-    args.response = response
+  def send_response(self, r_id):
+    self._oprot.writeMessageBegin('response', TMessageType.CALL, self._seqid)
+    args = response_args()
+    args.r_id = r_id
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_newResponse(self, ):
+  def recv_response(self, ):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
       x.read(self._iprot)
       self._iprot.readMessageEnd()
       raise x
-    result = newResponse_result()
+    result = response_result()
     result.read(self._iprot)
     self._iprot.readMessageEnd()
     return
 
-  def newPost(self, post):
+  def conversation(self, d_id):
     """
     Parameters:
-     - post
+     - d_id
     """
-    self.send_newPost(post)
-    self.recv_newPost()
+    self.send_conversation(d_id)
+    self.recv_conversation()
 
-  def send_newPost(self, post):
-    self._oprot.writeMessageBegin('newPost', TMessageType.CALL, self._seqid)
-    args = newPost_args()
-    args.post = post
+  def send_conversation(self, d_id):
+    self._oprot.writeMessageBegin('conversation', TMessageType.CALL, self._seqid)
+    args = conversation_args()
+    args.d_id = d_id
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_newPost(self, ):
+  def recv_conversation(self, ):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
       x.read(self._iprot)
       self._iprot.readMessageEnd()
       raise x
-    result = newPost_result()
+    result = conversation_result()
     result.read(self._iprot)
     self._iprot.readMessageEnd()
     return
@@ -171,8 +171,8 @@ class Processor(Iface, TProcessor):
   def __init__(self, handler):
     self._handler = handler
     self._processMap = {}
-    self._processMap["newResponse"] = Processor.process_newResponse
-    self._processMap["newPost"] = Processor.process_newPost
+    self._processMap["response"] = Processor.process_response
+    self._processMap["conversation"] = Processor.process_conversation
     self._processMap["auth"] = Processor.process_auth
     self._processMap["userModified"] = Processor.process_userModified
 
@@ -191,24 +191,24 @@ class Processor(Iface, TProcessor):
       self._processMap[name](self, seqid, iprot, oprot)
     return True
 
-  def process_newResponse(self, seqid, iprot, oprot):
-    args = newResponse_args()
+  def process_response(self, seqid, iprot, oprot):
+    args = response_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = newResponse_result()
-    self._handler.newResponse(args.response)
-    oprot.writeMessageBegin("newResponse", TMessageType.REPLY, seqid)
+    result = response_result()
+    self._handler.response(args.r_id)
+    oprot.writeMessageBegin("response", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
 
-  def process_newPost(self, seqid, iprot, oprot):
-    args = newPost_args()
+  def process_conversation(self, seqid, iprot, oprot):
+    args = conversation_args()
     args.read(iprot)
     iprot.readMessageEnd()
-    result = newPost_result()
-    self._handler.newPost(args.post)
-    oprot.writeMessageBegin("newPost", TMessageType.REPLY, seqid)
+    result = conversation_result()
+    self._handler.conversation(args.d_id)
+    oprot.writeMessageBegin("conversation", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
     oprot.trans.flush()
@@ -238,19 +238,19 @@ class Processor(Iface, TProcessor):
 
 # HELPER FUNCTIONS AND STRUCTURES
 
-class newResponse_args(object):
+class response_args(object):
   """
   Attributes:
-   - response
+   - r_id
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'response', (TResponse, TResponse.thrift_spec), None, ), # 1
+    (1, TType.I32, 'r_id', None, None, ), # 1
   )
 
-  def __init__(self, response=None,):
-    self.response = response
+  def __init__(self, r_id=None,):
+    self.r_id = r_id
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -262,9 +262,8 @@ class newResponse_args(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRUCT:
-          self.response = TResponse()
-          self.response.read(iprot)
+        if ftype == TType.I32:
+          self.r_id = iprot.readI32();
         else:
           iprot.skip(ftype)
       else:
@@ -276,10 +275,10 @@ class newResponse_args(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('newResponse_args')
-    if self.response is not None:
-      oprot.writeFieldBegin('response', TType.STRUCT, 1)
-      self.response.write(oprot)
+    oprot.writeStructBegin('response_args')
+    if self.r_id is not None:
+      oprot.writeFieldBegin('r_id', TType.I32, 1)
+      oprot.writeI32(self.r_id)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -299,7 +298,7 @@ class newResponse_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class newResponse_result(object):
+class response_result(object):
 
   thrift_spec = (
   )
@@ -322,7 +321,7 @@ class newResponse_result(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('newResponse_result')
+    oprot.writeStructBegin('response_result')
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
@@ -341,19 +340,19 @@ class newResponse_result(object):
   def __ne__(self, other):
     return not (self == other)
 
-class newPost_args(object):
+class conversation_args(object):
   """
   Attributes:
-   - post
+   - d_id
   """
 
   thrift_spec = (
     None, # 0
-    (1, TType.STRUCT, 'post', (TPost, TPost.thrift_spec), None, ), # 1
+    (1, TType.I32, 'd_id', None, None, ), # 1
   )
 
-  def __init__(self, post=None,):
-    self.post = post
+  def __init__(self, d_id=None,):
+    self.d_id = d_id
 
   def read(self, iprot):
     if iprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastbinary is not None:
@@ -365,9 +364,8 @@ class newPost_args(object):
       if ftype == TType.STOP:
         break
       if fid == 1:
-        if ftype == TType.STRUCT:
-          self.post = TPost()
-          self.post.read(iprot)
+        if ftype == TType.I32:
+          self.d_id = iprot.readI32();
         else:
           iprot.skip(ftype)
       else:
@@ -379,10 +377,10 @@ class newPost_args(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('newPost_args')
-    if self.post is not None:
-      oprot.writeFieldBegin('post', TType.STRUCT, 1)
-      self.post.write(oprot)
+    oprot.writeStructBegin('conversation_args')
+    if self.d_id is not None:
+      oprot.writeFieldBegin('d_id', TType.I32, 1)
+      oprot.writeI32(self.d_id)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -402,7 +400,7 @@ class newPost_args(object):
   def __ne__(self, other):
     return not (self == other)
 
-class newPost_result(object):
+class conversation_result(object):
 
   thrift_spec = (
   )
@@ -425,7 +423,7 @@ class newPost_result(object):
     if oprot.__class__ == TBinaryProtocol.TBinaryProtocolAccelerated and self.thrift_spec is not None and fastbinary is not None:
       oprot.trans.write(fastbinary.encode_binary(self, (self.__class__, self.thrift_spec)))
       return
-    oprot.writeStructBegin('newPost_result')
+    oprot.writeStructBegin('conversation_result')
     oprot.writeFieldStop()
     oprot.writeStructEnd()
 
