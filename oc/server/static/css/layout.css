@@ -20,7 +20,7 @@ a:hover {
 body{
 	font-family:Helvetica,Arial,Sans-Serif;
     font-size: 80%;
-    background: black url(/static/images/background.png) repeat-x top center;
+    background: black url(/static/images/background.png) repeat-x fixed top center;
 }
 #outer {
     width: 965px;
@@ -47,6 +47,9 @@ body{
     background: rgba(0,0,0,0.65);
     color: #ddd;
     overflow: hidden;
+    position: fixed;
+    z-index: 999;
+    top: 0;
 }
 #menu ul {
     float: left;
@@ -122,9 +125,10 @@ body{
 #miniProfile, .slide_show {
     right: 0px;
     width: 302px;
+    position: fixed;
+    z-index: 999
 }
 #miniProfile {
-    position: absolute;
     top: 45px;
     overflow: hidden;
 }
@@ -159,7 +163,6 @@ body{
  * slide show.
  */
 .slide_show{
-    position: absolute;
     top: 160px;
 }
 .slide_show .scroll {

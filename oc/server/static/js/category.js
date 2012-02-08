@@ -11,9 +11,6 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
         },
         goCategory: function(name,id,href) {
             nav.setTitle(name);
-            this.currentCategory.name = name;
-            this.currentCategory.id = id;
-            this.currentCategory.href = href;
 
             var self = this;
             $.getJSON(href,function(data) {
@@ -59,6 +56,11 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
             return html;
         },
         showCategoryHead: function(name,id,href) {
+            // change to the new category
+            this.currentCategory.name = name;
+            this.currentCategory.id = id;
+            this.currentCategory.href = href;
+
             // show category head
             $(".heading h2").html(name);
             $(".heading a").attr('href',href);
