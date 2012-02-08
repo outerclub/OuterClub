@@ -277,6 +277,8 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                         return false;
                     });
                 }
+                if (fadeIn)
+                    $('.responses').animate({scrollTop:$('.responses').height()});
 
          }
 
