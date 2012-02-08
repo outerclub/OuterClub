@@ -160,6 +160,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                     // show category head
                     self.showCategoryHead(data.category_name,data.category_id,data.category_url);
                     $("#conversation").show();
+                    socket.send({'register':['/happening','/user/'+user.user_id,'/conversation/'+id]});
             }
         },
         createResponse: function(fadeIn,r_id,r_user,date,content,canVote) {

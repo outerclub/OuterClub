@@ -8,6 +8,6 @@ class DefaultConfig:
     mysql_database = 'oc'
 
     bind_address = '0.0.0.0'
-    port = 5000
+    port = 8001
     debug = True
 

@@ -54,7 +54,8 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
                 $(this).remove();
                 createHappening(data,true);
             }); 
-        }
+        } else 
+            createHappening(data,true);
     });
     socket.addCallback('happening_init',function(data) {
         _.each(data,function(h,i) {
