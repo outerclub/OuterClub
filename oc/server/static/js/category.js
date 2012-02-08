@@ -278,7 +278,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                     });
                 }
                 if (fadeIn)
-                    $('.responses').animate({scrollTop:$('.conversation:last .section:last').offset().top});
+                    $('.responses').animate({scrollTop: $('.responses')[0].scrollHeight});
 
          }
 
