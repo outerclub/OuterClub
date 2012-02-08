@@ -12,30 +12,19 @@ Welcome
 {% endblock %}
 {% block content %}
 <div class="content_wrapper">
-    <div id="category_head" style="display: none">
-		<div class="heading">
-            <div class="left">
-                <a href="#">
-			    <img src="/static/images/technology_icon.png" /><h2></h2></a>
-            </div>
-            <div class="right">
-                <!--
-			    <h3>Show Newest First</h3>
-                <img src="/static/images/show_new_bg.png" />
-                -->
-                <button rel="#facebox">Start a Conversation</button>
-            </div>
-		</div>	
-        <div class="clear"></div>
-<!--
-		<div class="populer_tag">
-			<span>Populer Tags:</span>
-            <ul>
-			<li><a href="">tag</a></li>
-            </ul>
-		</div>
--->
-    </div>
+    <div class="heading hide">
+        <div class="left">
+            <a href="#">
+            <img src="/static/images/technology_icon.png" /><h2></h2></a>
+        </div>
+        <div class="right">
+            <!--
+            <h3>Show Newest First</h3>
+            <img src="/static/images/show_new_bg.png" />
+            -->
+            <button rel="#new_conversation_box">Start a Conversation</button>
+        </div>
+    </div>	
     <div class="frame">
         <div id="welcome" title="Welcome">
             <h1>Announcements</h1>
@@ -54,7 +43,7 @@ Welcome
                  </div>
             {% endfor %}
         </div>
-        <div id="categories" style="display: none" title="Categories">
+        <div id="categories" class="hide" title="Categories">
             <div align="center">
             <table id="nav">
             {% set x = 0 %}
@@ -70,44 +59,39 @@ Welcome
             </table>
             </div>
         </div>
-        <div id="trending" style="display: none" title="Trending">
-            <a><img src="/static/images/trending/discussions_hover.png" /></a>
+        <div id="trending" class="hide" title="Trending">
+            <!--<a><img src="/static/images/trending/discussions_hover.png" /></a>-->
             <div class="clear">&nbsp;</div>
         </div>
-        <div id="leaderboard" style="display: none" title="Leaderboard">
+        <div id="leaderboard" class="hide" title="Leaderboard">
         </div>
-        <div id="dynamic" style="display: none">
+        <div id="dynamic" class="hide">
         </div>
-        <div id="conversation" style="display: none">
-            <div class="conversation_frame">
-                <div class="room">
-                    <h2></h2>
-                    <div class="users">
-                    </div>
+        <div id="conversation" class="hide">
+            <div class="room">
+                <h2></h2>
+                <div class="cover">
                 </div>
-                <div class="responses">
-                <!-- 
-                        <br />
-                        <img src="/static/images/nav_icon.png">
-                        <a class="tag" href="#">Latin</a>
-                -->
-
+                <div class="users">
                 </div>
-                <div class="reply">
-                    <span class="info">Write a response</span><span class="error"></span><br />
-                    <textarea rows="6" cols="80"></textarea>
-                    <button>Post</button>
-                </div>
-                <div class="help">
-                    <ul>
-                     <li><span>@user</span> &rarr; mention user</li>
-                     <li><span>/me</span> nods &rarr; User nods.</li> 
-                    </ul>
-                </div>
-                
             </div>
+            <div class="responses">
 
+            </div>
+            <div class="reply">
+                <span class="info">Write a response</span><span class="error"></span><br />
+                <textarea rows="6" cols="80"></textarea>
+                <button>Post</button>
+            </div>
+            <div class="help">
+                <ul>
+                 <li><span>@user</span> &rarr; mention user</li>
+                 <li><span>/me</span> nods &rarr; User nods.</li> 
+                </ul>
+            </div>
+            
         </div>
+
     </div>
 </div>
 {% endblock %}

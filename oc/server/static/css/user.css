@@ -1,7 +1,10 @@
-#avatar .hover, #avatar .active{
+.profile .overlay .hover, .profile .overlay .active{
     opacity: 1;
 }
-#avatar img {
+.profile .overlay .active {
+    outline: 1px solid #222;
+}
+.profile .overlay img {
     opacity: 0.5;
     cursor: pointer;
 }
@@ -9,4 +12,30 @@
 .profile h2 {
     font-family: BebasRegular;
     font-size: 200%;
+}
+.profile a[rel='#cover'] img {
+    outline: 1px solid #222;
+}
+.profile > a:hover img {
+   outline: 1px solid  white;
+}
+
+/**
+ * Pager.
+ */
+.profile .border {
+    overflow: hidden;
+}
+.center {
+    margin: 0 auto 0 auto;
+}
+.center > div {
+    float: left;
+}
+#cover {
+    width: 640px;
+}
+#cover .center {
+    height: 400px;
+    overflow: auto;
 }

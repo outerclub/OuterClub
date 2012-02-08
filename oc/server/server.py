@@ -95,19 +95,16 @@ def category(category):
     posts = []
     cur2 = conn.cursor()
     for conversation in cur.fetchall():
-        tags = db.fetchConversationTags(cur2,conversation[0])
         posts.append({'id':conversation[0], 'title':conversation[1],  \
                       'user':db.fetchUser(cur,conversation[3]), \
-                      'date': util.dateFormat(conversation[2]), \
-                      'tags': tags})
-    popular_tags = db.fetchPopularTags(cur,cat_id)
+                      'date': util.dateFormat(conversation[2])})
     cur2.close()
     cur.close()
     conn.close()
     
     category = ' '.join(c.capitalize() for c in category.split())
 
-    return flask.jsonify(popular=popular_tags,posts=posts)
+    return flask.jsonify(posts=posts)
 
 @app.route('/conversation/<id>')
 def conversation(id):
@@ -122,15 +119,12 @@ def conversation(id):
     cat_id = conversation[3]
     cur.execute('select name from category where cat_id=%s',(cat_id,))
     categoryName = cur.fetchone()[0]
-    tags = db.fetchConversationTags(cur,id)
-    popular_tags = db.fetchPopularTags(cur,conversation[3])
 
     # populate the data object 
     conversation = {'id': id, 'title':conversation[0], \
                   'user':db.fetchUser(cur,conversation[4]), \
                    'date': util.dateFormat(conversation[1]), \
                    'content': util.replaceMentions(cur,conversation[2]), \
-                   'tags': tags \
                   }
     responses = db.fetchResponses(cur,id,getUid())
     cur.close()
@@ -139,7 +133,7 @@ def conversation(id):
     c_url = '/category/'+categoryName.lower().replace(' ','+')
 
     categoryName = util.formatCategoryName(categoryName)
-    return flask.jsonify(conversation=conversation,popular=popular_tags,responses=responses,category_name=categoryName,category_id=cat_id,category_url=c_url)
+    return flask.jsonify(conversation=conversation,responses=responses,category_name=categoryName,category_id=cat_id,category_url=c_url)
 
 @app.route('/trending')
 def trending():
@@ -164,6 +158,30 @@ def leaderboard():
     cur.close()
     conn.close()
     return flask.jsonify(users=d)
+
+@app.route('/covers',methods=['GET','POST'])
+def covers():
+    if not isLoggedIn():
+        return ''
+    
+    if request.method == 'GET':
+        covers = []
+        for f in os.listdir(app.root_path+'/static/images/covers'):
+            covers.append(f)
+        return flask.jsonify(covers=covers)
+    else:
+        conn = pool.connection()
+        cur = conn.cursor()
+        cur.execute('update user set cover_image=%s where user_id=%s',(request.form['cover'],getUid()))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        transport.open()
+        client.userModified(getUid())
+        transport.close()
+        
+        return ''
 
 @app.route('/avatars',methods=['GET','POST'])
 def avatars():
@@ -334,38 +352,41 @@ def signup():
         return render_template('signup.html')
 
     error = None
-    if len(request.form['username']) <= 2:
+    conn = pool.connection()
+    cur = conn.cursor()
+    if len(request.form['username']) == 0:
+        error = "Username cannot be empty."
+    elif len(request.form['username']) <= 2:
         error = "Username must be greater than 2 characters long."
-    elif not util.emailValid(request.form['email']):
-        error = "E-mail was not valid."
-    elif len(request.form['password']) == 0:
-        error = "Password cannot be empty."
     else:
-        
-        # process the signup
         # check to see if user exists
-        conn = pool.connection()
-        cur = conn.cursor()
         cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
         test = cur.fetchone()
 
         # if the user exists
         if (test != None):
             error = "Username already in use."
-            cur.close()
-            conn.close()
-        else:
-            avatar = 'user_%s.png' % random.randrange(1,6)
-            # process the form submission
-            res = cur.execute('insert into user (name,email,password,avatar_image,prestige) values (%s,%s,%s,%s,0)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar))
-            conn.commit()
-            key = initAuth(cur.lastrowid,False)
-            cur.close()
-            conn.close()
-            return flask.jsonify(success=True,user_id=cur.lastrowid,key=key)
+        elif len(request.form['email']) == 0:
+            error = "E-mail cannot be empty."
+        elif not util.emailValid(request.form['email']):
+            error = "E-mail was not valid."
+        elif len(request.form['password']) == 0:
+            error = "Password cannot be empty."
     
     if (error):
+        cur.close()
+        conn.close()
         return flask.jsonify(error=error)
+    else:
+        avatar = 'generic.png'
+        cover = 'default.jpg'
+        # process the form submission
+        res = cur.execute('insert into user (name,email,password,avatar_image,prestige,cover_image) values (%s,%s,%s,%s,0,%s)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar,cover))
+        conn.commit()
+        key = initAuth(cur.lastrowid,False)
+        cur.close()
+        conn.close()
+        return flask.jsonify(success=True,user_id=cur.lastrowid,key=key)
     
 @app.route('/logout')
 def logout():

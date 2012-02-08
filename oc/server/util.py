@@ -22,7 +22,7 @@ def formatCategoryName(c):
     return ' '.join([spl.capitalize() if len(spl) > 2 else spl.upper() for spl in c.split(' ')])
 
 def dateFormat(dt):
-    s = dt.strftime('%d %B %Y, '+str(dt.hour if dt.hour <= 12 else dt.hour-12)+':%M%p')
+    s = dt.strftime(str(dt.day)+' %B, %Y '+str(dt.hour if dt.hour <= 12 else dt.hour-12)+':%M%p')
     return s
 def hourDateFormat(dt):
     s = dt.strftime(str(dt.hour if dt.hour <= 12 else dt.hour-12)+':%M%p')
@@ -31,8 +31,12 @@ def hourDateFormat(dt):
 def replaceMentions(cur,data):
     users = findMentions(cur,data)
     accum = data
+    isAction = data.startswith('/me')
     for name in users:
-        accum = accum.replace('@'+name,'<a href="/user/%s">@%s</a>' % (users[name],name))
+        if isAction:
+            accum = accum.replace('@'+name,'<a name="%s" href="/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (users[name]['user_id'],users[name]['user_id'],users[name]['avatar_image']))
+        else:
+            accum = accum.replace('@'+name,'<a name="%s" href="/user/%s">@%s</a>' % (users[name]['user_id'],users[name]['user_id'],name))
     return accum
 
 def findMentions(cur,data):
@@ -40,9 +44,9 @@ def findMentions(cur,data):
     users = dict()
     if (len(mentions) > 0):
         replacements = map(lambda x:'%s',mentions)
-        cur.execute('select name,user_id from user where name in (%s)' % ','.join(replacements),tuple(mentions))
+        cur.execute('select name,user_id,avatar_image from user where name in (%s)' % ','.join(replacements),tuple(mentions))
         for u in cur.fetchall():
-            users[u[0]] = u[1]
+            users[u[0]] = {'user_id':u[1],'avatar_image':u[2]}
         for n in mentions:
             if not (n in users):
                 users[n] = None

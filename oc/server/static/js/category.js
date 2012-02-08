@@ -6,7 +6,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
             href: undefined
         },
         currentConversation: {
-            id: undefined,
+            data: undefined,
             viewers: []
         },
         goCategory: function(name,id,href) {
@@ -38,13 +38,13 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
             var html = '';
             _.each(d_list,function(d) {
               html += '<div title="'+d.title+'" class="post" '+(hide ? 'style="display: none"' : '')+ '>'
-                + '<div class="post_content"><img src="/static/images/icons/conversation.png" /> '
-                + '<h1><a href="/conversation/'+d.id+'" name="'+d.id+'">'+d.title+'</a></h1>'
-                + '<div class="sub">Started by <a href="/user/'+d.user.user_id+'" name="'+d.user.user_id+'">'+d.user.name+'</a> on '+d.date+'</div>'
-                + '</div>'
-                + '<div class="post_nav">'
-                //+ '<a class="tag" href="#">testTag</a>'
-                + '</div><div class="clear"></div></div>';
+                + '<div class="left"><img src="/static/images/icons/conversation.png" /> '
+                + '<h1><a href="/conversation/'+d.id+'" name="'+d.id+'">'+d.title+'</a></h1></div>'
+                + '<div class="right sub">'
+                    +'<img width="50" height="50" src="/static/images/avatars/'+d.user.avatar_image+'" />'
+                    +'<div class="block"><a href="/user/'+d.user.user_id+'" name="'+d.user.user_id+'">'+d.user.name+'</a></div>'
+                    +'<div class="block">'+d.date+'</div></div>'
+                +'</div>';
             });
             html = jQuery(html);
             var self = this;
@@ -52,7 +52,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                 self.goConversation($(this).attr('name'));
                 return false;
             });
-            html.find(".sub > a").click(function() {
+            html.find(".right a").click(function() {
                 user.go($(this).attr('name'));
                 return false;
             });
@@ -60,28 +60,28 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
         },
         showCategoryHead: function(name,id,href) {
             // show category head
-            $("#category_head h2").html(name);
-            $("#category_head a").attr('href',href);
-            $("#category_head").show();
+            $(".heading h2").html(name);
+            $(".heading a").attr('href',href);
+            $(".heading").show();
 
-            $("#category_head a").unbind();
+            $(".heading a").unbind();
             var self = this;
-            $("#category_head a").click(function() {
+            $(".heading a").click(function() {
                 self.goCategory(name,id,href);
                 return false;
             });
         },
         goConversation: function(id) {
            var self = this;
-            // only proceed if changing conversation or not displayed
-           if (this.currentConversation.id != id || !$("#conversation").is(':visible')) 
+            // only proceed if changing conversation or not not displayed
+           if (this.currentConversation.data == undefined ||  this.currentConversation.data.conversation.id != id) 
             {
                 $("#conversation .users").html('');
                this.currentConversation.viewers = [];
-               this.currentConversation.id = id;
                $.getJSON('/conversation/'+id,function(data) {
                     nav.hideAll();
                     nav.setTitle(data.conversation.title); 
+                    self.currentConversation.data = data;
 
                     // show category head
                     self.showCategoryHead(data.category_name,data.category_id,data.category_url);
@@ -106,15 +106,20 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                         // scan for insertions
                         for (v in viewers) {
                             if (!(v in self.currentConversation.viewers)) {
-                                var userView = jQuery('<img id="v_'+v+'"src="/static/images/avatars/'+viewers[v]+'" />');
+                                var userView = jQuery('<a href="/users/'+v+'" name="'+v+'"><img width="50" height="50" id="v_'+v+'"src="/static/images/avatars/'+viewers[v]+'" /></a>');
                                 userView.hide();
-                                $(".conversation_frame .users").append(userView);
+                                userView.click(function() {
+                                    user.go($(this).attr('name'));
+                                    return false;
+                                });
+                                $("#conversation .users").append(userView);
                                 userView.fadeIn();
                                 self.currentConversation.viewers[v] = '';
                             }
                         }
                     });
                     
+                    $("#conversation .cover").html('<img width="905" src="/static/images/covers/'+data.conversation.user.cover_image+'" />');
                     $("#conversation .room h2").html(data.conversation.title);
                     $("#conversation .conversation").remove();
                     self.createResponse(false,0,data.conversation.user,data.conversation.date,data.conversation.content,false);
@@ -146,6 +151,15 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                     $("#conversation").show();
 
                 }); 
+            } else if (this.currentConversation.data.conversation.id == id && !$("#conversation").is(':visible'))
+            {
+                    nav.hideAll();
+                    var data = self.currentConversation.data;
+                    nav.setTitle(data.conversation.title); 
+
+                    // show category head
+                    self.showCategoryHead(data.category_name,data.category_id,data.category_url);
+                    $("#conversation").show();
             }
         },
         createResponse: function(fadeIn,r_id,r_user,date,content,canVote) {
@@ -154,7 +168,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                 var lastDateSplit;
                 for (var x=previousD.size()-1; x >= 0; x--)
                 {
-                    var dates = $(previousD.get(x)).find('.date');
+                    var dates = $(previousD.get(x)).find('.date span');
                     for (var y=dates.size()-1; y >= 0; y--)
                     {
                         lastDateSplit = $(dates.get(y)).html().replace('  ',' ').split(' ');
@@ -183,46 +197,70 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
 
                 var lastDiscussion = $(".conversation:last");
                 // create right float
-                var dateHtml ='<div class="right date">'+date;
+                var dateHtml ='<div class="right date"><span>'+date+'</span>';
+
+                // display coffee upvote?
                 if (canVote)
-                {
                     dateHtml +='<a href="/upvote"><img width="20" height="20" src="/static/images/coffee.png" /></a>';
-                }
                 dateHtml += '</div>';
 
+                var mentionHandler = function() {
+                    user.go($(this).attr('name'));
+                    return false;
+                };
+
+                content = content.replace(/\n/g,'<br />');
+                var isAction = content.indexOf('/me') === 0;
                 // combine the postings or create new one?
-                if (lastDiscussion.find('.user h2 a').html() == r_user.name)
+                if (!isAction && !lastDiscussion.hasClass('action') && lastDiscussion.find('.user h2 a').html() == r_user.name)
                 {
-                    lastDiscussion.find('.content').append('<div class="section">'+content+dateHtml+"</div>");
+                    var section = jQuery('<div class="section">'+dateHtml+content+"</div>");
+                    section.hide();
+                    lastDiscussion.find('.content').append(section);
+                    if (fadeIn)
+                        section.fadeIn();
+                    else
+                        section.show();
+                    
+                    section.children("a").click(mentionHandler);
                 } else {
-                    var str ='<div class="conversation" style="display: none">';
-                    str += '<div class="user">'+
+                    // create a new posting
+            
+                    var str ='<div class="conversation';
+                    if (isAction) str += ' action';
+                    str += '">';
+                    if (!isAction)
+                    {
+                        str += '<div class="user">'+
                             '<div class="description">'+
                                 '<h2><a href="/user/'+r_user.user_id+'" name="'+r_user.user_id+'">'+r_user.name+'</a></h2>'+
                                 '<div>Prestige: '+r_user.prestige+'</div>'+
                             '</div>'+
-                            '<img src="/static/images/avatars/'+r_user.avatar_image+'" />'+
-                        '</div>'+
-                        '<div class="content"><div class="section">'+
-                            content+dateHtml+
+                            '<img width="50" height="50" src="/static/images/avatars/'+r_user.avatar_image+'" />'+
+                        '</div>';
+                    }
+                    if (isAction)
+                        content = content.replace(/^\/me/,'<a href="/user/'+r_user.user_id+'" name="'+r_user.user_id+'"><img width="30" height="30" src="/static/images/avatars/'+r_user.avatar_image+'" /></a>');
+                    str += '<div class="content"><div class="section">'+
+                            dateHtml+content+
                         '</div></div>';
-                    str += '</div>';
+                    if (!isAction)
+                        str += '</div>';
                     var element = jQuery(str);
+                    element.hide();
+                    element.find(".section > a").click(mentionHandler);
                     $(".responses").append(element);
                     if (fadeIn) {
                         element.fadeIn();
                     } else {
                         element.show();
                     }
-                    element.find("a").click(function() {
-                        user.go($(this).attr('name'));
-                        return false;
-                    });
                 }
 
+                // process a vote?
                 if (canVote)
                 {
-                    $(".conversation:last .section:last a").click(function() {
+                    $(".conversation:last .section:last .date a").click(function() {
                         var self = this;
                         $.ajax({
                             type:'POST',

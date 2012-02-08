@@ -2,7 +2,7 @@ define(function() {
     return {
         hideAll: function() {
             $(".frame > div").hide();
-            $("#category_head").hide();
+            $(".heading").hide();
             $("#discussion").hide();
             $("#dynamic").hide();
             $("#dynamic").removeClass();

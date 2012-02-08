@@ -7,25 +7,22 @@
 {% block headers %} {% endblock %}
 </head>
 <body>
-<div id="facebox" class="overlay">
+<div id="new_conversation_box" class="overlay">
     <div class="border">
     <h2>New Conversation</h2>
-    <p>
-            Title: <input type="text" name="title" />
-            <br />
-            <span style="vertical-align:top"> Content:</span> <textarea name="content"></textarea>
-    </p>
-    <p><button name="post" class="close">Post</button></p>
-    <p><button class="close">Close</button></p>
+    <div class="titleField"><input size="40" type="text" name="title" /><span class="label">title</span></div>
+    <div class="contentField"><textarea cols="90" rows="20" name="content"></textarea><span class="label">content</span></div>
+    <p><button name="post" class="close">Post</button> <button class="close">Close</button></p>
     </div>
 </div>
 <div id="menu">
 <ul>
 <li id="miniLogo"><a class="active" href="#welcome"></a></li>
-<li class="link"><a href="#community">COMMUNITY</a></li>
 <li class="link"><a href="#categories">CATEGORIES</a></li>
+<li class="link"><a href="#guilds">GUILDS</a></li>
 <li class="link"><a href="#trending">TRENDING NOW</a></li>
 <li class="link"><a href="#leaderboard">LEADERBOARD</a></li>
+<li class="link"><a href="#community">COMMUNITY</a></li>
 </ul>
 <div class="right">
 <div class="search">
@@ -36,13 +33,13 @@
 </div>
 </div>
 <div id="miniProfile">
-<a href="/user/{{ user_id }}"><img src="{{ url_for('static',filename='images/avatars/'+avatar) }}" /></a>
+<a href="/user/{{ user_id }}"><img width="100" height="100" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" /></a>
 <div>
 <h2>{{ username }}</h2> <a href="{{ url_for('logout') }}">Log out</a><br />
 <p>Prestige: <span class="prestige">{{ prestige }}</span></p>
 </div>
 </div>
-<div class="slide_show">
+<div class="slide_show hide">
 		<h2>Happening Right Now</h2>
         <div class="scroll">
         </div>

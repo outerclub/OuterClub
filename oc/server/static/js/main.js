@@ -20,6 +20,12 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
 
     var createHappening = function(data,animate) {
         var p = data.data;
+
+        // is the happening now bar shown?
+        if (!$(".slide_show").is(":visible"))
+            $(".slide_show").fadeIn();
+
+        // parse the happening type
         if (data.type == 'response' || data.type == 'post')
         {
             var verb = 'replied in';
@@ -43,8 +49,12 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
 
     socket.addCallback('happening',function(data) {
         if ($('.slide_show .item').size() >= 6)
-            $('.slide_show .item:first').remove(); 
-        createHappening(data,true);
+        {
+            $('.slide_show .item:last').fadeOut(function() {
+                $(this).remove();
+                createHappening(data,true);
+            }); 
+        }
     });
     socket.addCallback('happening_init',function(data) {
         _.each(data,function(h,i) {
@@ -96,14 +106,38 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
         return false;
     });
 
-    $("#category_head .right button").overlay({
+    $(".content_wrapper .heading .right button").overlay({
         mask: {
             color: '#000',
             loadSpeed: 200,
             opacity: 0.3
         }
     });
-    $("#facebox button[name='post']").click(function() {
-        $.post('/post',{ area: category.currentCategory.name,title:$("input[name='title']").val(),content:$("#facebox textarea").val() });
+
+
+    /**
+      * new conversation box.
+      */
+    $("#new_conversation_box button[name='post']").click(function() {
+        $.post('/post',{
+            area: category.currentCategory.name,
+            title:$("input[name='title']").val(),
+            content:$("#new_conversation_box textarea").val() },
+          function() {
+                $("#new_conversation_box .titleField input,#new_conversation_box textarea").val('');
+                $("#new_conversation_box span").show();
+        });
+    });
+    $("#new_conversation_box .titleField input,#new_conversation_box textarea").focusin(function() {
+        $(this).next('span').addClass('focus');
+    });
+    $("#new_conversation_box .titleField input,#new_conversation_box textarea").focusout(function() {
+        if ($(this).val() == '')
+            $(this).next('span').show();
+        $(this).next('span').removeClass('focus');
+    });
+    $("#new_conversation_box .titleField input, #new_conversation_box textarea").keypress(function() {
+        $(this).next('span').hide(); 
+            
     });
 });

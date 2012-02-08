@@ -75,7 +75,7 @@ def fetchTasks(cursor,user_id):
     return tasks
 
 def fetchUser(cursor,user_id):
-    res = cursor.execute('select name,avatar_image,prestige from user where user_id=%s',(user_id,))
+    res = cursor.execute('select name,avatar_image,prestige,cover_image from user where user_id=%s',(user_id,))
     user = cursor.fetchone()
-    return {'name':user[0],'avatar_image':user[1],'user_id':user_id,'prestige':user[2]}
+    return {'name':user[0],'avatar_image':user[1],'user_id':user_id,'prestige':user[2],'cover_image':user[3]}
 

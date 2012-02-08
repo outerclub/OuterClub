@@ -1,10 +1,10 @@
 .number,div .active {
-    background-color: #6597CA;
+    background-color: #6092c6;
     color: white;
     text-decoration: none;
 }
-.entry h2,.entry .date {
-    color: #6597CA
+.entry .date {
+    color: #6092c6;
 }
 .entry {
     clear: both;
@@ -30,13 +30,13 @@
     top: 10px;
     font-weight:bold;
 }
-.text {
+.entry .text {
     float: left;
     padding: 10px 10px 10px 10px;
     position: relative;
     width: 660px; 
     height: 70px;
-    background-color: rgba(0,0,0,0.2)
+    background-color: rgba(0,0,0,0.5)
 }
 .entry .number {
     font: 50px BebasRegular;
