@@ -142,6 +142,7 @@ define(['socket','nav','underscore','user'],function(socket,nav,_,user) {
                                 } else {
                                     $(".reply .error").fadeOut();
                                     $("textarea").val('');
+                                    $("textarea").focus();
                                 }
                             },
                             dataType: 'json'

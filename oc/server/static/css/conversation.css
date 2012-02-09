@@ -46,7 +46,7 @@
     background-color: #4376ce;
     color: white;
     float: left;
-    width: 225px;
+    width: 210px;
    }
 
 .conversation .user img {
@@ -63,7 +63,7 @@
 .conversation .content {
     padding: 10px 15px 10px 15px;
     background-color: #fff;
-    float: right;
+    float: left;
     width: 575px;
     color: #848484;
     font-size: 16px;
@@ -90,6 +90,7 @@
 .action .content {
     background-color: transparent;
     padding: 0px 15px 0px 15px;
+    margin-left: 210px;
     min-height: 0px;
 }
 .action .section img {
