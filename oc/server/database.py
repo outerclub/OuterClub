@@ -1,13 +1,5 @@
 import util
 import datetime
-
-def fetchConversationTags(cursor,d_id):
-    cursor.execute('select tag.name from link_conversation_tag inner join tag using (tag_id) where d_id=%s',(d_id,))
-    tags = []
-    for tag in cursor.fetchall():
-        tags.append(tag[0])
-    return tags
-    
 def fetchResponses(cursor,d_id,user_id):
     cursor.execute('select r_id,user_id,replyDate,content from response where d_id=%s order by replyDate asc', (d_id,))
     
@@ -30,13 +22,6 @@ def fetchResponses(cursor,d_id,user_id):
             if r['r_id'] in myVotes or r['user']['user_id'] == user_id:
                 r['canVote'] = False
     return responses
-
-def fetchPopularTags(cursor,cat_id):
-    cursor.execute('select tag.name,count(*) from link_conversation_tag inner join conversation using (d_id) inner join tag using (tag_id) where cat_id=%s group by tag_id order by count(*) desc limit 10',(cat_id,))
-    tags = []
-    for r in cursor.fetchall():
-        tags.append(r[0])
-    return tags
 
 def fetchTrendingConversations(cursor):
     cursor.execute('select d_id,image,user_id,title,postDate,content from conversation inner join category using (cat_id) limit 10')
