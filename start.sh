@@ -1,4 +1,5 @@
 #!/bin/bash
-rm -f *.log
-nohup python main.py > main.log &
-nohup python rtg.py > rtg.log &
+mkdir -p logs
+rm -f logs/*.log
+nohup python main.py > logs/main.log &
+nohup python rtg.py > logs/rtg.log &
