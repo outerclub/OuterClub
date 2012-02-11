@@ -1,20 +1,39 @@
-require.config({
-    'paths': {
-        'sockjs':'deps/sockjs-0.1.2.min',
-        'underscore':'deps/underscore-1.3.0',
-        'backbone':'deps/backbone-0.5.3',
-        'jquery-tools':'deps/jquery.tools.min'
-    }
-});
-require(['socket','underscore','category','nav','jquery-tools','user','trending','leaderboard'],
-  function(socket,_,category,nav,__,user,trending,leaderboard) {
-    user.init();
-    socket.init('http://'+window.location.hostname+':8002/sock',
+goog.provide('oc.Main');
+goog.require('jquery');
+goog.require('oc.Socket');
+goog.require('oc.Category');
+goog.require('oc.Nav');
+goog.require('jquery.tools');
+goog.require('oc.User');
+goog.require('oc.Trending');
+goog.require('oc.Leaderboard');
+goog.require('goog.array');
+goog.require('goog.events');
+goog.require('goog.events.EventType');
+goog.require('goog.dom.query');
+
+/**
+ *
+ * @constructor
+ */
+oc.Main = function() {
+    this.socket = new oc.Socket();
+    this.user = new oc.User(this.socket);
+    this.category = new oc.Category(this.socket,this.user);
+    this.trending = new oc.Trending(this.category);
+    this.leaderboard = new oc.Leaderboard(this.user);
+};
+
+oc.Main.prototype.start = function() {
+    this.user.init();
+    
+    var self = this;
+    this.socket.init('http://'+window.location.hostname+':8002/sock',
         function() {
-            socket.send({'user_id':user.user_id,'key':user.key});
+            self.socket.send({'user_id':self.user.user_id,'key':self.user.key});
     });
-    socket.send({'register':['/happening','/user/'+user.user_id]});
-    socket.addCallback('authRejected',function() {
+    this.socket.send({'register':['/happening','/user/'+self.user.user_id]});
+    this.socket.addCallback('authRejected',function() {
         window.location = '/logout';
     });
 
@@ -31,7 +50,7 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
             var verb = 'replied in';
             if (data.type == 'post')
                 verb = 'posted'; 
-            var element = jQuery('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category_image+'" /><img class="avatar" src="/static/images/avatars/'+p.user.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user.name+'</span> '+verb+' <span class="content"><h2>'+p.title+'</h2></span></div></div>');
+            var element = jQuery('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category.image+'" /><img class="avatar" src="/static/images/avatars/'+p.user.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user.name+'</span> '+verb+' <span class="content"><h2>'+p.title+'</h2></span></div></div>');
             element.hide();
             if (animate)
             {
@@ -42,12 +61,12 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
             }
             element.fadeIn();
             element.click(function() {
-                category.goConversation(p.d_id);
+                self.category.goConversation(p.d_id);
             });
         }
     }
 
-    socket.addCallback('happening',function(data) {
+    this.socket.addCallback('happening',function(data) {
         if ($('.slide_show .item').size() >= 6)
         {
             $('.slide_show .item:last').fadeOut(function() {
@@ -57,8 +76,8 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
         } else 
             createHappening(data,true);
     });
-    socket.addCallback('happening_init',function(data) {
-        _.each(data,function(h,i) {
+    this.socket.addCallback('happening_init',function(data) {
+        goog.array.forEach(data,function(h,i) {
             createHappening(h,false);
         });
     });
@@ -66,31 +85,32 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
     $("#categories a").click(function() {
             var name = $(this).attr('title');
             var cat_id = $(this).attr('id');
-        category.goCategory(name,cat_id,$(this).attr('href'));
+        self.category.goCategory(name,cat_id,$(this).attr('href'));
         return false; 
     });
-    // navigate to another section
+    // gate to another section
     $('#menu ul a').click(function() {
          $('#menu ul li a').each(function() { $(this).removeClass('active'); });
          $(this).addClass('active');
 
-        socket.send({'register':['/happening','/user/'+user.user_id]});
+        self.socket.send({'register':['/happening','/user/'+self.user.user_id]});
         if ($(this).attr('href') == '#trending')
-           trending.go(); 
+           self.trending.go(); 
         else if ($(this).attr('href') == '#leaderboard')
-            leaderboard.go();
+            self.leaderboard.go();
         else
         {
-            nav.hideAll();
+            oc.Nav.hideAll();
             var element = $($(this).attr('href'));
             element.show();
-            nav.setTitle(element.attr('title'));
+            oc.Nav.setTitle(element.attr('title'));
         }
 
         return false;
     });
 
     // search box
+    /*
     $("#menu input").focusin(function() {
         $(this).next('span').addClass('light');
     });
@@ -106,6 +126,7 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
         $(this).prev('input').focus();
         return false;
     });
+    */
 
     $(".content_wrapper .heading .right button").overlay({
         mask: {
@@ -121,7 +142,7 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
       */
     $("#new_conversation_box button[name='post']").click(function() {
         $.post('/post',{
-            area: category.currentCategory.name,
+            area: self.category.currentCategory.name,
             title:$("input[name='title']").val(),
             content:$("#new_conversation_box textarea").val() },
           function() {
@@ -129,16 +150,22 @@ require(['socket','underscore','category','nav','jquery-tools','user','trending'
                 $("#new_conversation_box span").show();
         });
     });
-    $("#new_conversation_box .titleField input,#new_conversation_box textarea").focusin(function() {
-        $(this).next('span').addClass('focus');
-    });
-    $("#new_conversation_box .titleField input,#new_conversation_box textarea").focusout(function() {
-        if ($(this).val() == '')
-            $(this).next('span').show();
-        $(this).next('span').removeClass('focus');
-    });
-    $("#new_conversation_box .titleField input, #new_conversation_box textarea").keypress(function() {
-        $(this).next('span').hide(); 
+    
+    var inputs = goog.dom.query("#new_conversation_box .titleField input,#new_conversation_box textarea");
+    goog.array.forEach(inputs,function(i) {
+        goog.events.listen(i,goog.events.EventType.FOCUSIN,function () {
+            $(this).next('span').addClass('focus');
+        });
+        goog.events.listen(i,goog.events.EventType.FOCUSOUT,function () {
+            if ($(this).val() == '')
+                $(this).next('span').show();
+            $(this).next('span').removeClass('focus');
+        });
+        goog.events.listen(i,goog.events.EventType.KEYPRESS,function () {
+            $(this).next('span').hide(); 
+        });
             
     });
-});
+};
+var main = new oc.Main();
+main.start();

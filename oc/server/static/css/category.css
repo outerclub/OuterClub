@@ -81,7 +81,6 @@
 .post .right .block {
     float: left;
     padding: 6px;
-    border-left; 1px solid gray;
 }
 .featured h1,.post h1{
     font-family: BebasRegular;

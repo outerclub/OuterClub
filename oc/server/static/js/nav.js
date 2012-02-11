@@ -1,5 +1,6 @@
-define(function() {
-    return {
+goog.provide('oc.Nav');
+goog.require('jquery');
+oc.Nav = {
         hideAll: function() {
             $(".frame > div").hide();
             $(".heading").hide();
@@ -11,4 +12,3 @@ define(function() {
             $('title').html(t+' - OuterClub');
         }
     };
-});

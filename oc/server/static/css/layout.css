@@ -277,6 +277,7 @@ textarea, input {
     display: none;
     width: 500px;
     border: 10px solid #666;
+    /* @alternate */
     border: 10px solid rgba(82,82,82,0.7);
     z-index: 9999;
     color: black;

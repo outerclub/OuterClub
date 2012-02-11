@@ -51,14 +51,14 @@ def index():
         return displaySignup()
     conn = pool.connection()
     cur = conn.cursor()
-    res = cur.execute('select name,image,cat_id from category order by cat_id asc') 
+    res = cur.execute('select name,image,cat_id from category where private=false order by cat_id asc') 
     categories = []
     for c in cur.fetchall():
         cat = c[0]
         sanitized = cat.lower().replace(' ','+')
         categories.append({'name':util.formatCategoryName(cat),'url':sanitized,'image':c[1],'id':c[2]})
     
-    g = {}
+    g = {'debug': DefaultConfig.debug}
     uid = getUid()
     user = db.fetchUser(cur,uid)
     g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige']})
@@ -83,28 +83,35 @@ def category(category):
     if not isLoggedIn():
         return ''
 
-    # fetch the category id from the name
+    # fetch the category id/visibility from the name
     category = category.replace('+',' ')
     conn = pool.connection()
     cur = conn.cursor()
-    cur.execute('select cat_id from category where name=%s', (category,))
-    cat_id = cur.fetchone()[0]
+    cur.execute('select cat_id,private from category where name=%s', (category,))
+    row = cur.fetchone()
+    cat_id = row[0]
+    isPrivate = row[1]
 
-    # fetch the conversations for this category
-    res = cur.execute('select d_id,title,postDate,user_id from conversation where cat_id=%s order by postDate desc',(cat_id,))
-    posts = []
-    cur2 = conn.cursor()
-    for conversation in cur.fetchall():
-        posts.append({'id':conversation[0], 'title':conversation[1],  \
-                      'user':db.fetchUser(cur,conversation[3]), \
-                      'date': util.dateFormat(conversation[2])})
-    cur2.close()
-    cur.close()
-    conn.close()
+    self = db.fetchUser(cur,getUid())
     
-    category = ' '.join(c.capitalize() for c in category.split())
+    # verify that this user has access to this category
+    if not isPrivate or (isPrivate and cat_id in self['guilds']):
+        # fetch the conversations for this category
+        res = cur.execute('select d_id,title,postDate,user_id from conversation where cat_id=%s order by postDate desc',(cat_id,))
+        posts = []
+        cur2 = conn.cursor()
+        for conversation in cur.fetchall():
+            posts.append({'id':conversation[0], 'title':conversation[1],  \
+                          'user':db.fetchUser(cur,conversation[3]), \
+                          'date': util.dateFormat(conversation[2])})
+        cur2.close()
+        cur.close()
+        conn.close()
+        
+        category = ' '.join(c.capitalize() for c in category.split())
 
-    return flask.jsonify(posts=posts)
+        return flask.jsonify(posts=posts)
+    return ''
 
 @app.route('/conversation/<id>')
 def conversation(id):
@@ -167,7 +174,8 @@ def covers():
     if request.method == 'GET':
         covers = []
         for f in os.listdir(app.root_path+'/static/images/covers'):
-            covers.append(f)
+            if f != 'thumbs':
+                covers.append(f)
         return flask.jsonify(covers=covers)
     else:
         conn = pool.connection()
@@ -191,7 +199,8 @@ def avatars():
     if request.method == 'GET':
         avatars = []
         for f in os.listdir(app.root_path+'/static/images/avatars'):
-            avatars.append(f)
+            if f != 'thumbs':
+                avatars.append(f)
         return flask.jsonify(avatars=avatars)
     else:
         conn = pool.connection()
