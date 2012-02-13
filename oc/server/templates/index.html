@@ -6,7 +6,7 @@ Welcome
 {% endblock %}
 {% block content %}
 <div class="content_wrapper">
-    <div class="heading hide">
+    <div class="heading" style="display: none">
         <div class="left">
             <a href="#">
             <img src="/static/images/technology_icon.png" /><h2></h2></a>
@@ -37,7 +37,7 @@ Welcome
                  </div>
             {% endfor %}
         </div>
-        <div id="categories" class="hide" title="Categories">
+        <div id="categories" title="Categories" style="display: none">
             <div align="center">
             <table id="nav">
             {% set x = 0 %}
@@ -53,15 +53,15 @@ Welcome
             </table>
             </div>
         </div>
-        <div id="trending" class="hide" title="Trending">
+        <div id="trending" title="Trending" style="display: none">
             <!--<a><img src="/static/images/trending/discussions_hover.png" /></a>-->
             <div class="clear">&nbsp;</div>
         </div>
-        <div id="leaderboard" class="hide" title="Leaderboard">
+        <div id="leaderboard" title="Leaderboard" style="display: none">
         </div>
-        <div id="dynamic" class="hide">
+        <div id="dynamic" style="display: none">
         </div>
-        <div id="conversation" class="hide">
+        <div id="conversation" style="display: none">
             <div class="room">
                 <h2></h2>
                 <div class="cover">

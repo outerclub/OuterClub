@@ -1,14 +1,17 @@
 goog.provide('oc.Nav');
-goog.require('jquery');
+goog.require('goog.dom');
+goog.require('goog.array');
+goog.require('goog.style');
+goog.require('goog.dom.classes');
 oc.Nav = {
         hideAll: function() {
-            $(".frame > div").hide();
-            $(".heading").hide();
-            $("#discussion").hide();
-            $("#dynamic").hide();
-            $("#dynamic").removeClass();
+            goog.array.forEach(goog.dom.query('.frame > div, .heading, #dynamic'),function(e) {
+                goog.style.showElement(e,false);
+            });
+            goog.dom.classes.remove(goog.dom.getElement('dynamic'));
         },
         setTitle:function(t) {
-            $('title').html(t+' - OuterClub');
+            var title = goog.dom.query('title')[0];
+            title.innerHTML = t+' - OuterClub';
         }
     };

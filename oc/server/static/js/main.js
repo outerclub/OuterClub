@@ -1,9 +1,7 @@
 goog.provide('oc.Main');
-goog.require('jquery');
 goog.require('oc.Socket');
-goog.require('oc.Category');
+goog.require('oc.Category.View');
 goog.require('oc.Nav');
-goog.require('jquery.tools');
 goog.require('oc.User');
 goog.require('oc.Trending');
 goog.require('oc.Leaderboard');
@@ -11,6 +9,7 @@ goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.dom.query');
+goog.require('goog.style');
 
 /**
  *
@@ -19,8 +18,8 @@ goog.require('goog.dom.query');
 oc.Main = function() {
     this.socket = new oc.Socket();
     this.user = new oc.User(this.socket);
-    this.category = new oc.Category(this.socket,this.user);
-    this.trending = new oc.Trending(this.category);
+    this.categoryView = new oc.Category.View(this.socket,this.user);
+    this.trending = new oc.Trending(this.categoryView.conversationView);
     this.leaderboard = new oc.Leaderboard(this.user);
 };
 
@@ -41,8 +40,12 @@ oc.Main.prototype.start = function() {
         var p = data.data;
 
         // is the happening now bar shown?
-        if (!$(".slide_show").is(":visible"))
-            $(".slide_show").fadeIn();
+        var slideShow = goog.dom.query('.slide_show')[0];
+        if (!goog.style.isElementShown(slideShow))
+        {
+            // TODO
+            //$(".slide_show").fadeIn();
+        }
 
         // parse the happening type
         if (data.type == 'response' || data.type == 'post')
@@ -50,29 +53,32 @@ oc.Main.prototype.start = function() {
             var verb = 'replied in';
             if (data.type == 'post')
                 verb = 'posted'; 
-            var element = jQuery('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category.image+'" /><img class="avatar" src="/static/images/avatars/'+p.user.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user.name+'</span> '+verb+' <span class="content"><h2>'+p.title+'</h2></span></div></div>');
-            element.hide();
-            if (animate)
-            {
-     
-                $('.slide_show .scroll').prepend(element);
-            } else {
-                $('.slide_show .scroll').prepend(element);
-            }
+            var element = goog.dom.htmlToDocumentFragment('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category.image+'" /><img class="avatar" src="/static/images/avatars/'+p.user.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user.name+'</span> '+verb+' <span class="content"><h2>'+p.title+'</h2></span></div></div>');
+            goog.style.showElement(element,false);
+            
+            var scroller = goog.dom.query('.scroll',slideShow)[0];
+            goog.dom.insertChildAt(scroller,element,0);
+
+            /* TODO
             element.fadeIn();
             element.click(function() {
-                self.category.goConversation(p.d_id);
+                self.categoryView.goConversation(p.d_id);
             });
+            */
         }
     }
 
     this.socket.addCallback('happening',function(data) {
-        if ($('.slide_show .item').size() >= 6)
+        var items = goog.dom.query('.slide_show .item');
+        
+        if (items.length >= 6)
         {
+            /* TODO
             $('.slide_show .item:last').fadeOut(function() {
                 $(this).remove();
                 createHappening(data,true);
             }); 
+            */
         } else 
             createHappening(data,true);
     });
@@ -81,32 +87,38 @@ oc.Main.prototype.start = function() {
             createHappening(h,false);
         });
     });
-
-    $("#categories a").click(function() {
-            var name = $(this).attr('title');
-            var cat_id = $(this).attr('id');
-        self.category.goCategory(name,cat_id,$(this).attr('href'));
-        return false; 
+    goog.array.forEach(goog.dom.query('#categories a'),function(category) {
+        goog.events.listen(category,goog.events.EventType.CLICK,function(e) {
+            var name = this.getAttribute('title');
+            var cat_id = this.getAttribute('id');
+            self.categoryView.goCategory(name,cat_id,this.getAttribute('href'));
+            e.preventDefault();
+        });
     });
     // gate to another section
-    $('#menu ul a').click(function() {
-         $('#menu ul li a').each(function() { $(this).removeClass('active'); });
-         $(this).addClass('active');
+    var menuItems = goog.dom.query('#menu ul a'); 
+    goog.array.forEach(menuItems,function(menuItem) {
+        goog.events.listen(menuItem,goog.events.EventType.CLICK,function(e) {
+             goog.array.forEach(menuItems,function(i) {
+                goog.dom.classes.remove(i,'active');
+            });
+            goog.dom.classes.add(menuItem,'active');
 
-        self.socket.send({'register':['/happening','/user/'+self.user.user_id]});
-        if ($(this).attr('href') == '#trending')
-           self.trending.go(); 
-        else if ($(this).attr('href') == '#leaderboard')
-            self.leaderboard.go();
-        else
-        {
-            oc.Nav.hideAll();
-            var element = $($(this).attr('href'));
-            element.show();
-            oc.Nav.setTitle(element.attr('title'));
-        }
+            self.socket.send({'register':['/happening','/user/'+self.user.user_id]});
+            if (menuItem.getAttribute('href') == '#trending')
+               self.trending.go(); 
+            else if (menuItem.getAttribute('href') == '#leaderboard')
+                self.leaderboard.go();
+            else
+            {
+                oc.Nav.hideAll();
+                var element = goog.dom.query(menuItem.getAttribute('href'))[0];
+                goog.style.showElement(element,true);
+                oc.Nav.setTitle(element.getAttribute('title'));
+            }
 
-        return false;
+            e.preventDefault();
+        });
     });
 
     // search box
@@ -128,6 +140,8 @@ oc.Main.prototype.start = function() {
     });
     */
 
+    /*
+    * TODO
     $(".content_wrapper .heading .right button").overlay({
         mask: {
             color: '#000',
@@ -135,14 +149,16 @@ oc.Main.prototype.start = function() {
             opacity: 0.3
         }
     });
+    */
 
 
     /**
       * new conversation box.
       */
+    /* TODO
     $("#new_conversation_box button[name='post']").click(function() {
         $.post('/post',{
-            area: self.category.currentCategory.name,
+            area: self.categoryView.category.name,
             title:$("input[name='title']").val(),
             content:$("#new_conversation_box textarea").val() },
           function() {
@@ -166,6 +182,7 @@ oc.Main.prototype.start = function() {
         });
             
     });
+    */
 };
 var main = new oc.Main();
 main.start();

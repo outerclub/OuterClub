@@ -3,7 +3,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>{% block title %} Unknown {% endblock %} - OuterClub</title>
-<link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/layout.compiled.css') }}"/>
+{% if debug %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/reset.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/footer.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/layout.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/welcome.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/trending.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/user.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/categories.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/category.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/conversation.css') }}"/>
+{% else %}
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/layout.compiled.css') }}"/>
+{% endif %}
 {% block headers %} {% endblock %}
 </head>
 <body>
@@ -48,9 +60,9 @@
 </div>
 {% include 'partials/footer.html' %}
 {% if debug %}
-<script type="text/javascript" src="http://localhost:9810/compile?id=outerclub"></script>
+    <script type="text/javascript" src="http://localhost:9810/compile?id=outerclub"></script>
 {% else %}
-<script type="text/javascript" src="/static/js/all.compiled.js"></script>
+    <script type="text/javascript" src="/static/js/all.compiled.js"></script>
 {% endif %}
 {% block footers %} {% endblock %}
 </body>

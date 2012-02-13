@@ -1,6 +1,7 @@
 goog.provide('oc.Socket');
 goog.require('sockjs');
 goog.require('goog.array');
+goog.require('goog.json');
 
 /**
  * @constructor
@@ -33,7 +34,7 @@ oc.Socket.prototype.addCallback = function(name,func) {
     this.callbacks[name] = func;
 };
 oc.Socket.prototype.send= function(payload) {
-    data = JSON.stringify(payload);
+    data = goog.json.serialize(payload);
     // is the connection open?
     if (!this.open)
         this.openQueue.push(data);

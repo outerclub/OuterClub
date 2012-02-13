@@ -1,11 +1,14 @@
 goog.provide('oc.User');
 goog.require('oc.Socket');
-goog.require('jquery');
 goog.require('oc.Nav');
 goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
-goog.require('goog.dom.query');
+goog.require('goog.dom');
+goog.require('goog.dom.classes');
+goog.require('goog.net.XhrIo');
+goog.require('goog.json');
+goog.require('goog.style');
 
 /**
  * @constructor
@@ -15,6 +18,16 @@ oc.User = function(socket) {
     this.key = undefined;
     this.socket = socket;
 };
+oc.User.extractFromJson = function(json) {
+    return {
+        avatar_image: json['avatar_image'],
+        user_id: json['user_id'],
+        name: json['name'],
+        guilds: json['guilds'],
+        cover_image: json['cover_image'],
+        prestige: json['prestige']
+    }
+}
 oc.User.prototype.init =  function() {
      var self = this;
      // extract the user_id and key from the cookies
@@ -44,20 +57,21 @@ oc.User.prototype.init =  function() {
         }
     }); 
     
-    var profile = goog.dom.query('#miniProfile a:first');
+    var profile = goog.dom.query('#miniProfile > a');
     goog.array.forEach(profile,function(p) {
-        goog.events.listen(p,goog.events.EventType.MOUSEOVER,
-            function(){
-                $(this).next('div').find('h2').css('color','#ff8211');
+        var h2 = goog.dom.query('h2',goog.dom.getNextElementSibling(p))[0];
+        goog.events.listen(p,goog.events.EventType.MOUSEOVER, function(){
+            goog.style.setStyle(h2,'color','#ff8211');
         });
         goog.events.listen(p,goog.events.EventType.MOUSEOUT,function() {
-            $(this).next('div').find('h2').css('color','white');
+            goog.style.setStyle(h2,'color','white');
         });
+        goog.events.listen(p,goog.events.EventType.CLICK,function(e) {
+            self.go(self.user_id); 
+            e.preventDefault();
+        }); 
     });
-    $("#miniProfile a:first").click(function() {
-        self.go(self.user_id); 
-        return false;
-    });
+
 };
 oc.User.prototype.changeAvatar = function(newAvatar) {
     var self = this;
@@ -74,46 +88,50 @@ oc.User.prototype.changeCover = function(newCover) {
 oc.User.prototype.go = function(user_id) {
     var self = this;
     var isMe = (self.user_id == user_id);
-    $.getJSON('/user/'+user_id,function(data) {
-        u = data.user;
+    goog.net.XhrIo.send('/user/'+user_id,function(e) {
+        var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
         oc.Nav.hideAll();
-        oc.Nav.setTitle(u.name);
+        oc.Nav.setTitle(u['name']);
 
-        $("#dynamic").show();
-        $("#dynamic").addClass('profile');
+        var dynamic = goog.dom.getElement('dynamic');
+        goog.style.showElement(dynamic,true); 
+        goog.dom.classes.add(dynamic,'profile');
         //
         // write the profile HTML
         var html = '';
         if (isMe) html += '<a rel="#cover">';
-            html += '<img width="905" name="'+u.cover_image+'"';
+            html += '<img width="905" name="'+u['cover_image']+'"';
             
             if (isMe) html += 'style="cursor: pointer" ';
-            html += 'src="/static/images/covers/'+u.cover_image+'" />';
+            html += 'src="/static/images/covers/'+u['cover_image']+'" />';
         if (isMe) html += '</a>';
 
         if (isMe)html += '<a rel="#avatar">';
-            html += '<img width="100" height="100" name="'+u.avatar_image+'" ';
+            html += '<img width="100" height="100" name="'+u['avatar_image']+'" ';
             if (isMe) html += 'style="cursor: pointer" ';
-            html += 'src="/static/images/avatars/'+u.avatar_image+'" />';
+            html += 'src="/static/images/avatars/'+u['avatar_image']+'" />';
         if (isMe) html += '</a>';
 
-        html += ' <h2>'+u.name+'</h2>';
-        $("#dynamic").html(html);
+        html += ' <h2>'+u['name']+'</h2>';
+        dynamic.innerHTML = html;
 
         // allow profile customization if isMe
         if (isMe) {
-            var coverOverlay = jQuery('<div id="cover" class="overlay">'+
+            var coverOverlay = goog.dom.htmlToDocumentFragment('<div id="cover" class="overlay">'+
                     '<div class="border"><h2>Select Cover</h2><div class="center"></div></div></div>');
             
-            $("#dynamic").append(coverOverlay);
+            goog.dom.append(dynamic,coverOverlay);
 
+            /*
+            TODO
             // process cover overlay click
             $("#dynamic a[rel='#cover']").overlay({
                 onBeforeLoad: function(e) {
                     var selfOverlay = this;
-                    $.getJSON("/covers",function(data) {
+                    goog.net.XhrIo.send('/covers',function(e) {
+                        var covers = goog.json.unsafeParse(e.target.getResponseText())['covers'];
                         var table = '';
-                        var pageSize = data.covers.length;
+                        var pageSize = covers.length;
                         var paginate = function(pageNo) {
                             var start = pageNo*pageSize;
                             var table = '';
@@ -121,16 +139,16 @@ oc.User.prototype.go = function(user_id) {
                             var hasLeft = start != 0;
                             for (var i=start; i < start+pageSize; i++)
                             {
-                                var c = data.covers[i];
+                                var c = covers[i];
                                 table += '<div><img class="';
-                                if (u.cover_image == c)
+                                if (u['cover_image'] == c)
                                     table += 'active';
                                  table += '" name="'+c+'" src="/static/images/covers/thumbs/'+c+'" /></div>';
                             }
                             coverOverlay.find(".center").fadeOut(function() {
                                $(this).html(table); 
                                $(this).find("img").click(function() {
-                                    if ($(this).attr('name') != u.cover_image) {
+                                    if ($(this).attr('name') != u['cover_image']) {
                                         self.changeCover($(this).attr('name'));
                                     }
                                     selfOverlay.close();
@@ -156,12 +174,15 @@ oc.User.prototype.go = function(user_id) {
                 },
                 fixed: false 
             });
+            */
     
-            var avatarOverlay = jQuery('<div id="avatar" class="overlay">'+
+            var avatarOverlay = goog.dom.htmlToDocumentFragment('<div id="avatar" class="overlay">'+
                     '<div class="border"><h2>Select Avatar</h2><div align="center"></div></div>');
             
-            $("#dynamic").append(avatarOverlay);
+            goog.dom.append(dynamic,avatarOverlay);
 
+            /**
+            * TODO
             // process overlay click
             $("#dynamic a[rel='#avatar']").overlay({
                 onBeforeLoad: function(e) {
@@ -181,7 +202,7 @@ oc.User.prototype.go = function(user_id) {
                         table += "</table>";
                         avatarOverlay.find("div[align='center']").html(table); 
                         avatarOverlay.find("img").click(function() {
-                            if ($(this).attr('name') != u.avatar_image) {
+                            if ($(this).attr('name') != u['avatar_image']) {
                                 self.changeAvatar($(this).attr('name'));
                             }
                             selfOverlay.close();
@@ -205,6 +226,7 @@ oc.User.prototype.go = function(user_id) {
                 },
                 fixed: false 
          });
+         */
       }
     }); // getJson
 };
