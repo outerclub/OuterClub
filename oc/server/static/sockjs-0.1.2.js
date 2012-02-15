@@ -1,4 +1,3 @@
-goog.provide('sockjs');
 /* SockJS client, version 0.1.2, http://sockjs.org, MIT License
 
 Copyright (C) 2011 VMware, Inc.
@@ -28,7 +27,7 @@ var JSON;JSON||(JSON={}),function(){function str(a,b){var c,d,e,f,g=gap,h,i=b[a]
 
 //     [*] Including lib/index.js
 // Public object
-SockJS = (function(){
+var SockJS = (function(){
               var _document = document;
               var _window = window;
 
@@ -160,8 +159,8 @@ utils.userSetCode = function (code) {
 };
 
 utils.log = function() {
-    if (_window.console && console.log && console.log.apply) {
-        console.log.apply(console, arguments);
+    if (_window.console && _window.console.log && _window.console.log.apply) {
+        _window.console.log.apply(_window.console, arguments);
     }
 };
 
@@ -553,7 +552,7 @@ utils.createHtmlfile = function (iframe_url, error_callback) {
             } catch (x) {}
             iframe.parentNode.removeChild(iframe);
             iframe = doc = null;
-            CollectGarbage();
+            window.CollectGarbage();
         }
     };
     var onerror = function(r)  {
@@ -1367,8 +1366,8 @@ IframeTransport.enabled = function() {
 var curr_window_id;
 
 var postMessage = function (type, data) {
-    if(parent !== _window) {
-        parent.postMessage(curr_window_id + type + (data || ''), '*');
+    if(window.parent !== _window) {
+        window.parent.postMessage(curr_window_id + type + (data || ''), '*');
     } else {
         utils.log("Can't postMessage, no parent window.", type, data);
     }
@@ -1389,6 +1388,7 @@ FacadeJS.prototype._doCleanup = function () {
 };
 
 SockJS.bootstrap_iframe = function() {
+    var parent = parent || undefined;
     var facade;
     curr_window_id = _document.location.hash.slice(1);
     var onMessage = function(e) {
@@ -1699,6 +1699,7 @@ Polling.prototype.abort = function() {
 
 var EventSourceReceiver = function(url) {
     var that = this;
+    var EventSource = EventSource || function() {};
     var es = new EventSource(url);
     es.onmessage = function(e) {
         that.dispatchEvent(new SimpleEvent('message',
@@ -1860,7 +1861,7 @@ SockJS.getIframeTransport = function(){
 
                   return SockJS;
           })();
-if ('_sockjs_onload' in window) setTimeout(_sockjs_onload, 1);
+if ('_sockjs_onload' in window) setTimeout(window._sockjs_onload, 1);
 //     [*] End of lib/index.js
 
 // [*] End of lib/all.js

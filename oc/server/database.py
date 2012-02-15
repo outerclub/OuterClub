@@ -24,7 +24,7 @@ def fetchResponses(cursor,d_id,user_id):
     return responses
 
 def fetchTrendingConversations(cursor):
-    cursor.execute('select d_id,image,user_id,title,postDate,content from conversation inner join category using (cat_id) limit 10')
+    cursor.execute('select d_id,thumb,user_id,title,postDate,content from conversation inner join category using (cat_id) limit 10')
     
     conversations = []
     i=1
@@ -46,9 +46,9 @@ def fetchLeaderboard(cursor):
 def fetchAnnouncements(cursor):
     cursor.execute('select a_id,title,content,postDate,user_id from announcement order by postDate desc');
     
-    announcements = [{'a_id':0,'title':'test announcement','content':'test Content','postDate':datetime.datetime.now(),'user_id':0}]
+    announcements = [{'a_id':0,'title':'test announcement','content':'test Content','postDate':util.dateFormat(datetime.datetime.now()),'user_id':0}]
     for a in cursor.fetchall():
-        announcements.append({'a_id':a[0],'title':a[1],'content':a[2],'postDate':a[3],'user_id':a[4]})
+        announcements.append({'a_id':a[0],'title':a[1],'content':a[2],'postDate':util.dateFormat(a[3]),'user_id':a[4]})
     return announcements
 
 def fetchTasks(cursor,user_id):

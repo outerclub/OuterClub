@@ -36,7 +36,7 @@ class TRtgHandler:
     def response(self,r_id):
         conn = self.pool.connection()
         cur = conn.cursor()
-        cur.execute('select d_id,response.user_id,replyDate,response.content,cat_id,category.image,conversation.title from response inner join (conversation inner join category using (cat_id)) using(d_id) \
+        cur.execute('select d_id,response.user_id,replyDate,response.content,cat_id,category.thumb,conversation.title from response inner join (conversation inner join category using (cat_id)) using(d_id) \
                     where r_id=%s',(r_id))
         res = cur.fetchone()
         user = database.fetchUser(cur,res[1])
@@ -48,13 +48,13 @@ class TRtgHandler:
         payload = {'date':util.dateFormat(res[2]),'content':newContent,'user':user,'r_id':r_id}
         QueueProc.put(event.Message('/conversation/%d' % (res[0]), 'response',payload))
 
-        happening_data = {'user':user,'date':util.hourDateFormat(res[2]),'category_image':res[5],'category_id':res[4],'d_id':res[0],'title': res[6],'r_id':r_id}
+        happening_data = {'user':user,'date':util.hourDateFormat(res[2]),'category_image':res[5],'category_id':res[4],'d_id':res[0],'title': res[6],'r_id':r_id,'content':newContent}
         QueueProc.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
 
     def conversation(self,d_id):
         conn = self.pool.connection()
         cur = conn.cursor()
-        cur.execute('select user_id,postDate,content,category.image,cat_id,title from conversation inner join category using (cat_id) \
+        cur.execute('select user_id,postDate,content,category.thumb,cat_id,title from conversation inner join category using (cat_id) \
                      where d_id=%s',(d_id,))
         convo = cur.fetchone()
         user = database.fetchUser(cur,convo[0])
@@ -64,7 +64,7 @@ class TRtgHandler:
         payload = {'d_id':d_id,'date':util.dateFormat(convo[1]),'title':convo[5],'user':user}
         QueueProc.put(event.Message('/category/%d' % (convo[4]),'conversation',payload))
 
-        happening_data = {'user':user,'date':util.hourDateFormat(convo[1]),'category_image':convo[3],'d_id':d_id,'title':convo[5]}
+        happening_data = {'user':user,'date':util.hourDateFormat(convo[1]),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':convo[2]}
         QueueProc.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
 
     def auth(self,auth):

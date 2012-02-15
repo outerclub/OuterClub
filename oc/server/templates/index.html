@@ -5,37 +5,51 @@ Welcome
 {% block headers %}
 {% endblock %}
 {% block content %}
+<div id="newConversation" class="overlay">
+    <div class="border">
+    <h2>New Conversation</h2>
+    <div class="titleField"><input size="40" type="text" name="title" /><span class="label">title</span></div>
+    <div class="contentField"><textarea cols="90" rows="20" name="content"></textarea><span class="label">content</span></div>
+    <p><button name="post" class="close">Post</button> <button class="close">Close</button></p>
+    </div>
+</div>
 <div class="content_wrapper">
     <div class="heading" style="display: none">
         <div class="left">
             <a href="#">
-            <img src="/static/images/technology_icon.png" /><h2></h2></a>
+            <img width="72" height="65" /><h2></h2></a>
         </div>
         <div class="right">
-            <!--
-            <h3>Show Newest First</h3>
-            <img src="/static/images/show_new_bg.png" />
-            -->
-            <button rel="#new_conversation_box">Start a Conversation</button>
+            <button rel="#newConversation" class="decorated">Start a Conversation</button>
         </div>
     </div>	
     <div class="frame">
         <div id="welcome" title="Welcome">
-            <h1>Announcements</h1>
-            {% for a in announcements %}
-                <div class="announcement">
-                    <h2>{{ a.title }}</h2>
-                    <p>{{ a.content }}</p>
-                    {{ a.postDate }}
-                </div>
-            {% endfor %}
-            <h1>Tasks</h1>
-            {% for t in tasks %}
-                <div class="task">
-                    <h2>{{ t.type }}</h2>
-                    <p> {{ t.done }}</p>
-                 </div>
-            {% endfor %}
+            <div class="announcements">
+                <h1>Announcements</h1>
+                {% for a in announcements %}
+                    <div class="announcement">
+                        <img src="/static/images/icons/oc.png" />
+                        <h2>{{ a.title }}</h2>
+                        <p>{{ a.content }}</p>
+                        <span class="date">{{ a.postDate }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="question">
+                <h1><span>Question</span> of the Week</h1>
+                <blockquote>&quot;Lorem Ipsum&quot; <span class="author">Author</span></blockquote>
+                <textarea cols="100" rows="5" name="question_answer"></textarea><button name="post">Post</button>
+            </div>
+            <div class="tasks">
+                <h1><span>Suggested</span> Tasks</h1>
+                {% for t in tasks %}
+                    <div class="task">
+                        <h2>{{ t.type }}</h2>
+                        <p> {{ t.done }}</p>
+                     </div>
+                {% endfor %}
+            </div>
         </div>
         <div id="categories" title="Categories" style="display: none">
             <div align="center">
@@ -46,18 +60,28 @@ Welcome
                 <tr>
                 {% endif %}
                 <td {% if x == 5 or x == 9 or x == 11 %} colspan="2" {% endif %}>
-                    <a title="{{ c.name }}" href="{{ url_for('category',category=c.url) }}" id="{{ c.id }}"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a>
+                    <a title="{{ c.name }}" href="#"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a>
                 </td>
                 {% set x = x + 1 %}
             {% endfor %}
             </table>
             </div>
         </div>
+        <div id="guilds" title="Guilds" style="display: none">
+            <button rel="#newGuild" class="decorated">Start a Guild</button>
+            <div id="newGuild" class="overlay">
+                <div class="border">
+                <h2>New Guild</h2>
+                </div>
+            </div>
+        </div>
         <div id="trending" title="Trending" style="display: none">
-            <!--<a><img src="/static/images/trending/discussions_hover.png" /></a>-->
-            <div class="clear">&nbsp;</div>
+            <h1>Trending Now</h1>
+            <!--<a><img src="/static/images/trending/discussions_hover.png" /></a>
+            <div class="clear">&nbsp;</div>-->
         </div>
         <div id="leaderboard" title="Leaderboard" style="display: none">
+            <h1>Leaderboard</h1>
         </div>
         <div id="dynamic" style="display: none">
         </div>

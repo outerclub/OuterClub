@@ -1,6 +1,7 @@
 goog.provide('oc.User');
 goog.require('oc.Socket');
 goog.require('oc.Nav');
+goog.require('oc.overlay');
 goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
@@ -9,19 +10,28 @@ goog.require('goog.dom.classes');
 goog.require('goog.net.XhrIo');
 goog.require('goog.json');
 goog.require('goog.style');
+goog.require('goog.fx.dom');
+goog.require('goog.fx.Transition');
+goog.require('goog.uri.utils');
 
 /**
+ * @param {oc.Socket} socket
  * @constructor
  */
 oc.User = function(socket) {
-    this.user_id = undefined;
+    this.id = undefined;
     this.key = undefined;
     this.socket = socket;
 };
+
+/**
+ * @param {Object} json
+ * @return {Object}
+ */
 oc.User.extractFromJson = function(json) {
     return {
         avatar_image: json['avatar_image'],
-        user_id: json['user_id'],
+        id: json['user_id'],
         name: json['name'],
         guilds: json['guilds'],
         cover_image: json['cover_image'],
@@ -34,26 +44,29 @@ oc.User.prototype.init =  function() {
      goog.array.forEach(document.cookie.split("; "),function(cookie) {
         var spl = cookie.split('=');
         if (spl[0] == 'user_id')
-            self.user_id = spl[1];
+            self.id = spl[1];
         else if (spl[0] == 'key')
             self.key = spl[1];
     });
     this.socket.addCallback('user',function(u) {
-        var currentPrestige = $("#miniProfile .prestige").html();
-        var currentAvatar = $("#miniProfile img").attr('name');
-        if (currentPrestige != u.prestige)
+        var prestigeElement = goog.dom.query('#miniProfile .prestige')[0];
+        var currentPrestige = prestigeElement.innerHTML;
+        var currentAvatar = goog.dom.query('#miniProfile img')[0].getAttribute('name');
+        if (currentPrestige != u['prestige'])
         {
-            $("#miniProfile .prestige").fadeOut(function() {
-                $(this).html(u.prestige);
-                $(this).css('color','yellow');
-                $(this).fadeIn(function() {
-                });
+            var anim = new goog.fx.dom.FadeOut(prestigeElement,500);
+            goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+                prestigeElement.innerHTML = u['prestige'];
+                goog.style.setStyle(prestigeElement,'color','yellow');
+                (new goog.fx.dom.FadeIn(prestigeElement,500)).play(); 
             });
+            anim.play();
         }
-        if (currentAvatar != u.avatar_image)
+        if (currentAvatar != u['avatar_image'])
         {
-            $("#miniProfile img").attr('name',u.avatar_image);
-            $("#miniProfile img").attr('src','/static/images/avatars/'+u.avatar_image);
+            var imgView = goog.dom.query('#miniProfile img')[0];
+            imgView.setAttribute('name',u['avatar_image']);
+            imgView.setAttribute('src','/static/images/avatars/'+u['avatar_image']);
         }
     }); 
     
@@ -67,27 +80,36 @@ oc.User.prototype.init =  function() {
             goog.style.setStyle(h2,'color','white');
         });
         goog.events.listen(p,goog.events.EventType.CLICK,function(e) {
-            self.go(self.user_id); 
+            self.go(self.id); 
             e.preventDefault();
         }); 
     });
 
 };
+/**
+ * @param {string} newAvatar
+ */
 oc.User.prototype.changeAvatar = function(newAvatar) {
     var self = this;
-    $.post("/avatars",{ avatar: newAvatar }, function() {
-       self.go(self.user_id); 
-    });
+    goog.net.XhrIo.send('/avatars',function(e) {
+       self.go(self.id); 
+    },'POST',goog.uri.utils.buildQueryDataFromMap({'avatar': newAvatar}));
 };
+/**
+ * @param {string} newCover
+ */
 oc.User.prototype.changeCover = function(newCover) {
     var self = this;
-    $.post("/covers",{ cover: newCover }, function() {
-       self.go(self.user_id); 
-    });
+    goog.net.XhrIo.send('/covers',function(e) {
+       self.go(self.id); 
+    },'POST',goog.uri.utils.buildQueryDataFromMap({'cover': newCover}));
 };
+/**
+ * @param {string} user_id
+ */
 oc.User.prototype.go = function(user_id) {
     var self = this;
-    var isMe = (self.user_id == user_id);
+    var isMe = (self.id == user_id);
     goog.net.XhrIo.send('/user/'+user_id,function(e) {
         var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
         oc.Nav.hideAll();
@@ -122,12 +144,10 @@ oc.User.prototype.go = function(user_id) {
             
             goog.dom.append(dynamic,coverOverlay);
 
-            /*
-            TODO
-            // process cover overlay click
-            $("#dynamic a[rel='#cover']").overlay({
-                onBeforeLoad: function(e) {
-                    var selfOverlay = this;
+            /**
+             * @param {function()} close
+             */
+            var coversCallback = function(close) {
                     goog.net.XhrIo.send('/covers',function(e) {
                         var covers = goog.json.unsafeParse(e.target.getResponseText())['covers'];
                         var table = '';
@@ -135,7 +155,7 @@ oc.User.prototype.go = function(user_id) {
                         var paginate = function(pageNo) {
                             var start = pageNo*pageSize;
                             var table = '';
-                            var hasRight = start+pageSize < data.covers.length;
+                            var hasRight = start+pageSize < covers.length;
                             var hasLeft = start != 0;
                             for (var i=start; i < start+pageSize; i++)
                             {
@@ -145,88 +165,81 @@ oc.User.prototype.go = function(user_id) {
                                     table += 'active';
                                  table += '" name="'+c+'" src="/static/images/covers/thumbs/'+c+'" /></div>';
                             }
-                            coverOverlay.find(".center").fadeOut(function() {
-                               $(this).html(table); 
-                               $(this).find("img").click(function() {
-                                    if ($(this).attr('name') != u['cover_image']) {
-                                        self.changeCover($(this).attr('name'));
-                                    }
-                                    selfOverlay.close();
+                            var center = goog.dom.query('.center',coverOverlay)[0];
+            
+                           // var anim = new goog.fx.dom.FadeOutAndHide(center,500);
+                            //anim.play();
+                            //goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+                                center.innerHTML = table;
+                                var images = goog.dom.query('img',center);
+                                goog.array.forEach(images,function(img) {
+                                    goog.events.listen(img,goog.events.EventType.CLICK,function() {
+                                        if (this.getAttribute('name') != u['cover_image']) {
+                                            self.changeCover(this.getAttribute('name'));
+                                        }
+                                        center.innerHTML = '';
+                                        close();
+                                    });
+                                    goog.events.listen(img,goog.events.EventType.MOUSEOVER,function() {
+                                        goog.dom.classes.add(img,'hover');
+                                    });
+                                    goog.events.listen(img,goog.events.EventType.MOUSEOUT,function() {
+                                        goog.dom.classes.remove(img,'hover');
+                                    });
                                 });
-                                $(this).find("img").hover(function() {
-                                    $(this).addClass('hover');
-                                },function() {
-                                    $(this).removeClass('hover');
-                                });
-                               $(this).fadeIn(); 
-                            });
+                                (new goog.fx.dom.FadeInAndShow(center,500)).play();
+                       //     });
                         };
                         paginate(0);
                     });
-                },
-                mask: {
-                    color: '#000',
-                    loadSpeed: 200,
-                    opacity: 0.3
-                },
-                onClose: function() {
-                    coverOverlay.find('.center').html('');
-                },
-                fixed: false 
-            });
-            */
+            };
+            oc.overlay(goog.dom.query("#dynamic a[rel='#cover']")[0],coversCallback);
     
-            var avatarOverlay = goog.dom.htmlToDocumentFragment('<div id="avatar" class="overlay">'+
+            var avatarOverlay = /** @type {Element} */ goog.dom.htmlToDocumentFragment('<div id="avatar" class="overlay">'+
                     '<div class="border"><h2>Select Avatar</h2><div align="center"></div></div>');
             
             goog.dom.append(dynamic,avatarOverlay);
 
             /**
-            * TODO
-            // process overlay click
-            $("#dynamic a[rel='#avatar']").overlay({
-                onBeforeLoad: function(e) {
-                    var selfOverlay = this;
-                    $.getJSON("/avatars",function(data) {
-                        var table = "<table>";
-                        goog.array.forEach(data.avatars,function(a,i) {
-                            if (i % 9 == 0)
-                                table += "<tr>";
-                            table += '<td><img class="';
-                            if (u.avatar_image == a)
-                                table += 'active';
-                             table += '" name="'+a+'" src="/static/images/avatars/thumbs/'+a+'" /></td>';
-                            if ((i+1) % 9 == 0)
-                                table += "</tr>";
-                        });
-                        table += "</table>";
-                        avatarOverlay.find("div[align='center']").html(table); 
-                        avatarOverlay.find("img").click(function() {
-                            if ($(this).attr('name') != u['avatar_image']) {
-                                self.changeAvatar($(this).attr('name'));
-                            }
-                            selfOverlay.close();
-                        });
-                        avatarOverlay.find("img").hover(function() {
-                            $(this).addClass('hover');
-                        },function() {
-                            $(this).removeClass('hover');
-                        });
-                       
+             * @param {function()} close
+             */
+            var avatarsCallback = function(close) {
+                goog.net.XhrIo.send('/avatars',function(e) {
+                    var avatars = goog.json.unsafeParse(e.target.getResponseText())['avatars'];
+                    var table = "<table>";
+                    goog.array.forEach(avatars,function(a,i) {
+                        if (i % 9 == 0)
+                            table += "<tr>";
+                        table += '<td><img class="';
+                        if (u['avatar_image'] == a)
+                            table += 'active';
+                         table += '" name="'+a+'" src="/static/images/avatars/thumbs/'+a+'" /></td>';
+                        if ((i+1) % 9 == 0)
+                            table += "</tr>";
                     });
-                },
-                mask: {
-                    color: '#000',
-                    loadSpeed: 200,
-                    opacity: 0.3
-                },
-                onClose: function() {
-                    // cleanup
-                    avatarOverlay.find("div[align='center']").html(''); 
-                },
-                fixed: false 
-         });
-         */
+                    table += "</table>";
+                    var tableView = goog.dom.query("div[align='center']",avatarOverlay)[0];
+                    tableView.innerHTML = table; 
+                    var images = goog.dom.query('img',avatarOverlay);
+                    goog.array.forEach(images,function(img) {
+                        goog.events.listen(img,goog.events.EventType.CLICK,function() {
+                            if (this.getAttribute('name') != u['avatar_image']) {
+                                self.changeAvatar(this.getAttribute('name'));
+                            }
+                            tableView.innerHTML = '';
+                            close();
+                        });
+                        goog.events.listen(img,goog.events.EventType.MOUSEOVER,function() {
+                            goog.dom.classes.add(img,'hover');
+                        });
+                        goog.events.listen(img,goog.events.EventType.MOUSEOUT,function() {
+                            goog.dom.classes.remove(img,'hover');
+                        });
+                    });
+                   
+                });
+            }
+            oc.overlay(goog.dom.query("#dynamic a[rel='#avatar']")[0],avatarsCallback);
       }
     }); // getJson
 };

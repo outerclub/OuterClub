@@ -51,12 +51,11 @@ def index():
         return displaySignup()
     conn = pool.connection()
     cur = conn.cursor()
-    res = cur.execute('select name,image,cat_id from category where private=false order by cat_id asc') 
+    res = cur.execute('select name,image from category where private=false order by cat_id asc') 
     categories = []
     for c in cur.fetchall():
         cat = c[0]
-        sanitized = cat.lower().replace(' ','+')
-        categories.append({'name':util.formatCategoryName(cat),'url':sanitized,'image':c[1],'id':c[2]})
+        categories.append({'name':util.formatCategoryName(cat),'image':c[1]})
     
     g = {'debug': DefaultConfig.debug}
     uid = getUid()
@@ -87,10 +86,11 @@ def category(category):
     category = category.replace('+',' ')
     conn = pool.connection()
     cur = conn.cursor()
-    cur.execute('select cat_id,private from category where name=%s', (category,))
+    cur.execute('select cat_id,private,icon from category where name=%s', (category,))
     row = cur.fetchone()
     cat_id = row[0]
     isPrivate = row[1]
+    icon = row[2]
 
     self = db.fetchUser(cur,getUid())
     
@@ -110,7 +110,7 @@ def category(category):
         
         category = ' '.join(c.capitalize() for c in category.split())
 
-        return flask.jsonify(posts=posts)
+        return flask.jsonify(posts=posts,id=cat_id,private=isPrivate,icon=icon)
     return ''
 
 @app.route('/conversation/<id>')
@@ -124,8 +124,10 @@ def conversation(id):
     res = cur.execute('select title,postDate,content,cat_id,user_id from conversation where d_id=%s',(id,))
     conversation = cur.fetchone()
     cat_id = conversation[3]
-    cur.execute('select name from category where cat_id=%s',(cat_id,))
-    categoryName = cur.fetchone()[0]
+    cur.execute('select name,icon from category where cat_id=%s',(cat_id,))
+    categoryData = cur.fetchone()
+    categoryName = categoryData[0]
+    c_icon = categoryData[1]
 
     # populate the data object 
     conversation = {'id': id, 'title':conversation[0], \
@@ -137,10 +139,8 @@ def conversation(id):
     cur.close()
     conn.close()
 
-    c_url = '/category/'+categoryName.lower().replace(' ','+')
-
     categoryName = util.formatCategoryName(categoryName)
-    return flask.jsonify(conversation=conversation,responses=responses,category_name=categoryName,category_id=cat_id,category_url=c_url)
+    return flask.jsonify(conversation=conversation,responses=responses,category_name=categoryName,category_id=cat_id,category_icon=c_icon)
 
 @app.route('/trending')
 def trending():

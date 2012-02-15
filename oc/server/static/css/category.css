@@ -36,18 +36,6 @@
 .heading .left a:hover {
     text-decoration: none;
 }
-.heading .right button{
-    display: inline-block;
-    font-family: BebasRegular;
-    font-size: 14px;
-	text-transform: uppercase;
-	background: url(/static/images/start_thread_button.png);
-    border: 0;
-	color: white;
-    height: 31px;
-    width: 161px;
-}
-
 /**
  * Posts
  */
@@ -63,7 +51,7 @@
 .post{
     background: #1b2127;
     display: block;
-    margin-bottom: 3px;
+    margin-bottom: 1px;
     color: #7a7a7a;
     overflow: hidden;
 }
@@ -94,43 +82,43 @@
 }
 
 /** Conversation box **/
-#new_conversation_box {
+#newConversation {
     width: 700px;
 }
-#new_conversation_box .titleField,#new_conversation_box .contentField {
+#newConversation .titleField,#newConversation .contentField {
     position: relative;
 }
-#new_conversation_box .titleField input, #new_conversation_box textarea {
+#newConversation .titleField input, #newConversation textarea {
     border:0;
     border-left: 4px solid #ddd;
     color: #888;
     width: 100%;
 }
-#new_conversation_box textarea {
+#newConversation textarea {
     font-size: 16px;
     color: #333;
     border: 0;
     border-left: 4px solid #ddd;
 }
-#new_conversation_box .titleField input {
+#newConversation .titleField input {
    font-size: 30px; 
     font-weight: bold;
 }
-#new_conversation_box span {
+#newConversation span {
     position: absolute;
     font-size: 30px;
     color: #ccc;
     font-weight: bold;
 }
-#new_conversation_box .focus {
+#newConversation .focus {
     color: #efefef;
 }
-#new_conversation_box .titleField span {
+#newConversation .titleField span {
     left: 50%;
     top: 4px;
     margin-left: -15px;
 }
-#new_conversation_box .contentField span {
+#newConversation .contentField span {
     left: 50%;
     top: 142px;
     margin-left: -40px;

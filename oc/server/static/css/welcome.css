@@ -1,4 +1,53 @@
-.announcement {
+#welcome h1 {
+    color: #77a1cc;
+    font-weight: bold;
+    font-family: BebasRegular;
+    font-size: 200%;
+    margin-bottom: 5px;
 }
-.task {
+#welcome h1 span {
+    color: white;
+    font-size: 120%;
+}
+#welcome > div {
+    background-color: rgba(0,0,0,0.5);
+    padding: 15px;
+    margin-bottom: 3px;
+}
+#welcome blockquote {
+    padding: 15px;
+    font-size: 150%;
+}
+#welcome blockquote .author {
+    color: #888
+}
+.announcements img {
+    float: left;
+    margin: 0 5px 10px 0;
+}
+.announcement h2{
+    font-weight: bold;
+    font-size: 160%;
+}
+.announcement p {
+    font-size: 120%;
+}
+.announcement .date {
+    font-style:italic;
+    font-si
+}
+.question textarea {
+    font-size: 14px;
+}
+.question button {
+   vertical-align: bottom;
+    background-color: #4376ce;
+    text-align: right;
+    color: white;
+    border: 0;
+    font-weight: bold;
+    padding: 10px;
+    font-size: 16px;
+}
+.tasks {
 }

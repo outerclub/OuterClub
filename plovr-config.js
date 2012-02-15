@@ -3,10 +3,11 @@
     "paths": "oc/server/static/js",
     "inputs": "oc/server/static/js/main.js",
     "mode":"ADVANCED",
+    "level": "VERBOSE",
     "debug":true,
     "pretty-print":true,
     "print-input-delimiter":true,
     "checks": {
-        "uselessCode": "OFF"
+        "checkTypes": "ERROR"
     }
 }

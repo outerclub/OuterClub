@@ -10,6 +10,9 @@ oc.Nav = {
             });
             goog.dom.classes.remove(goog.dom.getElement('dynamic'));
         },
+        /**
+         * @param {string} t
+         */ 
         setTitle:function(t) {
             var title = goog.dom.query('title')[0];
             title.innerHTML = t+' - OuterClub';

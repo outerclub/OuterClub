@@ -34,13 +34,12 @@
  * The actual conversation.
  */
 .responses {
-    height: 450px;
     overflow: auto;
     padding: 5px 0 5px 0;
 }
 .conversation {
     overflow: hidden;
-    margin: 0 30px 3px 30px;
+    margin: 0 30px 1px 30px;
 }
 .conversation .user {
     background-color: #4376ce;
@@ -113,7 +112,6 @@
 .reply .error {
     color: #c33;
     font-weight: bold;
-    display: none
 }
 
 .reply {

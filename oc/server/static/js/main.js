@@ -1,15 +1,23 @@
 goog.provide('oc.Main');
+
 goog.require('oc.Socket');
 goog.require('oc.Category.View');
 goog.require('oc.Nav');
 goog.require('oc.User');
 goog.require('oc.Trending');
 goog.require('oc.Leaderboard');
+goog.require('oc.overlay');
 goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
+goog.require('goog.dom');
 goog.require('goog.dom.query');
+goog.require('goog.dom.classes');
+goog.require('goog.fx.dom');
+goog.require('goog.fx.Transition');
 goog.require('goog.style');
+goog.require('goog.net.XhrIo');
+goog.require('goog.uri.utils');
 
 /**
  *
@@ -29,42 +37,46 @@ oc.Main.prototype.start = function() {
     var self = this;
     this.socket.init('http://'+window.location.hostname+':8002/sock',
         function() {
-            self.socket.send({'user_id':self.user.user_id,'key':self.user.key});
+            self.socket.send({'user_id':self.user.id,'key':self.user.key});
     });
-    this.socket.send({'register':['/happening','/user/'+self.user.user_id]});
+    this.socket.send({'register':['/happening','/user/'+self.user.id]});
     this.socket.addCallback('authRejected',function() {
         window.location = '/logout';
     });
 
+    var slideShow = goog.dom.query('.slide_show')[0];
+    goog.style.showElement(slideShow,false);
+
+    /**
+     * @param {Object} data
+     * @param {boolean} animate
+     */
     var createHappening = function(data,animate) {
         var p = data.data;
 
         // is the happening now bar shown?
-        var slideShow = goog.dom.query('.slide_show')[0];
         if (!goog.style.isElementShown(slideShow))
         {
-            // TODO
-            //$(".slide_show").fadeIn();
+            (new goog.fx.dom.FadeInAndShow(slideShow,500)).play();
         }
 
         // parse the happening type
         if (data.type == 'response' || data.type == 'post')
         {
-            var verb = 'replied in';
+            var verb = 'replied';
             if (data.type == 'post')
                 verb = 'posted'; 
-            var element = goog.dom.htmlToDocumentFragment('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p.category.image+'" /><img class="avatar" src="/static/images/avatars/'+p.user.avatar_image+'" /></div><div class="text"><span class="date">'+p.date+'</span> <span class="user">'+p.user.name+'</span> '+verb+' <span class="content"><h2>'+p.title+'</h2></span></div></div>');
+            var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p['category_image']+'" /><img class="avatar" src="/static/images/avatars/'+p['user']['avatar_image']+'" /></div><div class="text"><span class="date">'+p['date']+'</span><h2>'+p['title']+'</h2><span class="user">'+p['user']['name']+'</span> '+verb+' <span class="content">&quot;'+p['content']+'&quot;</span></div></div>');
             goog.style.showElement(element,false);
             
             var scroller = goog.dom.query('.scroll',slideShow)[0];
             goog.dom.insertChildAt(scroller,element,0);
 
-            /* TODO
-            element.fadeIn();
-            element.click(function() {
-                self.categoryView.goConversation(p.d_id);
+            goog.events.listen(element,goog.events.EventType.CLICK,function(e) {
+                self.categoryView.conversationView.go(p['d_id']);
             });
-            */
+            
+            (new goog.fx.dom.FadeInAndShow(element,500)).play();
         }
     }
 
@@ -73,12 +85,13 @@ oc.Main.prototype.start = function() {
         
         if (items.length >= 6)
         {
-            /* TODO
-            $('.slide_show .item:last').fadeOut(function() {
-                $(this).remove();
+            var last = items[items.length-1];
+            var anim = new goog.fx.dom.FadeOutAndHide(last,500);
+            goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+                goog.dom.removeNode(last);
                 createHappening(data,true);
-            }); 
-            */
+            });
+            anim.play();
         } else 
             createHappening(data,true);
     });
@@ -90,8 +103,7 @@ oc.Main.prototype.start = function() {
     goog.array.forEach(goog.dom.query('#categories a'),function(category) {
         goog.events.listen(category,goog.events.EventType.CLICK,function(e) {
             var name = this.getAttribute('title');
-            var cat_id = this.getAttribute('id');
-            self.categoryView.goCategory(name,cat_id,this.getAttribute('href'));
+            self.categoryView.go(name);
             e.preventDefault();
         });
     });
@@ -104,7 +116,7 @@ oc.Main.prototype.start = function() {
             });
             goog.dom.classes.add(menuItem,'active');
 
-            self.socket.send({'register':['/happening','/user/'+self.user.user_id]});
+            self.socket.send({'register':['/happening','/user/'+self.user.id]});
             if (menuItem.getAttribute('href') == '#trending')
                self.trending.go(); 
             else if (menuItem.getAttribute('href') == '#leaderboard')
@@ -140,49 +152,45 @@ oc.Main.prototype.start = function() {
     });
     */
 
-    /*
-    * TODO
-    $(".content_wrapper .heading .right button").overlay({
-        mask: {
-            color: '#000',
-            loadSpeed: 200,
-            opacity: 0.3
-        }
-    });
-    */
+    var newConvoCallback = function(close) {
+    }
+    oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],newConvoCallback);
 
 
     /**
       * new conversation box.
       */
-    /* TODO
-    $("#new_conversation_box button[name='post']").click(function() {
-        $.post('/post',{
-            area: self.categoryView.category.name,
-            title:$("input[name='title']").val(),
-            content:$("#new_conversation_box textarea").val() },
-          function() {
-                $("#new_conversation_box .titleField input,#new_conversation_box textarea").val('');
-                $("#new_conversation_box span").show();
-        });
+    goog.events.listen(goog.dom.query("#newConversation button[name='post']")[0],
+        goog.events.EventType.CLICK,function() {
+        goog.net.XhrIo.send('/post', function() {
+                /*
+                $("#newConversation .titleField input,#newConversation textarea").val('');
+                */
+                goog.style.showElement(goog.dom.getElement('newConversation'),true);
+            },'POST',goog.uri.utils.buildQueryDataFromMap({'area':self.categoryView.category.name,
+                'title':goog.dom.query("input[name='title']")[0].value,
+                'content':goog.dom.query('#newConversation textarea')[0].value}));
     });
     
-    var inputs = goog.dom.query("#new_conversation_box .titleField input,#new_conversation_box textarea");
+    var inputs = goog.dom.query("#newConversation .titleField input,#newConversation textarea");
     goog.array.forEach(inputs,function(i) {
         goog.events.listen(i,goog.events.EventType.FOCUSIN,function () {
-            $(this).next('span').addClass('focus');
+            goog.dom.classes.add(goog.dom.getNextElementSibling(this),'focus');
         });
         goog.events.listen(i,goog.events.EventType.FOCUSOUT,function () {
-            if ($(this).val() == '')
-                $(this).next('span').show();
-            $(this).next('span').removeClass('focus');
+            if (this.value == '')
+                goog.style.showElement(goog.dom.getNextElementSibling(this),true);
+            goog.dom.classes.remove(goog.dom.getNextElementSibling(this),'focus');
         });
         goog.events.listen(i,goog.events.EventType.KEYPRESS,function () {
-            $(this).next('span').hide(); 
+            goog.style.showElement(goog.dom.getNextElementSibling(this),false);
         });
             
     });
-    */
+
+    var newGuildCallback = function(close) {
+    }
+    oc.overlay(goog.dom.query('#guilds button')[0],newGuildCallback);
 };
 var main = new oc.Main();
 main.start();

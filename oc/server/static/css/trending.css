@@ -8,7 +8,7 @@
 }
 .entry {
     clear: both;
-    margin-bottom: 10px;
+    margin-bottom: 1px;
     overflow: hidden;
     color: #efefef;
     display: block;
@@ -34,9 +34,12 @@
     float: left;
     padding: 10px 10px 10px 10px;
     position: relative;
-    width: 660px; 
+    width: 645px; 
     height: 70px;
     background-color: rgba(0,0,0,0.5)
+}
+#leaderboard .entry .text {
+    width: 705px;
 }
 .entry .number {
     font: 50px BebasRegular;

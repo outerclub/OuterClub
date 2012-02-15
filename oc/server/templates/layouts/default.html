@@ -19,14 +19,7 @@
 {% block headers %} {% endblock %}
 </head>
 <body>
-<div id="new_conversation_box" class="overlay">
-    <div class="border">
-    <h2>New Conversation</h2>
-    <div class="titleField"><input size="40" type="text" name="title" /><span class="label">title</span></div>
-    <div class="contentField"><textarea cols="90" rows="20" name="content"></textarea><span class="label">content</span></div>
-    <p><button name="post" class="close">Post</button> <button class="close">Close</button></p>
-    </div>
-</div>
+
 <div id="menu">
 <ul>
 <li id="miniLogo"><a class="active" href="#welcome"></a></li>
@@ -50,7 +43,7 @@
 <p>Prestige: <span class="prestige">{{ prestige }}</span></p>
 </div>
 </div>
-<div class="slide_show hide">
+<div class="slide_show" style="display: none">
 		<h2>Happening Right Now</h2>
         <div class="scroll">
         </div>
@@ -59,6 +52,7 @@
 {% block content %} {% endblock %}
 </div>
 {% include 'partials/footer.html' %}
+    <script type="text/javascript" src="/static/sockjs-0.1.2.js"></script>
 {% if debug %}
     <script type="text/javascript" src="http://localhost:9810/compile?id=outerclub"></script>
 {% else %}

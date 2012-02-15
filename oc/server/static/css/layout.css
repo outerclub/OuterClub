@@ -187,12 +187,11 @@ body{
 }
 .slide_show img.bg {
     display: block;
-    height: 100px;
-    width: 120px;
+    height: 80px
 }
 .slide_show  .text {
-    height: 80px;
-    width: 160px;
+    height: 60px;
+    width: 145px;
     padding: 10px;
     float: left;
 }
@@ -242,6 +241,19 @@ h1 a,h2 a {
 textarea, input {
     font-family: Arial;
 }
+button.decorated{
+    display: inline-block;
+    font-family: BebasRegular;
+    font-size: 14px;
+	text-transform: uppercase;
+	background: url(/static/images/button.png);
+    border: 0;
+	color: white;
+    height: 31px;
+    width: 161px;
+}
+
+
 
 /* the overlayed element */
 .apple_overlay {
