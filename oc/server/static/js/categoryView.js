@@ -80,7 +80,7 @@ oc.Category.View.prototype.createConversations = function(hide,d_list) {
         +'</div>';
     });
     return goog.dom.htmlToDocumentFragment(html);
-}
+};
 
 /**
  * @param {Element} convos
@@ -215,7 +215,7 @@ oc.Conversation.View.prototype.go = function(id) {
                         (new goog.fx.dom.FadeInAndShow(errorView,500)).play();
                     } else {
                         (new goog.fx.dom.FadeOut(errorView,500)).play();
-                        var textarea = goog.dom.query('textarea')[0];
+                        var textarea = goog.dom.query('.reply textarea')[0];
                         textarea.value = '';
                         textarea.focus();
                     }

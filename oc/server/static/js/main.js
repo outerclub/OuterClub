@@ -78,7 +78,7 @@ oc.Main.prototype.start = function() {
             
             (new goog.fx.dom.FadeInAndShow(element,500)).play();
         }
-    }
+    };
 
     this.socket.addCallback('happening',function(data) {
         var items = goog.dom.query('.slide_show .item');
@@ -153,7 +153,7 @@ oc.Main.prototype.start = function() {
     */
 
     var newConvoCallback = function(close) {
-    }
+    };
     oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],newConvoCallback);
 
 
@@ -162,14 +162,19 @@ oc.Main.prototype.start = function() {
       */
     goog.events.listen(goog.dom.query("#newConversation button[name='post']")[0],
         goog.events.EventType.CLICK,function() {
-        goog.net.XhrIo.send('/post', function() {
-                /*
-                $("#newConversation .titleField input,#newConversation textarea").val('');
-                */
-                goog.style.showElement(goog.dom.getElement('newConversation'),true);
-            },'POST',goog.uri.utils.buildQueryDataFromMap({'area':self.categoryView.category.name,
-                'title':goog.dom.query("input[name='title']")[0].value,
-                'content':goog.dom.query('#newConversation textarea')[0].value}));
+            var titleInput = goog.dom.query(".titleField input")[0];
+            var contentArea = goog.dom.query('#newConversation textarea')[0];
+                
+            goog.net.XhrIo.send('/post', function() {
+                titleInput.value = ''; 
+                contentArea.value = '';
+                
+                // TODO CLOSE BOX
+                //goog.style.showElement(goog.dom.getElement('newConversation'),);
+                 },'POST',goog.uri.utils.buildQueryDataFromMap({'area':self.categoryView.category.name,
+                    'title':titleInput.value,
+                    'content':contentArea.value})
+            );
     });
     
     var inputs = goog.dom.query("#newConversation .titleField input,#newConversation textarea");

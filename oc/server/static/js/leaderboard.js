@@ -13,7 +13,7 @@ goog.require('goog.events.EventType');
  */
 oc.Leaderboard = function(user) {
     this.user = user;
-}
+};
 oc.Leaderboard.prototype.go = function() {
     var self = this;
     goog.net.XhrIo.send('/leaderboard',function(e) {

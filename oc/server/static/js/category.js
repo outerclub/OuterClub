@@ -18,7 +18,7 @@ oc.Category = function(id,name,icon) {
  */
 oc.Category.toUrl = function(name) {
     return name.toLowerCase().replace(/ /g,'+');
-}
+};
 
 /**
  * @param {Object} json
@@ -26,4 +26,4 @@ oc.Category.toUrl = function(name) {
  */
 oc.Category.extractFromJson = function(json) {
     return new oc.Category(json['id'],json['name'],json['icon']);
-}
+};
