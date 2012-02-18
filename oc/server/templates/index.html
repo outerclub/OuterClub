@@ -36,9 +36,10 @@ Welcome
                     </div>
                 {% endfor %}
             </div>
+            {% if question %}
             <div class="question">
                 <h1><span>Question</span> of the Week</h1>
-                <blockquote>&quot;Lorem Ipsum&quot; <span class="author">Author</span></blockquote>
+                <a href="/category/question+of+the+week/"><blockquote>&quot;Lorem Ipsum&quot; <span class="author">Author</span></blockquote></a>
                 <textarea cols="100" rows="5" name="question_answer"></textarea><button name="post">Post</button>
             </div>
             <div class="tasks">
@@ -50,6 +51,7 @@ Welcome
                      </div>
                 {% endfor %}
             </div>
+            {% endif %}
         </div>
         <div id="categories" title="Categories" style="display: none">
             <div align="center">
@@ -67,6 +69,7 @@ Welcome
             </table>
             </div>
         </div>
+        <!--
         <div id="guilds" title="Guilds" style="display: none">
             <button rel="#newGuild" class="decorated">Start a Guild</button>
             <div id="newGuild" class="overlay">
@@ -75,6 +78,7 @@ Welcome
                 </div>
             </div>
         </div>
+        -->
         <div id="trending" title="Trending" style="display: none">
             <h1>Trending Now</h1>
             <!--<a><img src="/static/images/trending/discussions_hover.png" /></a>

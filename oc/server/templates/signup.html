@@ -14,25 +14,26 @@ body {
     background-color: #333;
     margin: 0;
 } 
-#grayBg {
-    background-color: #c9c9c9
+#blackBg {
+    background-color: #000
 }
-#grayBg .footer {
+#blackBg .footer {
     color: #ccc;
 }
 #center {
+	clear: both;
     margin: 0 auto 0 auto;
-    width: 1500px;
-    height: 830px;
-    background: url('/static/images/new/signup_bg.png') repeat-x top center;
+    height: 980px;
+    background: url('/static/images/signup/bg.png') no-repeat top center;
     text-align: center;
+    position: relative;
 }
 #center .error {
     color: #c33;
-    position: relative;
-    top: 600px;
     display: none;
     margin-top: 10px;
+    position:relative;
+    margin-bottom: -28px;
     font-size: 16px;
 }
 .footer .error {
@@ -50,15 +51,25 @@ body {
     color: #efefef;
     padding: 4px;
 }
+
+.slideshow {
+	position:relative;
+	top:140px;
+	height: 469px;
+	background: url(/static/images/signup/0.png) no-repeat top center;
+}
+
+/**
+ * Input fields
+ */
 .wrap {
-    position: relative;
-    top: 600px;
-    width: 221px;
-    height: 44px;
-    margin: 0 auto;
-    background: url('/static/images/new/signup_bubble.png') no-repeat;
+    width: 219px;
+    height: 42px;
+    margin: 25px 3px auto;
+    background: url('/static/images/signup/bubble.png') no-repeat;
     display: inline-block;
-    color: #494949;
+    color: #3798b4;
+    position: relative;
 }
 .wrap span {
     position: absolute;
@@ -68,37 +79,58 @@ body {
     font-size: 16px;
 }
 .wrap span.light {
-    color: #777;
+    color: #67b8d4;
 }
 .wrap input {
     background: url('/static/images/new/transparent.png') repeat;
     border: 0;
     font-size: 16px;
-    color: #494949;
+    color: white;
     margin: 12px 0 0 0px;
     z-index: 99;
 }
 
-button {
-    position: relative;
-    top: 640px;
-    height: 127px;
-    width: 251px;
-    background: url('/static/images/new/signup_submit.png') no-repeat;
+/**
+ * Buttons.
+ */
+button[type='submit'] {
+    height: 128px;
+    width: 306px;
+    background: url('/static/images/signup/submit.png') no-repeat;
     border: 0;
-    opacity: 1;
+    margin-top: 5px
 }
-button:hover {
-    opacity: 0.7;
+
+button[type='submit']:hover {
+    background: url('/static/images/signup/submit_hover.png') no-repeat;
 }
+.dots {
+    position:relative;
+	margin-top: 70px;
+	z-index: 99;
+}
+button {
+	cursor: pointer;
+}
+button.dot:hover,button.dotActive {
+	background: url('/static/images/signup/dot_hover.png') no-repeat;
+}
+button.dot,button.dotActive {
+	height: 27px;
+	width: 27px;
+	border: 0;
+}
+button.dot {
+	background: url('/static/images/signup/dot.png') no-repeat;
+	}
 .clear {
     clear: both;
 }
 </style>
 </head>
 <body>
-<div id="grayBg">
-    <div class="footer">
+<div id="blackBg">
+    <div class="footer" style="border:0;border-bottom: 1px solid #333">
      <div class="footer_menu">
         <div class="footer_menu_left">
             <form action="/login" method="post">
@@ -113,35 +145,46 @@ button:hover {
         </div>
      </div>
     </div>
-    <div class="clear"></div>
     <div id="center">
-        <div class="wrap">
-            <input type="text" name='username' />
-            <span>User name</span>
-        </div>
+    	<div class="slideshow">
+    	</div>
+    	<div class="dots">
+    		<button class="dotActive" />
+    		<button class="dot" />
+    		<button class="dot" />
+    	</div>
         <div class="wrap">
             <input type="text" name='email' />
-            <span>E-mail</span>
+            <span>EMAIL ADDRESS</span>
+        </div>
+        <div class="wrap">
+            <input type="text" name='username' />
+            <span>USERNAME</span>
         </div>
         <div class="wrap">
             <input type="password" name='password'/>
-            <span>Password</span>
+            <span>PASSWORD</span>
+        </div>
+        <div class="wrap">
+            <input type="password" name='confirm'/>
+            <span>CONFIRM PASSWORD</span>
         </div>
         <div class="error">
         </div>
         <div class="clear"></div>
-        <div id="button">
-        <button type="submit"></button>
+        <button type="submit" />
+    </div>
+    <div class="footer">
+        <div class="footer_menu">
+            <div class="footer_menu_left">
+            </div>
+            <div class="footer_menu_right">
+                &copy; 2012 OuterClub
+            </div>
         </div>
     </div>
-    <div class="clear"></div>
 </div>
-{% include 'partials/footer.html' %}
 
-<script type="text/javascript">
-goog = {}
-goog.provide = function() {};
-</script>
 <script type="text/javascript" src="/static/jquery-1.7.1.min.js"></script>
 <script type="text/javascript">
 function showError(msg) {
@@ -149,7 +192,6 @@ function showError(msg) {
     if ($("#center .error").css('display') == 'none')
     {
         $("#center .error").fadeIn();
-        $("button").css('top', '612px');
     }
 }
 $(document).ready(function() {
@@ -157,18 +199,35 @@ $(document).ready(function() {
         $(this).prev('input').focus();
         return false;
     });
-    $("input[name='username'],input[name='email'],input[name='password']").focusin(function() {
+    $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").focusin(function() {
         $(this).next('span').addClass('light');
     });
-    $("input[name='username'],input[name='password'],input[name='email']").focusout(function() {
+    $("input[name='username'],input[name='password'],input[name='email'],input[name='confirm']").focusout(function() {
         if ($(this).val() == '')
             $(this).next('span').show();
          $(this).next('span').removeClass('light');
     });
-    $("input[name='username'],input[name='email'],input[name='password']").keypress(function() {
+    $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").keypress(function() {
         $(this).next('span').hide();
     });
-    $("button").click(function() {
+    $('.dots button').click(function() {
+        $('.dots button').each(function() {
+            if ($(this).hasClass('dotActive')) {
+                $(this).removeClass('dotActive');
+                $(this).addClass('dot');
+            }
+        });
+    	$(this).removeClass('dot');
+		$(this).addClass('dotActive');
+        var no = $(this).index();
+        alert(no);
+        $('.slideshow').fadeOut(function() {
+            $(this).css('background-image','url(/static/images/signup/'+no+'.png)');
+            $(this).fadeIn();
+        });
+
+    });
+    $("button[type='submit']").click(function() {
         $.ajax({
             type:'POST',
             url:'/signup',

@@ -8,7 +8,7 @@ def fetchResponses(cursor,d_id,user_id):
     for resp in cursor.fetchall():
         r_ids.append(resp[0])
         responses.append({'r_id':resp[0],'user':fetchUser(cursor,resp[1]), \
-                          'date': util.dateFormat(resp[2]), 'content': util.replaceMentions(cursor,resp[3]), \
+                          'date': util.dateFormat(resp[2]), 'content': util.replaceMentions(cursor,util.escape(resp[3])), \
                           'canVote':True})
     if (len(responses) > 0):
         whereClause = map(lambda x:'object_id=%s',r_ids)
@@ -29,7 +29,7 @@ def fetchTrendingConversations(cursor):
     conversations = []
     i=1
     for d in cursor.fetchall():
-        conversations.append({'rank':i,'d_id': d[0],'image':d[1],'title':d[3],'date':util.dateFormat(d[4]),'content':d[5]})
+        conversations.append({'rank':i,'id': d[0],'image':d[1],'title':d[3],'date':util.dateFormat(d[4]),'content':util.escape(d[5])})
         i += 1
     return conversations
 
@@ -60,12 +60,22 @@ def fetchTasks(cursor,user_id):
     return tasks
 
 def fetchUser(cursor,user_id):
-    res = cursor.execute('select name,avatar_image,prestige,cover_image from user where user_id=%s',(user_id,))
+    res = cursor.execute('select name,avatar_image,prestige,cover_image,admin from user where user_id=%s',(user_id,))
     user = cursor.fetchone()
-    userData =  {'name':user[0],'avatar_image':user[1],'user_id':user_id,'prestige':user[2],'cover_image':user[3]}
+    userData =  {'name':user[0],'avatar_image':user[1],'user_id':user_id,'prestige':user[2],'cover_image':user[3],'admin':user[4]}
     res = cursor.execute('select cat_id,name from user_guild inner join category using (cat_id) where user_id=%s',(user_id,))
-    guilds = []
+    guilds = dict()
     for guild in cursor.fetchall():
-        guilds.append({'id':guild[0],'name':guild[1]}) 
+        guilds[guild[0]] = guild[1]
     userData['guilds'] = guilds
     return userData
+
+def fetchQuestion(cursor):
+    res = cursor.execute('select cat_id from category where name=%s',('question of the week',))
+    cat_id = cursor.fetchone()[0];
+    res = cursor.execute('select d_id,title from conversation where cat_id=%s order by postDate desc limit 1',(cat_id,))
+    row = cursor.fetchone()
+    if (row != None):
+        return {'id':row[0],'title':row[1]}
+    else:
+        return None

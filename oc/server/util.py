@@ -1,4 +1,5 @@
 import re
+import cgi
 
 qtext = '[^\\x0d\\x22\\x5c\\x80-\\xff]'
 dtext = '[^\\x0d\\x5b-\\x5d\\x80-\\xff]'
@@ -13,7 +14,6 @@ domain = "%s(?:\\x2e%s)*" % (sub_domain, sub_domain)
 local_part = "%s(?:\\x2e%s)*" % (word, word)
 addr_spec = "%s\\x40%s" % (local_part, domain)
 
-
 emailValidator = re.compile('\A%s\Z' % addr_spec)
 def emailValid(s):
     return emailValidator.match(s)
@@ -27,6 +27,9 @@ def dateFormat(dt):
 def hourDateFormat(dt):
     s = dt.strftime(str(dt.hour if dt.hour <= 12 else dt.hour-12)+':%M%p')
     return s
+
+def escape(s):
+    return cgi.escape(s)
 
 def replaceMentions(cur,data):
     users = findMentions(cur,data)

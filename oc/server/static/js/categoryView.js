@@ -5,6 +5,7 @@ goog.require('oc.Socket');
 goog.require('oc.Category');
 goog.require('oc.Nav');
 goog.require('oc.User');
+goog.require('oc.User.View');
 goog.require('oc.Conversation');
 goog.require('oc.Conversation.Response');
 goog.require('goog.array');
@@ -12,6 +13,7 @@ goog.require('goog.net.XhrIo');
 goog.require('goog.json');
 goog.require('goog.dom');
 goog.require('goog.dom.classes');
+goog.require('goog.string');
 goog.require('goog.fx.dom');
 goog.require('goog.fx.Transition');
 goog.require('goog.style');
@@ -21,14 +23,29 @@ goog.require('goog.uri.utils');
 
 /**
  * @param {oc.Socket} socket
- * @param {oc.User} user
+ * @param {oc.User.View} userView
  * @constructor
  */
-oc.Category.View = function(socket,user) {
-    this.category = undefined;
+oc.Category.View = function(socket,userView) {
+    /**
+     * @type {oc.Category}
+     */
+    this.category = null;
+    
+    /**
+     * @type {oc.Socket}
+     */
     this.socket = socket;
-    this.user = user;
-    this.conversationView = new oc.Conversation.View(this,socket,user);
+
+    /**
+     * @type {oc.User.View}
+     */  
+    this.userView = userView;
+
+    /**
+     * @type {oc.Conversation.View}
+     */
+    this.conversationView = new oc.Conversation.View(this,socket,userView);
 };
 
 /**
@@ -50,8 +67,9 @@ oc.Category.View.prototype.go = function(name) {
         oc.Nav.hideAll();
         goog.style.showElement(dynamic,true);
 
-        self.showHeading(name,categoryData['id'],categoryData['icon']);
-        self.socket.send({'register':['/happening','/user/'+self.user.id,'/category/'+categoryData['id']]});
+        var canCreate = !categoryData['private'] || self.userView.user.admin;
+        self.showHeading(name,categoryData['id'],categoryData['icon'],!categoryData['private']);
+        self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/category/'+categoryData['id']]});
     });
     this.socket.addCallback('conversation',function(data) {
         var d = self.createConversations(true,[{'id':data['d_id'],'title':data['title'],'user':data['user'],'date':data['date']}]);
@@ -67,18 +85,7 @@ oc.Category.View.prototype.go = function(name) {
  * @return {Node}
  */
 oc.Category.View.prototype.createConversations = function(hide,d_list) {
-    //id,title,user,date
-    var html = '';
-    goog.array.forEach(d_list,function(d) {
-      html += '<div title="'+d['title']+'" class="post" '+(hide ? 'style="display: none"' : '')+ '>'
-        + '<div class="left"><img src="/static/images/icons/conversation.png" /> '
-        + '<h1><a href="/conversation/'+d['id']+'" name="'+d['id']+'">'+d['title']+'</a></h1></div>'
-        + '<div class="right sub">'
-            +'<img src="/static/images/avatars/thumbs/'+d['user']['avatar_image']+'" />'
-            +'<div class="block"><a href="/user/'+d['user']['user_id']+'" name="'+d['user']['user_id']+'">'+d['user']['name']+'</a></div>'
-            +'<div class="block">'+d['date']+'</div></div>'
-        +'</div>';
-    });
+    var html = oc.templates.conversationList({hide:hide,conversationList:d_list});
     return goog.dom.htmlToDocumentFragment(html);
 };
 
@@ -95,7 +102,7 @@ oc.Category.View.prototype.convoHandle = function(convos) {
     });
     goog.array.forEach(goog.dom.query('.right a',convos),function(c) {
         goog.events.listen(c,goog.events.EventType.CLICK,function(e) {
-            self.user.go(this.getAttribute('name'));
+            self.userView.go(this.getAttribute('name'));
             e.preventDefault();
         });
     });
@@ -103,10 +110,12 @@ oc.Category.View.prototype.convoHandle = function(convos) {
 
 /**
  * @param {string} name
- * @param {string} id
+ * @param {number} id
  * @param {string} icon
+ * @param {boolean=} canCreate
  */
-oc.Category.View.prototype.showHeading = function(name,id,icon) {
+oc.Category.View.prototype.showHeading = function(name,id,icon,canCreate) {
+    canCreate = goog.isBoolean(canCreate) ? canCreate : true;
     // change to the new category
     this.category = new oc.Category(id,name,icon);
 
@@ -114,7 +123,17 @@ oc.Category.View.prototype.showHeading = function(name,id,icon) {
     goog.dom.query('.heading h2')[0].innerHTML = name;
     var link = goog.dom.query('.heading a')[0];
     goog.style.showElement(goog.dom.query('.heading')[0],true);
-    goog.dom.query('.heading img')[0].setAttribute('src','/static/images/categories/'+icon);
+    var img = goog.dom.query('.heading img')[0];
+    if (!goog.isDefAndNotNull(icon) || icon == '')
+    {
+        goog.style.showElement(img,false);
+    } else {
+        img.setAttribute('src','/static/images/categories/'+icon);
+        goog.style.showElement(img,true);
+    }
+    
+    var newConvoButton = goog.dom.query('.heading .right button')[0];
+    goog.style.showElement(newConvoButton,canCreate);
 
     goog.events.removeAll(link);
     var self = this;
@@ -127,13 +146,24 @@ oc.Category.View.prototype.showHeading = function(name,id,icon) {
 /**
  * @param {oc.Category.View} category_view
  * @param {oc.Socket} socket
- * @param {oc.User} user
+ * @param {oc.User.View} userView
  * @constructor
  */
-oc.Conversation.View = function(category_view,socket,user) {
+oc.Conversation.View = function(category_view,socket,userView) {
+    /**
+     * @type {oc.Category.View}
+     */
     this.categoryView = category_view;
+
+    /**
+     * @type {oc.Socket}
+     */
     this.socket = socket;
-    this.user = user;
+
+    /**
+     * @type {oc.User.View}
+     */
+    this.userView = userView;
 };
 
 /**
@@ -156,7 +186,7 @@ oc.Conversation.View.prototype.go = function(id) {
             // show category head
             self.categoryView.showHeading(self.conversation.category.name,self.conversation.category.id,self.conversation.category.icon);
 
-            self.socket.send({'register':['/happening','/user/'+self.user.id,'/conversation/'+id]});
+            self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
             self.socket.addCallback('response',function(data) {
                 self.createResponse(true,oc.Conversation.Response.extractFromJson(data));
             });
@@ -179,10 +209,11 @@ oc.Conversation.View.prototype.go = function(id) {
                 // scan for insertions
                 for (v in viewers) {
                     if (!(v in self.conversation.viewers)) {
-                        var userView = /** @type {Element} */ goog.dom.htmlToDocumentFragment('<a href="/users/'+v+'" name="'+v+'"><img id="v_'+v+'"src="/static/images/avatars/thumbs/'+viewers[v]+'" /></a>');
+                        var html = oc.templates.viewerIcon({user_id:v,avatar_image:viewers[v]});
+                        var userView = /** @type {!Element} */ goog.dom.htmlToDocumentFragment(html);
                         goog.style.showElement(userView,false);
                         goog.events.listen(userView,goog.events.EventType.CLICK,function(e) {
-                            self.user.go(this.getAttribute('name'));
+                            self.userView.go(this.getAttribute('name'));
                             e.preventDefault();
                         });
                         goog.dom.append(usersView,userView);
@@ -193,12 +224,12 @@ oc.Conversation.View.prototype.go = function(id) {
             });
             
             goog.dom.query('#conversation .cover')[0].innerHTML = '<img width="905" src="/static/images/covers/'+self.conversation.user.cover_image+'" />';
-            goog.dom.query('#conversation .room h2')[0].innerHTML = self.conversation.title;
+            goog.dom.query('#conversation .room h2')[0].innerHTML = goog.string.htmlEscape(self.conversation.title,false);
 
             goog.array.forEach(goog.dom.query('#conversation .conversation'),function(c) {
                 goog.dom.removeNode(c);
             });
-            self.createResponse(false,new oc.Conversation.Response('',self.conversation.date,self.conversation.content,self.conversation.user,false));
+            self.createResponse(false,new oc.Conversation.Response(-1,self.conversation.date,self.conversation.content,self.conversation.user,false));
 
             /**
              * Reply
@@ -230,7 +261,6 @@ oc.Conversation.View.prototype.go = function(id) {
                 self.createResponse(false,r);
             });
             
-            
             goog.style.showElement(conversationDiv,true);
 
         }); 
@@ -243,7 +273,7 @@ oc.Conversation.View.prototype.go = function(id) {
             // show category head
             self.categoryView.showHeading(self.conversation.category.name,self.conversation.category.id,self.conversation.category.href);
             goog.style.showElement(conversationDiv,true);
-            self.socket.send({'register':['/happening','/user/'+self.user.id,'/conversation/'+id]});
+            self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
     }
 };
 
@@ -254,7 +284,7 @@ oc.Conversation.View.prototype.go = function(id) {
 oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
     var previousD = goog.dom.query('.conversation');
     // get last full date
-    var lastDateSplit;
+    var lastDateSplit = null;
     for (var x=previousD.length-1; x >= 0; x--)
     {
         var dates = goog.dom.query('.date span',previousD[x]);
@@ -287,15 +317,11 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
 
     // create right float
     var dateHtml ='<div class="right date"><span>'+date+'</span>';
-
-    // display coffee upvote?
-    if (response.canVote)
-        dateHtml +='<a href="/upvote"><img width="20" height="20" src="/static/images/coffee.png" /></a>';
     dateHtml += '</div>';
 
     var self = this;
-    var mentionHandler = function(e) {
-        self.user.go(this.getAttribute('name'));
+    var userLinkHandler = function(e) {
+        self.userView.go(this.getAttribute('name'));
         e.preventDefault();
     };
 
@@ -315,7 +341,7 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
             goog.style.showElement(section,true);
         
         goog.array.forEach(goog.dom.query('a',section),function(mention) {
-            goog.events.listen(mention,goog.events.EventType.CLICK,mentionHandler);
+            goog.events.listen(mention,goog.events.EventType.CLICK,userLinkHandler);
         });
     } else {
         // create a new posting
@@ -343,8 +369,13 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
         goog.style.showElement(element,false);
         goog.dom.append(goog.dom.query('.responses')[0],element);
         
+        // add clickhandlers for users
+        goog.array.forEach(goog.dom.query('.description a',element),function(userLink) {
+            goog.events.listen(userLink,goog.events.EventType.CLICK,userLinkHandler);
+        });
+        
         goog.array.forEach(goog.dom.query('.section > a',element),function(link) {
-            goog.events.listen(link,goog.events.EventType.CLICK,mentionHandler);
+            goog.events.listen(link,goog.events.EventType.CLICK,userLinkHandler);
         });
         if (fadeIn) {
             (new goog.fx.dom.FadeInAndShow(element,500)).play();
@@ -354,6 +385,7 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
     }
 
     // process a vote?
+    /*
     if (response.canVote)
     {
         var coffee = goog.dom.query('.conversation:last .section:last .date a')[0];
@@ -364,6 +396,7 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
             e.preventDefault(); 
         });
     }
+    */
     if (fadeIn)
     {
         var responses = goog.dom.query('.responses')[0];

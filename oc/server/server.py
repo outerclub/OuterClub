@@ -13,7 +13,7 @@ import hashlib
 import random
 import uuid
 import re
-
+ 
 from ..rtg.t_rtg import RtgService
 from ..rtg.t_rtg.ttypes import *
 
@@ -22,7 +22,7 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 import os
-
+ 
 # setup rtg
 transport = TSocket.TSocket(DefaultConfig.rtg_server,DefaultConfig.rtg_server_port)
 transport = TTransport.TBufferedTransport(transport)
@@ -65,6 +65,8 @@ def index():
 
     g.update({'announcements':db.fetchAnnouncements(cur)})
     g.update({'tasks':db.fetchTasks(cur,user['user_id'])})
+
+    g.update({'question':db.fetchQuestion(cur)})
     cur.close()
     conn.close()
 
@@ -89,7 +91,7 @@ def category(category):
     cur.execute('select cat_id,private,icon from category where name=%s', (category,))
     row = cur.fetchone()
     cat_id = row[0]
-    isPrivate = row[1]
+    isPrivate = bool(row[1])
     icon = row[2]
 
     self = db.fetchUser(cur,getUid())
@@ -133,7 +135,7 @@ def conversation(id):
     conversation = {'id': id, 'title':conversation[0], \
                   'user':db.fetchUser(cur,conversation[4]), \
                    'date': util.dateFormat(conversation[1]), \
-                   'content': util.replaceMentions(cur,conversation[2]), \
+                   'content': util.replaceMentions(cur,util.escape(conversation[2])), \
                   }
     responses = db.fetchResponses(cur,id,getUid())
     cur.close()
@@ -363,24 +365,38 @@ def signup():
     error = None
     conn = pool.connection()
     cur = conn.cursor()
-    if len(request.form['username']) == 0:
-        error = "Username cannot be empty."
-    elif len(request.form['username']) <= 2:
-        error = "Username must be greater than 2 characters long."
-    else:
-        # check to see if user exists
-        cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
-        test = cur.fetchone()
+    
+    if len(request.form['email']) == 0:
+        error = "E-mail cannot be empty."
+    elif not util.emailValid(request.form['email']):
+        error = "E-mail was not valid."
+        
+    # check to see if email exists
+    cur.execute('select user_id from user where email=%s', (request.form['email'],))
+    test = cur.fetchone()
+    
+    if (test != None):
+        error = "E-mail already in use."
+    
+    # test for user
+    if not error:
+        if len(request.form['username']) == 0:
+            error = "Username cannot be empty."
+        elif len(request.form['username']) <= 2:
+            error = "Username must be greater than 2 characters long."
+        elif not re.match("^\w+$",request.form['username']):
+            error = "Username can only contain alphanumeric characters or underscores."
 
-        # if the user exists
-        if (test != None):
-            error = "Username already in use."
-        elif len(request.form['email']) == 0:
-            error = "E-mail cannot be empty."
-        elif not util.emailValid(request.form['email']):
-            error = "E-mail was not valid."
-        elif len(request.form['password']) == 0:
-            error = "Password cannot be empty."
+        else:
+            # check to see if user exists
+            cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
+            test = cur.fetchone()
+    
+            # if the user exists
+            if (test != None):
+                error = "Username already in use."
+            elif len(request.form['password']) == 0:
+                error = "Password cannot be empty."
     
     if (error):
         cur.close()

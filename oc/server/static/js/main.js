@@ -4,6 +4,7 @@ goog.require('oc.Socket');
 goog.require('oc.Category.View');
 goog.require('oc.Nav');
 goog.require('oc.User');
+goog.require('oc.User.View');
 goog.require('oc.Trending');
 goog.require('oc.Leaderboard');
 goog.require('oc.overlay');
@@ -18,28 +19,48 @@ goog.require('goog.fx.Transition');
 goog.require('goog.style');
 goog.require('goog.net.XhrIo');
 goog.require('goog.uri.utils');
+goog.require('oc.templates');
 
 /**
  *
  * @constructor
  */
 oc.Main = function() {
+    /**
+     * @type {oc.Socket}
+     */
     this.socket = new oc.Socket();
-    this.user = new oc.User(this.socket);
-    this.categoryView = new oc.Category.View(this.socket,this.user);
+
+    /**
+     * @type {oc.User.View}
+     */
+    this.userView = new oc.User.View(this.socket);
+
+    /**
+     * @type {oc.Category.View}
+     */
+    this.categoryView = new oc.Category.View(this.socket,this.userView);
+
+    /**
+     * @type {oc.Trending}
+     */
     this.trending = new oc.Trending(this.categoryView.conversationView);
-    this.leaderboard = new oc.Leaderboard(this.user);
+
+    /**
+     * @type {oc.Leaderboard}
+     */
+    this.leaderboard = new oc.Leaderboard(this.userView);
 };
 
 oc.Main.prototype.start = function() {
-    this.user.init();
+    this.userView.init();
     
     var self = this;
     this.socket.init('http://'+window.location.hostname+':8002/sock',
         function() {
-            self.socket.send({'user_id':self.user.id,'key':self.user.key});
+            self.socket.send({'user_id':self.userView.user.id,'key':self.userView.key});
+            self.socket.send({'register':['/happening','/user/'+self.userView.user.id]});
     });
-    this.socket.send({'register':['/happening','/user/'+self.user.id]});
     this.socket.addCallback('authRejected',function() {
         window.location = '/logout';
     });
@@ -66,7 +87,14 @@ oc.Main.prototype.start = function() {
             var verb = 'replied';
             if (data.type == 'post')
                 verb = 'posted'; 
-            var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment('<div class="item"><div class="images"><img class="bg" src="/static/images/categories/'+p['category_image']+'" /><img class="avatar" src="/static/images/avatars/'+p['user']['avatar_image']+'" /></div><div class="text"><span class="date">'+p['date']+'</span><h2>'+p['title']+'</h2><span class="user">'+p['user']['name']+'</span> '+verb+' <span class="content">&quot;'+p['content']+'&quot;</span></div></div>');
+            var html = oc.templates.happening({
+                    user:oc.User.extractFromJson(p['user']),
+                    category_image:p['category_image'],
+                    date:p['date'],
+                    title:p['title'],
+                    verb:verb,
+                    content:p['content']});
+            var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
             goog.style.showElement(element,false);
             
             var scroller = goog.dom.query('.scroll',slideShow)[0];
@@ -116,7 +144,7 @@ oc.Main.prototype.start = function() {
             });
             goog.dom.classes.add(menuItem,'active');
 
-            self.socket.send({'register':['/happening','/user/'+self.user.id]});
+            self.socket.send({'register':['/happening','/user/'+self.userView.user.id]});
             if (menuItem.getAttribute('href') == '#trending')
                self.trending.go(); 
             else if (menuItem.getAttribute('href') == '#leaderboard')
@@ -154,7 +182,7 @@ oc.Main.prototype.start = function() {
 
     var newConvoCallback = function(close) {
     };
-    oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],newConvoCallback);
+    var ov = oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],newConvoCallback);
 
 
     /**
@@ -169,6 +197,7 @@ oc.Main.prototype.start = function() {
                 titleInput.value = ''; 
                 contentArea.value = '';
                 
+                ov.close();
                 // TODO CLOSE BOX
                 //goog.style.showElement(goog.dom.getElement('newConversation'),);
                  },'POST',goog.uri.utils.buildQueryDataFromMap({'area':self.categoryView.category.name,
@@ -190,12 +219,20 @@ oc.Main.prototype.start = function() {
         goog.events.listen(i,goog.events.EventType.KEYPRESS,function () {
             goog.style.showElement(goog.dom.getNextElementSibling(this),false);
         });
-            
     });
 
+    var questionLink = goog.dom.query("#welcome .question a")[0];
+    if (goog.isDef(questionLink)) {
+        goog.events.listen(questionLink,goog.events.EventType.CLICK,function(e) {
+            self.categoryView.go('question of the week');
+            e.preventDefault(); 
+        });
+    }
+    /*
     var newGuildCallback = function(close) {
     }
     oc.overlay(goog.dom.query('#guilds button')[0],newGuildCallback);
+    */
 };
 var main = new oc.Main();
 main.start();

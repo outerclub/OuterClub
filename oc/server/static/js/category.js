@@ -1,14 +1,25 @@
 goog.provide('oc.Category');
 
 /**
- * @param {string} id
+ * @param {number} id
  * @param {string} name
  * @param {string} icon
  * @constructor
  */
 oc.Category = function(id,name,icon) {
+    /**
+     * @type {string}
+     */
     this.name = name;
+
+    /**
+     * @type {number}
+     */
     this.id = id;
+
+    /**
+     * @type {string}
+     */
     this.icon = icon;
 };
 

@@ -12,9 +12,10 @@
     float: right;
 }
 
-.heading{
+.content_wrapper .heading{
     padding-top: 20px;
     overflow: hidden;
+    margin-bottom:5px;
 }
 .content_wrapper .heading h2{
     color: #FFFFFF;

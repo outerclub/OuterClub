@@ -5,4 +5,4 @@ delete from response;
 delete from task;
 delete from conversation;
 delete from announcement;
-delete from category where private=true;
+delete from category where private=false or (private=true and name != 'question of the week');

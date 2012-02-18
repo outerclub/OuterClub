@@ -8,11 +8,15 @@ goog.require('goog.json');
 goog.require('goog.style');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
+goog.require('oc.templates');
 
 /**
  * @constructor
  */
 oc.Trending = function(conversationView) {
+    /**
+     * @type {oc.Conversation.View}
+     */
     this.conversationView = conversationView;
 };
 oc.Trending.prototype.go = function() {
@@ -21,15 +25,8 @@ oc.Trending.prototype.go = function() {
         var conversations = goog.json.unsafeParse(e.target.getResponseText())['conversations'];
         var trending = goog.dom.getElement('trending');
         oc.Nav.setTitle(trending.getAttribute('title'));
-        var html = '';
-        goog.array.forEach(conversations,function(c) {
-            html += '<div class="entry">'+
-                    '<div class="number"><span>'+c['rank']+'</span></div>'+
-                    '<img src="/static/images/categories/'+c['image']+'" height="90" />'+
-                    '<div class="text"><h2><a href="/conversation/'+c['d_id']+'" name="'+c['d_id']+'">'+c['title']+'</a></h2>'+
-                        '<div class="date">'+c['date']+'</div>'+
-                        '<p>'+c['content']+'</p></div></div>';
-        });
+        var html = oc.templates.trending({conversations:conversations});
+            
         goog.array.forEach(goog.dom.query('.entry',trending),function(e) {
             goog.dom.removeNode(e);
         });

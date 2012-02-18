@@ -6,9 +6,24 @@ goog.require('goog.json');
  * @constructor
  */
 oc.Socket = function() {
+    /**
+     * @type {boolean}
+     */
     this.open =  false;
+
+    /**
+     * @type {Array}
+     */
     this.openQueue = [];
+
+    /**
+     * @type {Object|undefined}
+     */
     this.conn = undefined;
+
+    /**
+     * @type {Object}
+     */
     this.callbacks = {}
 };
 

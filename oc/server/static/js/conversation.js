@@ -7,9 +7,9 @@ goog.require('goog.array');
 
 /**
  * @param {oc.Category} category
- * @param {Object} user
+ * @param {oc.User} user
  * @param {string} date
- * @param {string} id
+ * @param {number} id
  * @param {string} title
  * @param {string} content
  * @param {Array.<oc.Conversation.Response>} responses
@@ -17,27 +17,62 @@ goog.require('goog.array');
  * @extends {oc.Conversation.Response}
  */
 oc.Conversation = function(category,user,date,id,title,content,responses) {
+    /**
+     * @type {oc.Category}
+     */
     this.category = category;
+
+    /**
+     * @type {Array}
+     */
     this.viewers = [];
+
+    /**
+     * @type {Array.<oc.Conversation.Response>}
+     */
     this.responses = responses;
+
+    /**
+     * @type {string}
+     */
     this.title = title;
+
     oc.Conversation.Response.call(this,id,date,content,user,false);
 };
 goog.inherits(oc.Conversation,oc.Conversation.Response);
 
 /**
- * @param {string} id
+ * @param {number} id
  * @param {string} date
  * @param {string} content
- * @param {Object} user
+ * @param {oc.User} user
  * @param {boolean} canVote
  * @constructor
  */
 oc.Conversation.Response = function(id,date,content,user,canVote) {
+    /**
+     * @type {oc.User}
+     */
     this.user = user;
+
+    /**
+     * @type {string}
+     */
     this.date = date;
+
+    /**
+     * @type {number}
+     */
     this.id = id;
+
+    /**
+     * @type {string}
+     */
     this.content = content;
+
+    /**
+     * @type {boolean}
+     */
     this.canVote = canVote;
 };
 

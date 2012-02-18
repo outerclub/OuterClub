@@ -3,6 +3,7 @@ goog.require('goog.dom');
 goog.require('goog.array');
 goog.require('goog.style');
 goog.require('goog.dom.classes');
+goog.require('goog.string');
 
 oc.Nav.hideAll = function() {
     goog.array.forEach(goog.dom.query('.frame > div, .heading, #dynamic'),function(e) {
@@ -14,6 +15,6 @@ oc.Nav.hideAll = function() {
  * @param {string} t
  */ 
 oc.Nav.setTitle = function(t) {
-    var title = goog.dom.query('title')[0];
+    var title = goog.string.htmlEscape(goog.dom.query('title')[0],false);
     title.innerHTML = t+' - OuterClub';
 };

@@ -1,4 +1,5 @@
 goog.provide('oc.User');
+goog.provide('oc.User.View');
 goog.require('oc.Socket');
 goog.require('oc.Nav');
 goog.require('oc.overlay');
@@ -15,45 +16,104 @@ goog.require('goog.fx.Transition');
 goog.require('goog.uri.utils');
 
 /**
- * @param {oc.Socket} socket
+ * @param {number} id
+ * @param {string} name
+ * @param {string} avatar_image
+ * @param {string} cover_image
+ * @param {number} prestige
+ * @param {Object} guilds
+ * @param {boolean} admin
  * @constructor
  */
-oc.User = function(socket) {
-    this.id = undefined;
-    this.key = undefined;
-    this.socket = socket;
-};
+oc.User = function(id,name,avatar_image,cover_image,prestige,guilds,admin) {
+    /**
+     * @type {number}
+     */
+    this.id = id;
+
+    /**
+     * @type {string}
+     */
+    this.name = name;
+
+    /**
+     * @type {string}
+     */
+    this.avatar_image = avatar_image;
+
+    /**
+     * @type {string}
+     */
+    this.cover_image = cover_image;
+
+    /**
+     * @type {number}
+     */
+    this.prestige = prestige;
+
+    /**
+     * @type {Object}
+     */
+    this.guilds = guilds; 
+
+    /**
+     * @type {boolean}
+     */
+    this.admin = admin;
+}
 
 /**
  * @param {Object} json
- * @return {Object}
+ * @return {oc.User}
  */
 oc.User.extractFromJson = function(json) {
-    return {
-        avatar_image: json['avatar_image'],
-        id: json['user_id'],
-        name: json['name'],
-        guilds: json['guilds'],
-        cover_image: json['cover_image'],
-        prestige: json['prestige']
-    }
+    return new oc.User(json['user_id'],json['name'],json['avatar_image'],json['cover_image'],json['prestige'],json['guilds'],json['admin']);
 }
-oc.User.prototype.init =  function() {
+
+/**
+ * @param {oc.Socket} socket
+ * @constructor
+ */
+oc.User.View = function(socket) {
+    /**
+     * @type {oc.User}
+     */
+    this.user = null;
+
+    /**
+     * @type {string}
+     */
+    this.key = '';
+
+    /**
+     * @type {oc.Socket}
+     */
+    this.socket = socket;
+};
+oc.User.View.prototype.init =  function() {
      var self = this;
+     var id = undefined;
      // extract the user_id and key from the cookies
      goog.array.forEach(document.cookie.split("; "),function(cookie) {
         var spl = cookie.split('=');
         if (spl[0] == 'user_id')
-            self.id = spl[1];
+            id = spl[1];
         else if (spl[0] == 'key')
             self.key = spl[1];
     });
+
+    // load the user details
+    goog.net.XhrIo.send('/user/'+id,function(e) {
+        var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
+        self.user = new oc.User(u['user_id'],u['name'],u['avatar_image'],u['cover_image'],u['prestige'],u['guilds'],u['admin']);
+    });
+
+    // add the callback for user updates
     this.socket.addCallback('user',function(u) {
         var prestigeElement = goog.dom.query('#miniProfile .prestige')[0];
-        var currentPrestige = prestigeElement.innerHTML;
-        var currentAvatar = goog.dom.query('#miniProfile img')[0].getAttribute('name');
-        if (currentPrestige != u['prestige'])
+        if (self.user.prestige != u['prestige'])
         {
+            self.user.prestige = u['prestige'];
             var anim = new goog.fx.dom.FadeOut(prestigeElement,500);
             goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
                 prestigeElement.innerHTML = u['prestige'];
@@ -62,8 +122,9 @@ oc.User.prototype.init =  function() {
             });
             anim.play();
         }
-        if (currentAvatar != u['avatar_image'])
+        if (self.user.avatar_image != u['avatar_image'])
         {
+            self.user.avatar_image = u['avatar_image'];
             var imgView = goog.dom.query('#miniProfile img')[0];
             imgView.setAttribute('name',u['avatar_image']);
             imgView.setAttribute('src','/static/images/avatars/'+u['avatar_image']);
@@ -80,7 +141,7 @@ oc.User.prototype.init =  function() {
             goog.style.setStyle(h2,'color','white');
         });
         goog.events.listen(p,goog.events.EventType.CLICK,function(e) {
-            self.go(self.id); 
+            self.go(self.user.id); 
             e.preventDefault();
         }); 
     });
@@ -89,27 +150,29 @@ oc.User.prototype.init =  function() {
 /**
  * @param {string} newAvatar
  */
-oc.User.prototype.changeAvatar = function(newAvatar) {
+oc.User.View.prototype.changeAvatar = function(newAvatar) {
     var self = this;
+    self.user.avatar_image = newAvatar;
     goog.net.XhrIo.send('/avatars',function(e) {
-       self.go(self.id); 
+       self.go(self.user.id); 
     },'POST',goog.uri.utils.buildQueryDataFromMap({'avatar': newAvatar}));
 };
 /**
  * @param {string} newCover
  */
-oc.User.prototype.changeCover = function(newCover) {
+oc.User.View.prototype.changeCover = function(newCover) {
     var self = this;
+    self.user.cover_image = newCover;
     goog.net.XhrIo.send('/covers',function(e) {
-       self.go(self.id); 
+       self.go(self.user.id); 
     },'POST',goog.uri.utils.buildQueryDataFromMap({'cover': newCover}));
 };
 /**
  * @param {string} user_id
  */
-oc.User.prototype.go = function(user_id) {
+oc.User.View.prototype.go = function(user_id) {
     var self = this;
-    var isMe = (self.id == user_id);
+    var isMe = (self.user.id == user_id);
     goog.net.XhrIo.send('/user/'+user_id,function(e) {
         var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
         oc.Nav.hideAll();

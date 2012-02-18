@@ -41,7 +41,7 @@ class TRtgHandler:
         res = cur.fetchone()
         user = database.fetchUser(cur,res[1])
 
-        newContent = util.replaceMentions(cur,res[3])
+        newContent = util.replaceMentions(cur,util.escape(res[3]))
         cur.close()
         conn.close()
         
@@ -64,7 +64,7 @@ class TRtgHandler:
         payload = {'d_id':d_id,'date':util.dateFormat(convo[1]),'title':convo[5],'user':user}
         QueueProc.put(event.Message('/category/%d' % (convo[4]),'conversation',payload))
 
-        happening_data = {'user':user,'date':util.hourDateFormat(convo[1]),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':convo[2]}
+        happening_data = {'user':user,'date':util.hourDateFormat(convo[1]),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':util.escape(convo[2])}
         QueueProc.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
 
     def auth(self,auth):
