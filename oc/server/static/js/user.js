@@ -3,6 +3,7 @@ goog.provide('oc.User.View');
 goog.require('oc.Socket');
 goog.require('oc.Nav');
 goog.require('oc.overlay');
+goog.require('oc.Templates.User');
 goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
@@ -23,9 +24,10 @@ goog.require('goog.uri.utils');
  * @param {number} prestige
  * @param {Object} guilds
  * @param {boolean} admin
+ * @param {Object} blurbs
  * @constructor
  */
-oc.User = function(id,name,avatar_image,cover_image,prestige,guilds,admin) {
+oc.User = function(id,name,avatar_image,cover_image,prestige,guilds,admin,blurbs) {
     /**
      * @type {number}
      */
@@ -60,6 +62,11 @@ oc.User = function(id,name,avatar_image,cover_image,prestige,guilds,admin) {
      * @type {boolean}
      */
     this.admin = admin;
+
+    /**
+     * @type {Object}
+     */
+    this.blurbs = blurbs;
 }
 
 /**
@@ -67,7 +74,7 @@ oc.User = function(id,name,avatar_image,cover_image,prestige,guilds,admin) {
  * @return {oc.User}
  */
 oc.User.extractFromJson = function(json) {
-    return new oc.User(json['user_id'],json['name'],json['avatar_image'],json['cover_image'],json['prestige'],json['guilds'],json['admin']);
+    return new oc.User(json['user_id'],json['name'],json['avatar_image'],json['cover_image'],json['prestige'],json['guilds'],json['admin'],json['blurbs']);
 }
 
 /**
@@ -105,32 +112,22 @@ oc.User.View.prototype.init =  function() {
     // load the user details
     goog.net.XhrIo.send('/user/'+id,function(e) {
         var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
-        self.user = new oc.User(u['user_id'],u['name'],u['avatar_image'],u['cover_image'],u['prestige'],u['guilds'],u['admin']);
+        self.user = new oc.User(u['user_id'],u['name'],u['avatar_image'],u['cover_image'],u['prestige'],u['guilds'],u['admin'],u['blurbs']);
+        self.socket.init('http://'+window.location.hostname+':8002/sock',
+            function() {
+                self.socket.send({'user_id':self.user.id,'key':self.key});
+                self.socket.send({'register':['/happening','/user/'+self.user.id]});
+        });
+    });
+    self.socket.addCallback('user',function(data) {
+        // increase prestige
+        if (data['prestige'] != self.user.prestige)
+        {
+            self.user.prestige = data['prestige'];
+            goog.dom.query("#miniProfile .prestige")[0].innerHTML = self.user.prestige;
+        }
     });
 
-    // add the callback for user updates
-    this.socket.addCallback('user',function(u) {
-        var prestigeElement = goog.dom.query('#miniProfile .prestige')[0];
-        if (self.user.prestige != u['prestige'])
-        {
-            self.user.prestige = u['prestige'];
-            var anim = new goog.fx.dom.FadeOut(prestigeElement,500);
-            goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
-                prestigeElement.innerHTML = u['prestige'];
-                goog.style.setStyle(prestigeElement,'color','yellow');
-                (new goog.fx.dom.FadeIn(prestigeElement,500)).play(); 
-            });
-            anim.play();
-        }
-        if (self.user.avatar_image != u['avatar_image'])
-        {
-            self.user.avatar_image = u['avatar_image'];
-            var imgView = goog.dom.query('#miniProfile img')[0];
-            imgView.setAttribute('name',u['avatar_image']);
-            imgView.setAttribute('src','/static/images/avatars/'+u['avatar_image']);
-        }
-    }); 
-    
     var profile = goog.dom.query('#miniProfile > a');
     goog.array.forEach(profile,function(p) {
         var h2 = goog.dom.query('h2',goog.dom.getNextElementSibling(p))[0];
@@ -153,6 +150,9 @@ oc.User.View.prototype.init =  function() {
 oc.User.View.prototype.changeAvatar = function(newAvatar) {
     var self = this;
     self.user.avatar_image = newAvatar;
+    var imgView = goog.dom.query('#miniProfile img')[0];
+    imgView.setAttribute('src','/static/images/avatars/'+self.user.avatar_image);
+
     goog.net.XhrIo.send('/avatars',function(e) {
        self.go(self.user.id); 
     },'POST',goog.uri.utils.buildQueryDataFromMap({'avatar': newAvatar}));
@@ -174,30 +174,16 @@ oc.User.View.prototype.go = function(user_id) {
     var self = this;
     var isMe = (self.user.id == user_id);
     goog.net.XhrIo.send('/user/'+user_id,function(e) {
-        var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
+        var u = oc.User.extractFromJson(goog.json.unsafeParse(e.target.getResponseText())['user']);
         oc.Nav.hideAll();
-        oc.Nav.setTitle(u['name']);
+        oc.Nav.setTitle(u.name);
 
         var dynamic = goog.dom.getElement('dynamic');
         goog.style.showElement(dynamic,true); 
         goog.dom.classes.add(dynamic,'profile');
-        //
+
         // write the profile HTML
-        var html = '';
-        if (isMe) html += '<a rel="#cover">';
-            html += '<img width="905" name="'+u['cover_image']+'"';
-            
-            if (isMe) html += 'style="cursor: pointer" ';
-            html += 'src="/static/images/covers/'+u['cover_image']+'" />';
-        if (isMe) html += '</a>';
-
-        if (isMe)html += '<a rel="#avatar">';
-            html += '<img width="100" height="100" name="'+u['avatar_image']+'" ';
-            if (isMe) html += 'style="cursor: pointer" ';
-            html += 'src="/static/images/avatars/'+u['avatar_image']+'" />';
-        if (isMe) html += '</a>';
-
-        html += ' <h2>'+u['name']+'</h2>';
+        var html = oc.Templates.User.show({cover_image:u.cover_image,avatar_image:u.avatar_image,name:u.name,isMe:isMe,blurbs:[]});
         dynamic.innerHTML = html;
 
         // allow profile customization if isMe
@@ -224,7 +210,7 @@ oc.User.View.prototype.go = function(user_id) {
                             {
                                 var c = covers[i];
                                 table += '<div><img class="';
-                                if (u['cover_image'] == c)
+                                if (u.cover_image == c)
                                     table += 'active';
                                  table += '" name="'+c+'" src="/static/images/covers/thumbs/'+c+'" /></div>';
                             }
@@ -237,7 +223,7 @@ oc.User.View.prototype.go = function(user_id) {
                                 var images = goog.dom.query('img',center);
                                 goog.array.forEach(images,function(img) {
                                     goog.events.listen(img,goog.events.EventType.CLICK,function() {
-                                        if (this.getAttribute('name') != u['cover_image']) {
+                                        if (this.getAttribute('name') != u.cover_image) {
                                             self.changeCover(this.getAttribute('name'));
                                         }
                                         center.innerHTML = '';
@@ -274,7 +260,7 @@ oc.User.View.prototype.go = function(user_id) {
                         if (i % 9 == 0)
                             table += "<tr>";
                         table += '<td><img class="';
-                        if (u['avatar_image'] == a)
+                        if (u.avatar_image == a)
                             table += 'active';
                          table += '" name="'+a+'" src="/static/images/avatars/thumbs/'+a+'" /></td>';
                         if ((i+1) % 9 == 0)
@@ -286,7 +272,7 @@ oc.User.View.prototype.go = function(user_id) {
                     var images = goog.dom.query('img',avatarOverlay);
                     goog.array.forEach(images,function(img) {
                         goog.events.listen(img,goog.events.EventType.CLICK,function() {
-                            if (this.getAttribute('name') != u['avatar_image']) {
+                            if (this.getAttribute('name') != u.avatar_image) {
                                 self.changeAvatar(this.getAttribute('name'));
                             }
                             tableView.innerHTML = '';

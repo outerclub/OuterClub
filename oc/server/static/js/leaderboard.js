@@ -8,7 +8,7 @@ goog.require('goog.json');
 goog.require('goog.events');
 goog.require('goog.dom');
 goog.require('goog.events.EventType');
-goog.require('oc.templates');
+goog.require('oc.Templates.Main');
 
 /**
  * @param {oc.User.View} userView
@@ -27,7 +27,7 @@ oc.Leaderboard.prototype.go = function() {
         var leaderboard = goog.dom.query('#leaderboard')[0];
         oc.Nav.setTitle(leaderboard.getAttribute('title'));
 
-        var html = oc.templates.leaderboard({users:users});
+        var html = oc.Templates.Main.leaderboard({users:users});
         goog.array.forEach(goog.dom.query('.entry',leaderboard),function(l) {
             goog.dom.removeNode(l);
         });

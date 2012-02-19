@@ -1,0 +1,26 @@
+{namespace oc.Templates.User}
+
+/**
+ * @param cover_image
+ * @param avatar_image
+ * @param isMe
+ * @param name
+ * @param blurbs
+ */
+{template .show}
+    <a rel="#cover">
+        <img width="905" name="{$cover_image}" {if $isMe}class="me" style="cursor: pointer"{/if}
+    src="/static/images/covers/{$cover_image}" />
+    </a>
+    <a rel="#avatar">
+        <img width="100" height="100" name="{$avatar_image}"
+            {if $isMe}class="me" style="cursor: pointer"{/if}
+            src="/static/images/avatars/{$avatar_image}" />
+    </a>
+<h2>{$name}</h2>
+{foreach $blurb in $blurbs}
+<div class="blurb">
+blurbit
+</div>
+{/foreach}
+{/template}

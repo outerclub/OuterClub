@@ -194,6 +194,13 @@ function showError(msg) {
         $("#center .error").fadeIn();
     }
 }
+var wait = 7000;
+function slideshow() {
+    var active = $(".dots .dotActive").index();
+    var next = active < 2 ? active + 1 : 0;
+    $($(".dots").children().get(next)).click();
+    setTimeout('slideshow()',wait);
+}
 $(document).ready(function() {
     $("span").mousedown(function() {
         $(this).prev('input').focus();
@@ -220,13 +227,13 @@ $(document).ready(function() {
     	$(this).removeClass('dot');
 		$(this).addClass('dotActive');
         var no = $(this).index();
-        alert(no);
         $('.slideshow').fadeOut(function() {
             $(this).css('background-image','url(/static/images/signup/'+no+'.png)');
             $(this).fadeIn();
         });
 
     });
+    setTimeout('slideshow()',wait);
     $("button[type='submit']").click(function() {
         $.ajax({
             type:'POST',

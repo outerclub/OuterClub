@@ -137,12 +137,32 @@ def conversation(id):
                    'date': util.dateFormat(conversation[1]), \
                    'content': util.replaceMentions(cur,util.escape(conversation[2])), \
                   }
-    responses = db.fetchResponses(cur,id,getUid())
+    myUid = getUid()
+    responses = db.fetchResponses(cur,id,myUid)
+
+    # gather uids
+    user_ids = set()
+    user_ids.add(conversation['user']['user_id'])
+    # gather user_ids from responses
+    if (len(responses) > 0):
+        for r in responses:
+            user_ids.add(r['user']['user_id'])
+
+    whereClause = map(lambda x:'object_id=%s',user_ids)
+    sql = 'select object_id from upvote where context_id=%s and user_id=%s and type=%s and (' + ' or '.join(whereClause)+')'
+    cur.execute(sql,(id,myUid,util.Upvote.UserType)+tuple(user_ids))
+    
+    for r in cur.fetchall():
+        user_ids.remove(r[0])
+
+    # can't vote for self
+    user_ids.discard(myUid)
+
     cur.close()
     conn.close()
 
     categoryName = util.formatCategoryName(categoryName)
-    return flask.jsonify(conversation=conversation,responses=responses,category_name=categoryName,category_id=cat_id,category_icon=c_icon)
+    return flask.jsonify(votableUsers=list(user_ids),conversation=conversation,responses=responses,category_name=categoryName,category_id=cat_id,category_icon=c_icon)
 
 @app.route('/trending')
 def trending():
@@ -267,11 +287,18 @@ def reply():
     conn = pool.connection()
     cur = conn.cursor()
 
+    error = None
+    if len(data) == 0:
+        error = 'Please enter some text before responding.'
+
     # ensure that any mentions are valid
     mentions = util.findMentions(cur,data)
     for name in mentions:
         if mentions[name] == None:
-            return flask.jsonify(error="@%s didn't match to a user." % name) 
+            error = "@%s didn't match to a user." % name
+
+    if (error):
+        return flask.jsonify(error=error)
     
     # insert the response
     cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,getUid(),data))
@@ -292,23 +319,23 @@ def upvote():
     if not isLoggedIn():
         return ''
 
-    r_id = int(request.form['r_id'])
+    d_id = int(request.form['d_id'])
+    object_id = int(request.form['user_id'])
+
     conn = pool.connection()
     cur = conn.cursor()
     uid = getUid() 
-    cur.execute('select COUNT(*) from upvote where user_id=%s and object_id=%s and type=%s',(uid,r_id,util.Upvote.ResponseType))
+    cur.execute('select COUNT(*) from upvote where user_id=%s and context_id=%s and object_id=%s and type=%s',(uid,d_id,object_id,util.Upvote.UserType))
     
     # does this current upvote exist?
     if (cur.fetchone()[0] == 0):
-        cur.execute('insert into upvote (user_id, object_id, type) values (%s,%s,%s)',(uid,r_id,util.Upvote.ResponseType))
-        cur.execute('select user_id from response where r_id=%s',(r_id,))
-        dest_user = cur.fetchone()[0]
-        cur.execute('select prestige from user where user_id=%s',(dest_user,))
-        cur.execute('update user set prestige=%s where user_id=%s',(cur.fetchone()[0]+1,dest_user))
+        cur.execute('insert into upvote (user_id, context_id,object_id, type) values (%s,%s,%s,%s)',(uid,d_id,object_id,util.Upvote.UserType))
+        cur.execute('select prestige from user where user_id=%s',(object_id,))
+        cur.execute('update user set prestige=%s where user_id=%s',(cur.fetchone()[0]+1,object_id))
         conn.commit()
 
         transport.open()
-        client.userModified(dest_user);
+        client.userModified(object_id);
         transport.close()
     cur.close()
     conn.close()

@@ -7,7 +7,7 @@
     top: 205px;
     border:5px solid white
 }
-.profile a[rel='#avatar']:hover img {
+.profile a[rel='#avatar']:hover img.me {
     border:5px solid #333;
 }
 .profile .overlay .hover, .profile .overlay .active{
@@ -31,7 +31,7 @@
 .profile a[rel='#cover'] img {
     outline: 1px solid #222;
 }
-.profile > a[rel='#cover']:hover img {
+.profile > a[rel='#cover']:hover img.me {
    outline: 1px solid  white;
 }
 

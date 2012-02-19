@@ -13,10 +13,11 @@ goog.require('goog.array');
  * @param {string} title
  * @param {string} content
  * @param {Array.<oc.Conversation.Response>} responses
+ * @param {Array.<number>} votableUsers
  * @constructor
  * @extends {oc.Conversation.Response}
  */
-oc.Conversation = function(category,user,date,id,title,content,responses) {
+oc.Conversation = function(category,user,date,id,title,content,responses,votableUsers) {
     /**
      * @type {oc.Category}
      */
@@ -37,8 +38,14 @@ oc.Conversation = function(category,user,date,id,title,content,responses) {
      */
     this.title = title;
 
-    oc.Conversation.Response.call(this,id,date,content,user,false);
+    /**
+     * @type {Array.<number>}
+     */
+    this.votableUsers = votableUsers;
+
+    oc.Conversation.Response.call(this,id,date,content,user);
 };
+
 goog.inherits(oc.Conversation,oc.Conversation.Response);
 
 /**
@@ -46,10 +53,9 @@ goog.inherits(oc.Conversation,oc.Conversation.Response);
  * @param {string} date
  * @param {string} content
  * @param {oc.User} user
- * @param {boolean} canVote
  * @constructor
  */
-oc.Conversation.Response = function(id,date,content,user,canVote) {
+oc.Conversation.Response = function(id,date,content,user) {
     /**
      * @type {oc.User}
      */
@@ -69,11 +75,6 @@ oc.Conversation.Response = function(id,date,content,user,canVote) {
      * @type {string}
      */
     this.content = content;
-
-    /**
-     * @type {boolean}
-     */
-    this.canVote = canVote;
 };
 
 /**
@@ -85,8 +86,7 @@ oc.Conversation.Response.extractFromJson = function(json) {
         json['r_id'],
         json['date'],
         json['content'],
-        oc.User.extractFromJson(json['user']),
-        json['canVote']);
+        oc.User.extractFromJson(json['user']));
 };
 
 /**
@@ -105,7 +105,8 @@ oc.Conversation.extractFromJson = function(json) {
         json['conversation']['id'],
         json['conversation']['title'],
         json['conversation']['content'],
-        responses
+        responses,
+        json['votableUsers']
     );
 };
 

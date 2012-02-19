@@ -8,6 +8,7 @@ goog.require('oc.User');
 goog.require('oc.User.View');
 goog.require('oc.Conversation');
 goog.require('oc.Conversation.Response');
+goog.require('oc.Templates.Category');
 goog.require('goog.array');
 goog.require('goog.net.XhrIo');
 goog.require('goog.json');
@@ -85,7 +86,7 @@ oc.Category.View.prototype.go = function(name) {
  * @return {Node}
  */
 oc.Category.View.prototype.createConversations = function(hide,d_list) {
-    var html = oc.templates.conversationList({hide:hide,conversationList:d_list});
+    var html = oc.Templates.Category.conversationList({hide:hide,conversationList:d_list});
     return goog.dom.htmlToDocumentFragment(html);
 };
 
@@ -164,6 +165,11 @@ oc.Conversation.View = function(category_view,socket,userView) {
      * @type {oc.User.View}
      */
     this.userView = userView;
+
+    /**
+     * @type {oc.Conversation}
+     */
+    this.conversation = null;
 };
 
 /**
@@ -209,7 +215,7 @@ oc.Conversation.View.prototype.go = function(id) {
                 // scan for insertions
                 for (v in viewers) {
                     if (!(v in self.conversation.viewers)) {
-                        var html = oc.templates.viewerIcon({user_id:v,avatar_image:viewers[v]});
+                        var html = oc.Templates.Category.viewerIcon({user_id:v,avatar_image:viewers[v]});
                         var userView = /** @type {!Element} */ goog.dom.htmlToDocumentFragment(html);
                         goog.style.showElement(userView,false);
                         goog.events.listen(userView,goog.events.EventType.CLICK,function(e) {
@@ -229,7 +235,7 @@ oc.Conversation.View.prototype.go = function(id) {
             goog.array.forEach(goog.dom.query('#conversation .conversation'),function(c) {
                 goog.dom.removeNode(c);
             });
-            self.createResponse(false,new oc.Conversation.Response(-1,self.conversation.date,self.conversation.content,self.conversation.user,false));
+            self.createResponse(false,new oc.Conversation.Response(-1,self.conversation.date,self.conversation.content,self.conversation.user));
 
             /**
              * Reply
@@ -271,7 +277,7 @@ oc.Conversation.View.prototype.go = function(id) {
             oc.Nav.setTitle(self.conversation.title); 
 
             // show category head
-            self.categoryView.showHeading(self.conversation.category.name,self.conversation.category.id,self.conversation.category.href);
+            self.categoryView.showHeading(self.conversation.category.name,self.conversation.category.id,self.conversation.category.toUrl());
             goog.style.showElement(conversationDiv,true);
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
     }
@@ -316,8 +322,6 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
     }
 
     // create right float
-    var dateHtml ='<div class="right date"><span>'+date+'</span>';
-    dateHtml += '</div>';
 
     var self = this;
     var userLinkHandler = function(e) {
@@ -327,11 +331,12 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
 
     var content = response.content.replace(/\n/g,'<br />');
     var isAction = content.indexOf('/me') === 0;
-    var lastDiscussion = goog.dom.query(".conversation:last");
+    var lastDiscussion = goog.dom.query(".conversation:last-child");
     // combine the postings or create new one?
-    if (!isAction && lastDiscussion.length == 1 && !goog.dom.classes.has(lastDiscussion[0],'action') && goog.dom.query('.user h2 a',lastDiscussion[0])[0].innerHTML == response.user.name)
+    if (!isAction && lastDiscussion.length == 1 && !goog.dom.classes.has(lastDiscussion[0],'action') && goog.dom.query('.user h2 a',lastDiscussion[0])[0].getAttribute('name') == response.user.id)
     {
-        var section = goog.dom.createDom('div','section',goog.dom.htmlToDocumentFragment(dateHtml+content));
+        var html = oc.Templates.Category.responseContent({date:date,content:content});
+        var section = goog.dom.createDom('div','section',goog.dom.htmlToDocumentFragment(html));
         goog.style.showElement(section,false);
         goog.dom.append(goog.dom.query('.content',lastDiscussion[0])[0],section);
         if (fadeIn)
@@ -344,33 +349,19 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
             goog.events.listen(mention,goog.events.EventType.CLICK,userLinkHandler);
         });
     } else {
-        // create a new posting
-        var str ='<div class="conversation';
-        if (isAction) str += ' action';
-        str += '">';
-        if (!isAction)
-        {
-            str += '<div class="user">'+
-                '<div class="description">'+
-                    '<h2><a href="/user/'+response.user.id+'" name="'+response.user.id+'">'+response.user.name+'</a></h2>'+
-                    '<div>Prestige: '+response.user.prestige+'</div>'+
-                '</div>'+
-                '<img src="/static/images/avatars/thumbs/'+response.user.avatar_image+'" />'+
-            '</div>';
-        }
+        // strip away /me and convert to an icon
         if (isAction)
-            content = content.replace(/^\/me/,'<a href="/user/'+response.user.id+'" name="'+response.user.id+'"><img width="30" height="30" src="/static/images/avatars/'+response.user.avatar_image+'" /></a>');
-        str += '<div class="content"><div class="section">'+
-                dateHtml+content+
-            '</div></div>';
-        if (!isAction)
-            str += '</div>';
-        var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(str);
+            content = content.replace(/^\/me/,oc.Templates.Category.actionMe({response:response}));
+
+        var canVote = goog.array.contains(self.conversation.votableUsers,response.user.id);
+        var html = oc.Templates.Category.response({response:response,content:content,date:date,canVote:canVote});
+
+        var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
         goog.style.showElement(element,false);
         goog.dom.append(goog.dom.query('.responses')[0],element);
         
         // add clickhandlers for users
-        goog.array.forEach(goog.dom.query('.description a',element),function(userLink) {
+        goog.array.forEach(goog.dom.query('.description a:first-child',element),function(userLink) {
             goog.events.listen(userLink,goog.events.EventType.CLICK,userLinkHandler);
         });
         
@@ -382,21 +373,27 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
         } else {
             goog.style.showElement(element,true);
         }
+        // process a vote?
+        if (canVote)
+        {
+            var coffee = goog.dom.query('.conversation:last-child a[name="upvote"]')[0];
+            goog.events.listen(coffee,goog.events.EventType.CLICK,function(e) {
+                goog.net.XhrIo.send('/upvote',function() {
+                    goog.array.remove(self.conversation.votableUsers,response.user.id);
+                    goog.array.forEach(goog.dom.query('a[name="upvote"] > img'),function(img) {
+                        if (goog.string.toNumber(img.getAttribute('name')) == response.user.id)
+                        {
+                            (new goog.fx.dom.FadeOutAndHide(img.parentNode,500)).play();
+                        }
+                    });
+                },
+                'POST',
+                goog.uri.utils.buildQueryDataFromMap({ 'd_id':self.conversation.id,'user_id': response.user.id }));
+                e.preventDefault(); 
+            });
+        }
     }
 
-    // process a vote?
-    /*
-    if (response.canVote)
-    {
-        var coffee = goog.dom.query('.conversation:last .section:last .date a')[0];
-        goog.events.listen(coffee,goog.events.EventType.CLICK,function(e) {
-            goog.net.XhrIo.send('/upvote',function() { (new goog.fx.dom.FadeOut(coffee,500)).play() },
-                'POST',
-                goog.uri.utils.buildQueryDataFromMap({ 'r_id': response.id }));
-            e.preventDefault(); 
-        });
-    }
-    */
     if (fadeIn)
     {
         var responses = goog.dom.query('.responses')[0];

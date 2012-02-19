@@ -8,7 +8,7 @@ goog.require('goog.json');
 goog.require('goog.style');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
-goog.require('oc.templates');
+goog.require('oc.Templates.Main');
 
 /**
  * @constructor
@@ -25,7 +25,7 @@ oc.Trending.prototype.go = function() {
         var conversations = goog.json.unsafeParse(e.target.getResponseText())['conversations'];
         var trending = goog.dom.getElement('trending');
         oc.Nav.setTitle(trending.getAttribute('title'));
-        var html = oc.templates.trending({conversations:conversations});
+        var html = oc.Templates.Main.trending({conversations:conversations});
             
         goog.array.forEach(goog.dom.query('.entry',trending),function(e) {
             goog.dom.removeNode(e);

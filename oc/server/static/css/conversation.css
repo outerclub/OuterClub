@@ -1,5 +1,4 @@
 #conversation {
-    background-color: #f5f5f5;
     overflow: hidden;
 }
 #conversation a:hover img {
@@ -42,7 +41,7 @@
     margin: 0 30px 1px 30px;
 }
 .conversation .user {
-    background-color: #4376ce;
+    background-color: rgba(91,144,194,0.7);
     color: white;
     float: left;
     width: 210px;
@@ -52,19 +51,23 @@
     float: right;
 }
 .conversation .description {
-    padding: 7px;
+    padding: 6px 0 6px 8px;
     float: left;
 }
+.conversation .description a{
+    vertical-align:middle;
+    color: white;
+    font-family: BebasRegular;
+}
 .conversation .user h2 {
-   font-size: 160%;
+   font-size: 140%;
     margin-bottom: 2px;
 }
 .conversation .content {
     padding: 10px 15px 10px 15px;
-    background-color: #fff;
     float: left;
     width: 575px;
-    color: #848484;
+    color: white;
     font-size: 16px;
     min-height: 30px;
 }
@@ -74,6 +77,7 @@
 .conversation .content .date {
     font-size: 12px;
     font-weight: bold;
+    color: #999;
 }
 .conversation .date a {
     float:right;
@@ -104,7 +108,6 @@
 .help {
     float: right;
     margin: 20px 5px 0 15px;
-    color: gray;
 }
 .help span {
     color: lightblue;
@@ -116,23 +119,18 @@
 
 .reply {
     float: right;
-    margin-right: 30px;
-}
-.reply .info {
-    color: white;
-    font-weight: bold;
-    display: inline-block;
-    background-color: #a9a9a9;
-    padding: 3px;
-    margin-right: 5px;
+    margin-right: 75px;
 }
 .reply textarea {
+    display:block;
     border: 0;
     font-size: 16px;
 }
 .reply button {
-    vertical-align: bottom;
-    background-color: #4376ce;
+    cursor: pointer;
+    width:100%;
+    display:block;
+    background-color: #1b2127;
     text-align: right;
     color: white;
     border: 0;
@@ -141,5 +139,5 @@
     font-size: 16px;
 }
 .reply button:hover {
-    background-color: #639cee;
+    color: rgba(91,144,194,1);
 }

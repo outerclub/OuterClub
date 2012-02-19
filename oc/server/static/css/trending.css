@@ -1,3 +1,8 @@
+h1 {
+    font-family: BebasRegular;
+    font-size: 400%;
+    margin-bottom: 15px;
+}
 .number,div .active {
     background-color: #6092c6;
     color: white;

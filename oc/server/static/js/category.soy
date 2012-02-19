@@ -1,0 +1,77 @@
+{namespace oc.Templates.Category}
+
+/**
+ * @param hide
+ * @param conversationList
+ */
+{template .conversationList}
+{foreach $c in $conversationList}
+<div title="{$c['title']}" class="post" {if $hide}style="display: none"{/if}>
+    <div class="left">
+        <img src="/static/images/icons/conversation.png" />
+        <h1><a href="/conversation/{$c['id']}" name="{$c['id']}">{$c['title']}</a></h1>
+    </div>
+    <div class="right sub">
+       <img src="/static/images/avatars/thumbs/{$c['user']['avatar_image']}" />
+        <div class="block">
+            <a href="/user/{$c['user']['user_id']}" name="{$c['user']['user_id']}">
+                {$c['user']['name']}</a>
+        </div>
+        <div class="block">{$c['date']}</div>
+    </div>
+</div>
+{/foreach}
+{/template}
+
+/**
+ * @param response
+ */
+{template .actionMe}
+<a href="/user/{$response.user.id}" name="{$response.user.id}">
+<img width="30" height="30" src="/static/images/avatars/{$response.user.avatar_image}" />
+</a>
+{/template}
+
+/**
+ * @param content
+ * @param date
+ */
+{template .responseContent}
+<div class="right date"><span>{$date}</span>
+</div>
+{$content|noAutoescape}
+{/template}
+
+/**
+ * @param content
+ * @param date
+ * @param response
+ * @param isAction
+ * @param canVote
+ */
+{template .response}
+<div class="conversation {if $isAction}action{/if}">
+{if not $isAction}
+    <div class="user">
+        <div class="description">
+            <h2><a href="/user/{$response.user.id}" name="{$response.user.id}">{$response.user.name}</a>{if $canVote}<a name="upvote" href="#"><img width="25 height="25" name="{$response.user.id}" src="/static/images/coffee.png" /></a>{/if}</h2>
+             <div>Prestige: {$response.user.prestige}</div>
+         </div>
+         <img src="/static/images/avatars/thumbs/{$response.user.avatar_image}" />
+     </div>
+{/if}
+    <div class="content">
+        <div class="section">
+            {call .responseContent data="all"/}
+        </div>
+    </div>
+
+{/template}
+
+/**
+ * @param user_id
+ * @param avatar_image
+ */
+{template .viewerIcon}
+<a href="/users/{$user_id}" name="{$user_id}"><img id="v_{$user_id}"src="/static/images/avatars/thumbs/{$avatar_image}" /></a>
+{/template}

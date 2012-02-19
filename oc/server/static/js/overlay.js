@@ -48,7 +48,7 @@ oc.overlay = function(element,func,fixed) {
             goog.style.setStyle(overlay,'position','absolute');
          var size = goog.style.getSize(overlay);
          goog.style.setStyle(overlay,'margin-left','-'+(size.width/2)+'px');
-         goog.style.setPosition(overlay,'50%',100);
+         goog.style.setPosition(overlay,'50%','15%');
     });
     return {close:close}
 };

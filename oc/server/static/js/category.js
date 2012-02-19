@@ -24,6 +24,12 @@ oc.Category = function(id,name,icon) {
 };
 
 /**
+ * @return {string}
+ */
+oc.Category.prototype.toUrl = function() {
+    return oc.Category.toUrl(this.name);
+};
+/**
  * @param {string} name
  * @return {string}
  */

@@ -139,6 +139,7 @@ class QueueProc(threading.Thread):
                         del self.uid_sessions[myConn['uid']]
                 del self.conns[conn_id]
             elif isinstance(msg,event.Message):
+                print msg.path
                 # distribute to path
                 if (msg.path in self.paths):
                     for conn in self.paths[msg.path]['conns']: 

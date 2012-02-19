@@ -19,7 +19,7 @@ goog.require('goog.fx.Transition');
 goog.require('goog.style');
 goog.require('goog.net.XhrIo');
 goog.require('goog.uri.utils');
-goog.require('oc.templates');
+goog.require('oc.Templates.Main');
 
 /**
  *
@@ -56,11 +56,6 @@ oc.Main.prototype.start = function() {
     this.userView.init();
     
     var self = this;
-    this.socket.init('http://'+window.location.hostname+':8002/sock',
-        function() {
-            self.socket.send({'user_id':self.userView.user.id,'key':self.userView.key});
-            self.socket.send({'register':['/happening','/user/'+self.userView.user.id]});
-    });
     this.socket.addCallback('authRejected',function() {
         window.location = '/logout';
     });
@@ -82,30 +77,24 @@ oc.Main.prototype.start = function() {
         }
 
         // parse the happening type
-        if (data.type == 'response' || data.type == 'post')
-        {
-            var verb = 'replied';
-            if (data.type == 'post')
-                verb = 'posted'; 
-            var html = oc.templates.happening({
-                    user:oc.User.extractFromJson(p['user']),
-                    category_image:p['category_image'],
-                    date:p['date'],
-                    title:p['title'],
-                    verb:verb,
-                    content:p['content']});
-            var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
-            goog.style.showElement(element,false);
-            
-            var scroller = goog.dom.query('.scroll',slideShow)[0];
-            goog.dom.insertChildAt(scroller,element,0);
+        var html = oc.Templates.Main.happening({
+                user:oc.User.extractFromJson(p['user']),
+                category_image:p['category_image'],
+                date:p['date'],
+                title:p['title'],
+                type:data['type'],
+                content:p['content']});
+        var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
+        goog.style.showElement(element,false);
+        
+        var scroller = goog.dom.query('.scroll',slideShow)[0];
+        goog.dom.insertChildAt(scroller,element,0);
 
-            goog.events.listen(element,goog.events.EventType.CLICK,function(e) {
-                self.categoryView.conversationView.go(p['d_id']);
-            });
-            
-            (new goog.fx.dom.FadeInAndShow(element,500)).play();
-        }
+        goog.events.listen(element,goog.events.EventType.CLICK,function(e) {
+            self.categoryView.conversationView.go(p['d_id']);
+        });
+        
+        (new goog.fx.dom.FadeInAndShow(element,500)).play();
     };
 
     this.socket.addCallback('happening',function(data) {
@@ -221,6 +210,7 @@ oc.Main.prototype.start = function() {
         });
     });
 
+    // question of the week
     var questionLink = goog.dom.query("#welcome .question a")[0];
     if (goog.isDef(questionLink)) {
         goog.events.listen(questionLink,goog.events.EventType.CLICK,function(e) {
@@ -228,11 +218,28 @@ oc.Main.prototype.start = function() {
             e.preventDefault(); 
         });
     }
+
+    goog.events.listen(window,goog.events.EventType.RESIZE,oc.Main.Resize);
+    oc.Main.Resize();
     /*
     var newGuildCallback = function(close) {
     }
     oc.overlay(goog.dom.query('#guilds button')[0],newGuildCallback);
     */
+};
+oc.Main.Resize = function() {
+    var size = goog.dom.getViewportSize();
+    var frame = 965;
+    var happeningSize = 302;
+    var padding = 15;
+    var overlap = happeningSize + padding - (size.width-frame)/2;
+    var isShadowing =  overlap > 0;
+    if (isShadowing)
+    {
+        goog.style.setStyle(goog.dom.getElement('outer'),'margin-right',(happeningSize+padding)+'px');
+    } else {
+        goog.style.setStyle(goog.dom.getElement('outer'),'margin-right','auto');
+    }
 };
 var main = new oc.Main();
 main.start();
