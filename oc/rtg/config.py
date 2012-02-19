@@ -3,3 +3,4 @@ class DefaultConfig:
     mysql_user = 'root'
     mysql_password = 'asdfgh'
     mysql_database = 'oc'
+    webPort = 8080

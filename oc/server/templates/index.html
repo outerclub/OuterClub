@@ -31,7 +31,7 @@ Welcome
                     <div class="announcement">
                         <img src="/static/images/icons/oc.png" />
                         <h2>{{ a.title }}</h2>
-                        <p>{{ a.content }}</p>
+                        <p>{{ a.content.replace('\n','<br />')|safe }}</p>
                         <span class="date">{{ a.postDate }}</span>
                     </div>
                 {% endfor %}
@@ -80,12 +80,10 @@ Welcome
         </div>
         -->
         <div id="trending" title="Trending" style="display: none">
-            <h1>Trending Now</h1>
             <!--<a><img src="/static/images/trending/discussions_hover.png" /></a>
             <div class="clear">&nbsp;</div>-->
         </div>
         <div id="leaderboard" title="Leaderboard" style="display: none">
-            <h1>Leaderboard</h1>
         </div>
         <div id="dynamic" style="display: none">
         </div>

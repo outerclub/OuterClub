@@ -84,7 +84,7 @@ def start():
 	EventRouter = SockJSRouter(EventConnection,'/sock')
 
 	app = tornado.web.Application(EventRouter.urls)
-	app.listen(8002)
+	app.listen(DefaultConfig.webPort)
 	External.ioloop = tornado.ioloop.IOLoop.instance()
 
 	handler = TRtgHandler()

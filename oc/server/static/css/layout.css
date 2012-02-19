@@ -133,9 +133,8 @@ body{
     overflow: hidden;
 }
 #miniProfile h2 {
-    font-weight: bold;
     font-family: 'BebasRegular';
-    font-size: 16px;
+    font-size: 140%;
     display: inline-block;
 
 }
@@ -172,10 +171,9 @@ body{
 }
 .slide_show h2{
     color: #FFFFFF;
-    font-size: 16px;
+    font-size: 140%;
     margin: 0 0 5px 0;
-    text-transform: uppercase;
-    font-weight: bold;
+    font-family: BebasRegular;
 }
 .slide_show .item {
     overflow: hidden;

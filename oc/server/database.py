@@ -32,7 +32,7 @@ def fetchLeaderboard(cursor):
 def fetchAnnouncements(cursor):
     cursor.execute('select a_id,title,content,postDate,user_id from announcement order by postDate desc');
     
-    announcements = [{'a_id':0,'title':'test announcement','content':'test Content','postDate':util.dateFormat(datetime.datetime.now()),'user_id':0}]
+    announcements = []
     for a in cursor.fetchall():
         announcements.append({'a_id':a[0],'title':a[1],'content':a[2],'postDate':util.dateFormat(a[3]),'user_id':a[4]})
     return announcements

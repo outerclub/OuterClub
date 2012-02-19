@@ -264,7 +264,7 @@ def post():
 
     user = db.fetchUser(cur,getUid())
     # insert the post
-    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,user['user_id'],request.form['title'],request.form['content']))
+    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,user['user_id'],request.form['title'].encode('utf-8'),request.form['content'].encode('utf-8')))
     conn.commit()
 
     d_id = cur.lastrowid
@@ -282,7 +282,7 @@ def reply():
     if not isLoggedIn():
         return ''
     d_id = int(request.form['d_id'])
-    data = request.form['data']
+    data = request.form['data'].encode('utf-8')
 
     conn = pool.connection()
     cur = conn.cursor()

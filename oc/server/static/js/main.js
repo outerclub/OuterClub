@@ -100,7 +100,7 @@ oc.Main.prototype.start = function() {
     this.socket.addCallback('happening',function(data) {
         var items = goog.dom.query('.slide_show .item');
         
-        if (items.length >= 6)
+        if (items.length >= 5)
         {
             var last = items[items.length-1];
             var anim = new goog.fx.dom.FadeOutAndHide(last,500);
@@ -114,7 +114,8 @@ oc.Main.prototype.start = function() {
     });
     this.socket.addCallback('happening_init',function(data) {
         goog.array.forEach(data,function(h,i) {
-            createHappening(h,false);
+	    if (i < 5)
+            	createHappening(h,false);
         });
     });
     goog.array.forEach(goog.dom.query('#categories a'),function(category) {
@@ -181,18 +182,20 @@ oc.Main.prototype.start = function() {
         goog.events.EventType.CLICK,function() {
             var titleInput = goog.dom.query(".titleField input")[0];
             var contentArea = goog.dom.query('#newConversation textarea')[0];
+            var title = titleInput.value;
+            var content = contentArea.value;
                 
+	    titleInput.value = ''; 
+	    contentArea.value = '';
             goog.net.XhrIo.send('/post', function() {
-                titleInput.value = ''; 
-                contentArea.value = '';
                 
-                ov.close();
                 // TODO CLOSE BOX
                 //goog.style.showElement(goog.dom.getElement('newConversation'),);
                  },'POST',goog.uri.utils.buildQueryDataFromMap({'area':self.categoryView.category.name,
-                    'title':titleInput.value,
-                    'content':contentArea.value})
+                    'title':title,
+                    'content':content})
             );
+            ov.close();
     });
     
     var inputs = goog.dom.query("#newConversation .titleField input,#newConversation textarea");

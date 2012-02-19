@@ -1,6 +1,5 @@
 #welcome h1 {
     color: #77a1cc;
-    font-weight: bold;
     font-family: BebasRegular;
     font-size: 200%;
     margin-bottom: 5px;
@@ -31,8 +30,10 @@
 }
 .announcement p {
     font-size: 120%;
+    margin-bottom: 5px;
 }
 .announcement .date {
+    color: #aaa;
     font-style:italic;
 }
 .question textarea {
