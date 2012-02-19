@@ -203,62 +203,67 @@ function slideshow() {
     setTimeout('slideshow()',wait);
 }
 $(document).ready(function() {
-    $("span").mousedown(function() {
-        $(this).prev('input').focus();
-        return false;
-    });
-    $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").focusin(function() {
-        $(this).next('span').addClass('light');
-    });
-    $("input[name='username'],input[name='password'],input[name='email'],input[name='confirm']").focusout(function() {
-        if ($(this).val() == '')
-            $(this).next('span').show();
-         $(this).next('span').removeClass('light');
-    });
-    $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").keypress(function() {
-        $(this).next('span').hide();
-    });
-    
-    var preload = new Image();
-    preload.src = '/static/images/signup/0.png';
-    preload.src = '/static/images/signup/1.png';
-    preload.src = '/static/images/signup/2.png';
-    $('.dots button').click(function() {
-        $('.dots button').each(function() {
-            if ($(this).hasClass('dotActive')) {
-                $(this).removeClass('dotActive');
-                $(this).addClass('dot');
-            }
+    if ($.browser.msie) {
+        $(".footer:first,.slideshow,.dots,.wrap,button").hide();
+        $("#center").append('<div style="font-size:200%;padding-top:400px;color:white">Sorry, OuterClub does not support Internet Explorer at this time.</div>');
+    } else {
+        $("span").mousedown(function() {
+            $(this).prev('input').focus();
+            return false;
         });
-    	$(this).removeClass('dot');
-		$(this).addClass('dotActive');
-        var no = $(this).index();
-        $('.slideshow').fadeOut(function() {
-            $(this).css('background-image','url(/static/images/signup/'+no+'.png)');
-            $(this).fadeIn();
+        $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").focusin(function() {
+            $(this).next('span').addClass('light');
         });
+        $("input[name='username'],input[name='password'],input[name='email'],input[name='confirm']").focusout(function() {
+            if ($(this).val() == '')
+                $(this).next('span').show();
+             $(this).next('span').removeClass('light');
+        });
+        $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").keypress(function() {
+            $(this).next('span').hide();
+        });
+        
+        var preload = new Image();
+        preload.src = '/static/images/signup/0.png';
+        preload.src = '/static/images/signup/1.png';
+        preload.src = '/static/images/signup/2.png';
+        $('.dots button').click(function() {
+            $('.dots button').each(function() {
+                if ($(this).hasClass('dotActive')) {
+                    $(this).removeClass('dotActive');
+                    $(this).addClass('dot');
+                }
+            });
+            $(this).removeClass('dot');
+            $(this).addClass('dotActive');
+            var no = $(this).index();
+            $('.slideshow').fadeOut(function() {
+                $(this).css('background-image','url(/static/images/signup/'+no+'.png)');
+                $(this).fadeIn();
+            });
 
-    });
-    setTimeout('slideshow()',wait);
-    $("button[type='submit']").click(function() {
-        $.ajax({
-            type:'POST',
-            url:'/signup',
-            data: { username: $("input[name='username']").val(), email: $("input[name='email']").val(),
-                password: $("input[name='password']").val() },
-            success:function(data) {
-                if ('error' in data) {
-                    showError(data['error']);
-                }
-                if ('user_id' in data && 'key' in data) {
-                    document.cookie = 'user_id='+data['user_id']+';';
-                    document.cookie = 'key='+data['key']+';';
-                    window.location = '/';
-                }
-            },
-            dataType: 'json'
         });
-    });
+        setTimeout('slideshow()',wait);
+        $("button[type='submit']").click(function() {
+            $.ajax({
+                type:'POST',
+                url:'/signup',
+                data: { username: $("input[name='username']").val(), email: $("input[name='email']").val(),
+                    password: $("input[name='password']").val() },
+                success:function(data) {
+                    if ('error' in data) {
+                        showError(data['error']);
+                    }
+                    if ('user_id' in data && 'key' in data) {
+                        document.cookie = 'user_id='+data['user_id']+';';
+                        document.cookie = 'key='+data['key']+';';
+                        window.location = '/';
+                    }
+                },
+                dataType: 'json'
+            });
+        });
+    }
 });
 </script>
 </body>

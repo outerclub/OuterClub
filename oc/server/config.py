@@ -9,5 +9,5 @@ class DefaultConfig:
 
     bind_address = '0.0.0.0'
     port = 80
-    debug = False
+    debug = True
 
