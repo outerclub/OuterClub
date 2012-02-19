@@ -162,7 +162,7 @@ body{
  * slide show.
  */
 .slide_show{
-    top: 160px;
+    top: 125px;
 }
 .slide_show .scroll {
     border-top: 1px solid #222;
@@ -172,7 +172,7 @@ body{
 .slide_show h2{
     color: #FFFFFF;
     font-size: 140%;
-    margin: 0 0 5px 0;
+    margin: 0 0 10px 0;
     font-family: BebasRegular;
 }
 .slide_show .item {

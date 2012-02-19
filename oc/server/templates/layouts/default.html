@@ -40,7 +40,7 @@
 </div>
 </div>
 <div id="miniProfile">
-<a href="/user/{{ user_id }}"><img width="100" height="100" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" /></a>
+<a href="/user/{{ user_id }}"><img width="70" height="70" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" /></a>
 <div>
 <h2>{{ username }}</h2> <a href="{{ url_for('logout') }}">Log out</a><br />
 <p>Prestige: <span class="prestige">{{ prestige }}</span></p>
