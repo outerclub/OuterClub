@@ -277,7 +277,7 @@ oc.Conversation.View.prototype.go = function(id) {
             oc.Nav.setTitle(self.conversation.title); 
 
             // show category head
-            self.categoryView.showHeading(self.conversation.category.name,self.conversation.category.id,self.conversation.category.toUrl());
+            self.categoryView.showHeading(self.conversation.category.name,self.conversation.category.id,self.conversation.category.icon);
             goog.style.showElement(conversationDiv,true);
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
     }
