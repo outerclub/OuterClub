@@ -4,6 +4,7 @@
 <head>
 <title>OuterClub</title>
 
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/misc.css') }}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/footer.css') }}" />
 <style type="text/css">
 input,body {
@@ -93,7 +94,7 @@ body {
 /**
  * Buttons.
  */
-button[type='submit'] {
+#center button[type='submit'] {
     height: 128px;
     width: 306px;
     background: url('/static/images/signup/submit.png') no-repeat;
@@ -101,7 +102,7 @@ button[type='submit'] {
     margin-top: 5px
 }
 
-button[type='submit']:hover {
+#center button[type='submit']:hover {
     background: url('/static/images/signup/submit_hover.png') no-repeat;
 }
 .dots {
@@ -135,7 +136,7 @@ button.dot {
         <div class="footer_menu_left">
             <form action="/login" method="post">
             Username <input type="text" name="l_username" size="16" /> &nbsp;Password <input type="password" name="l_password" size="16" />
-            <input type="submit" name="submit" value="Log In" /><div class="error">
+            <button type="submit" name="login" class="default">Log In</button><div class="error">
             {% with messages = get_flashed_messages() %}
             {% if messages %}
             {{ messages[0] }}
