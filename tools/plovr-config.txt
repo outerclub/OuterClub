@@ -1,7 +1,7 @@
 {
     "id": "outerclub",
-    "paths": "oc/server/static/js",
-    "inputs": "oc/server/static/js/main.js",
+    "paths": "../oc/server/static/js",
+    "inputs": "../oc/server/static/js/main.js",
     "mode":"ADVANCED",
     "level": "VERBOSE",
     "checks": {
