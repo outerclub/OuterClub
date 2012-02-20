@@ -9,7 +9,7 @@ class WebserverConfig:
     MYSQL_DATABASE = 'oc'
 
     BIND_ADDRESS = '0.0.0.0'
-    PORT = 80
+    PORT = 5000
     DEBUG = True
 
 class RtgConfig:
