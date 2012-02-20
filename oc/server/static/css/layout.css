@@ -15,7 +15,8 @@ a{
 	color:#ff8211;
 }
 a:hover {
-    text-decoration: underline;
+    color: #ffcc55;
+    text-decoration: none
 }
 body{
 	font-family:Helvetica,Arial,Sans-Serif;

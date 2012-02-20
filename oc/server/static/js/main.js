@@ -20,6 +20,7 @@ goog.require('goog.style');
 goog.require('goog.net.XhrIo');
 goog.require('goog.uri.utils');
 goog.require('oc.Templates.Main');
+goog.require('oc.Tracking');
 
 /**
  *
@@ -140,14 +141,15 @@ oc.Main.prototype.start = function() {
             goog.dom.classes.add(menuItem,'active');
 
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id]});
-            if (menuItem.getAttribute('href') == '#trending')
+            oc.Tracking.page(menuItem.getAttribute('href'));
+            if (menuItem.getAttribute('href') == '/trending')
                self.trending.go(); 
-            else if (menuItem.getAttribute('href') == '#leaderboard')
+            else if (menuItem.getAttribute('href') == '/leaderboard')
                 self.leaderboard.go();
             else
             {
                 oc.Nav.hideAll();
-                var element = goog.dom.query(menuItem.getAttribute('href'))[0];
+                var element = goog.dom.query(menuItem.getAttribute('href').replace('/','#'))[0];
                 goog.style.showElement(element,true);
                 oc.Nav.setTitle(element.getAttribute('title'));
             }
@@ -184,6 +186,7 @@ oc.Main.prototype.start = function() {
      */
     var faqLink = goog.dom.getElement('faq_link');
     goog.events.listen(faqLink,goog.events.EventType.CLICK,function(e) {
+        oc.Tracking.page('/faq');
         var faqPage = goog.dom.getElement("faq");
         oc.Nav.setTitle('FAQ');
         oc.Nav.hideAll();

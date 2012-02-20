@@ -8,7 +8,7 @@
     vertical-align: middle;
     margin-top: -24px;
 }
-.content_wrapper .right {
+.content_wrapper .heading .right {
     float: right;
 }
 
@@ -42,44 +42,38 @@
  */
 .posts {
     margin-bottom: 15px;
+    overflow:hidden;
 }
-.posts h1 a {
+.post a h1 {
     color: #6597ca;
 }
-.post a:hover {
-    color: #dd9a7a
+.post a:hover h1 {
+    color: #a5c7ea;
+}
+.post a:hover img {
+    opacity: 0.7;
 }
 .post{
-    background: #1b2127;
-    display: block;
-    margin-bottom: 1px;
-    color: #7a7a7a;
-    overflow: hidden;
+    float:left;
+    width:295px;
+    background-color: rgba(0,0,0,0.5);
+    margin: 0 3px 6px 3px;
 }
-.post .left img {
-    vertical-align: 40%;
+.post h1{
+    font-family: BebasRegular;
+    font-size: 140%;
+    float:left;
 }
-.post .left {
-    padding: 3px 10px 3px 10px;
-    float: left;
+.post .inner {
+    padding:5px;
+    overflow:hidden;
 }
 .post .right {
-    float: right;
-    overflow: hidden;
+    float:right;
 }
-.post .right .block {
-    float: left;
-    padding: 6px;
-}
-.featured h1,.post h1{
-    font-family: BebasRegular;
-    font-size: 24px;
-    display: inline
-}
-.featured_nav{
-    width: 182px;
-    float: left;
-    margin-top: 50px;
+.post .block {
+    float:left;
+    clear:left;
 }
 
 /** Conversation box **/

@@ -71,10 +71,12 @@
     font-size: 16px;
     min-height: 30px;
 }
+
 .content .section {
     clear: both;
 }
 .conversation .content .date {
+    float:right;
     font-size: 12px;
     font-weight: bold;
     color: #999;

@@ -21,6 +21,7 @@
 {% if not config['DEBUG'] %}
 <script type="text/javascript">
   var _gaq = _gaq || [];
+  window['_gaq'] = _gaq;
   _gaq.push(['_setAccount', 'UA-29349455-1']);
   _gaq.push(['_trackPageview']);
 
@@ -35,10 +36,10 @@
 <body>
 <div id="menu">
 <ul>
-<li id="miniLogo"><a class="active" href="#welcome"></a></li>
-<li class="link"><a href="#categories">CATEGORIES</a></li>
-<li class="link"><a href="#trending">TRENDING NOW</a></li>
-<li class="link"><a href="#leaderboard">LEADERBOARD</a></li>
+<li id="miniLogo"><a class="active" href="/welcome"></a></li>
+<li class="link"><a href="/categories">CATEGORIES</a></li>
+<li class="link"><a href="/trending">TRENDING NOW</a></li>
+<li class="link"><a href="/leaderboard">LEADERBOARD</a></li>
 </ul>
 <div class="right">
 <div class="search">
@@ -66,6 +67,7 @@
 {% include 'partials/footer.html' %}
 <script type="text/javascript">
 window['RTG_WEBPORT'] = {{ config['RTG_WEBPORT'] }};
+window['DEBUG'] = {% if config['DEBUG'] %}true{% else %}false{% endif%};
 </script>
     <script type="text/javascript" src="/static/sockjs-0.1.2.min.js"></script>
 {% if config['DEBUG'] %}

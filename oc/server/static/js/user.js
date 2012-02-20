@@ -15,6 +15,7 @@ goog.require('goog.style');
 goog.require('goog.fx.dom');
 goog.require('goog.fx.Transition');
 goog.require('goog.uri.utils');
+goog.require('oc.Tracking');
 
 /**
  * @param {number} id
@@ -171,6 +172,7 @@ oc.User.View.prototype.changeCover = function(newCover) {
  * @param {string} user_id
  */
 oc.User.View.prototype.go = function(user_id) {
+    oc.Tracking.page('/user/'+user_id);
     var self = this;
     var isMe = (self.user.id == user_id);
     goog.net.XhrIo.send('/user/'+user_id,function(e) {

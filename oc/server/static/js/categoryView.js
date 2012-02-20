@@ -21,6 +21,7 @@ goog.require('goog.style');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.uri.utils');
+goog.require('oc.Tracking');
 
 /**
  * @param {oc.Socket} socket
@@ -53,6 +54,7 @@ oc.Category.View = function(socket,userView) {
  * @param {string} name
  */
 oc.Category.View.prototype.go = function(name) {
+    oc.Tracking.page('/category/'+oc.Category.toUrl(name));
     oc.Nav.setTitle(name);
 
     var self = this;
@@ -95,13 +97,13 @@ oc.Category.View.prototype.createConversations = function(hide,d_list) {
  */
 oc.Category.View.prototype.convoHandle = function(convos) {
     var self = this;
-    goog.array.forEach(goog.dom.query('h1 > a',convos),function(c) {
+    goog.array.forEach(goog.dom.query('.convo',convos),function(c) {
         goog.events.listen(c,goog.events.EventType.CLICK,function(e) {
             self.conversationView.go(this.getAttribute('name'));
             e.preventDefault();
         });
     });
-    goog.array.forEach(goog.dom.query('.right a',convos),function(c) {
+    goog.array.forEach(goog.dom.query('.block a',convos),function(c) {
         goog.events.listen(c,goog.events.EventType.CLICK,function(e) {
             self.userView.go(this.getAttribute('name'));
             e.preventDefault();
@@ -176,6 +178,7 @@ oc.Conversation.View = function(category_view,socket,userView) {
  * @param {string} id
  */
 oc.Conversation.View.prototype.go = function(id) {
+    oc.Tracking.page('/conversation/'+id);
    var self = this;
     var conversationDiv = goog.dom.getElement('conversation');
     // only proceed if changing conversation
