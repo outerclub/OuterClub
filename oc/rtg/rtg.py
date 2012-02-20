@@ -4,7 +4,6 @@ from thrift.protocol import TBinaryProtocol
 from thrift.server import TServer
 import threading
 
-import sys
 from t_rtg import RtgService
 from t_rtg.ttypes import *
 from os import path as op
@@ -19,7 +18,6 @@ from proc import QueueProc
 from connection import EventConnection
 from sockjs.tornado import SockJSRouter,SockJSConnection
 from ..server import database
-from config import DefaultConfig
 from ..server import util
 
 ROOT = op.normpath(op.dirname(__file__))
@@ -28,10 +26,9 @@ class External(threading.Thread):
     def run(self):
         External.ioloop.start()
 
-
 class TRtgHandler:
-    def __init__(self):
-        self.pool = PooledDB(creator=MySQLdb,mincached=10,host=DefaultConfig.mysql_server,user=DefaultConfig.mysql_user,passwd=DefaultConfig.mysql_password,db=DefaultConfig.mysql_database)
+    def __init__(self,config):
+        self.pool = PooledDB(creator=MySQLdb,mincached=10,host=config.MYSQL_SERVER,user=config.MYSQL_USER,passwd=config.MYSQL_PASSWORD,db=config.MYSQL_DATABASE)
 
     def response(self,r_id):
         conn = self.pool.connection()
@@ -80,32 +77,33 @@ class TRtgHandler:
         QueueProc.put(event.Message('/user/%d' % user_id,'user',user))
 
 
-def start():
-	EventRouter = SockJSRouter(EventConnection,'/sock')
+def start(config):
+    EventRouter = SockJSRouter(EventConnection,'/sock')
 
-	app = tornado.web.Application(EventRouter.urls)
-	app.listen(DefaultConfig.webPort)
-	External.ioloop = tornado.ioloop.IOLoop.instance()
+    app = tornado.web.Application(EventRouter.urls)
+    app.listen(config.WEBPORT)
+    External.ioloop = tornado.ioloop.IOLoop.instance()
 
-	handler = TRtgHandler()
-	processor = RtgService.Processor(handler)
-	transport = TSocket.TServerSocket(port=9090)
-	tfactory = TTransport.TBufferedTransportFactory()
-	pfactory = TBinaryProtocol.TBinaryProtocolFactory()
+    handler = TRtgHandler(config)
+    processor = RtgService.Processor(handler)
+    transport = TSocket.TServerSocket(port=config.PORT)
+    tfactory = TTransport.TBufferedTransportFactory()
+    pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
-	server = TServer.TThreadPoolServer(processor, transport, tfactory, pfactory,daemon=True)
+    server = TServer.TThreadPoolServer(processor, transport, tfactory, pfactory,daemon=True)
 
-	ext = External()
-	ext.start()
+    ext = External()
+    ext.start()
 
-	qu = QueueProc()
-	qu.start()
-	try:
-	    server.serve()
-	except:
-	    print 'Shutdown initiate.'
-	    print 'Stopping ioloop...'
-	    External.ioloop.stop()
-	    print 'Stopping queue...'
-	    qu.stop()
-	    print 'Finish'
+    qu = QueueProc()
+    qu.init(config)
+    qu.start()
+    try:
+        server.serve()
+    except:
+        print 'Shutdown initiate.'
+        print 'Stopping ioloop...'
+        External.ioloop.stop()
+        print 'Stopping queue...'
+        qu.stop()
+        print 'Finish'

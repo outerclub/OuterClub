@@ -5,7 +5,6 @@ import event
 import threading
 import Queue
 import json
-from config import DefaultConfig
 
 class QueueProc(threading.Thread):
     auth = dict()
@@ -17,7 +16,11 @@ class QueueProc(threading.Thread):
     happening = []
 
     users = dict()
-    pool = PooledDB(creator=MySQLdb,mincached=10,host=DefaultConfig.mysql_server,user=DefaultConfig.mysql_user,passwd=DefaultConfig.mysql_password,db=DefaultConfig.mysql_database)
+
+    @staticmethod
+    def init(config):
+        QueueProc.pool = PooledDB(creator=MySQLdb,mincached=10,host=config.MYSQL_SERVER,user=config.MYSQL_USER,passwd=config.MYSQL_PASSWORD,db=config.MYSQL_DATABASE)
+        
     
     # convert a list of connections to keys
     def connsToUids(self,arr):
@@ -159,6 +162,7 @@ class QueueProc(threading.Thread):
                     
             if msg == event.QueueKill:
                 break
+
     @staticmethod
     def put(msg):
         QueueProc.queue.put(msg)

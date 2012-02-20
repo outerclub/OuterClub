@@ -50,6 +50,11 @@ oc.Main = function() {
      * @type {oc.Leaderboard}
      */
     this.leaderboard = new oc.Leaderboard(this.userView);
+
+    /**
+     * @type {number}
+     */
+    this.happeningItems = 5;
 };
 
 oc.Main.prototype.start = function() {
@@ -100,7 +105,7 @@ oc.Main.prototype.start = function() {
     this.socket.addCallback('happening',function(data) {
         var items = goog.dom.query('.slide_show .item');
         
-        if (items.length >= 5)
+        if (items.length >= self.happeningItems)
         {
             var last = items[items.length-1];
             var anim = new goog.fx.dom.FadeOutAndHide(last,500);
@@ -114,7 +119,7 @@ oc.Main.prototype.start = function() {
     });
     this.socket.addCallback('happening_init',function(data) {
         goog.array.forEach(data,function(h,i) {
-	    if (i < 5)
+	    if (i < self.happeningItems)
             	createHappening(h,false);
         });
     });
@@ -152,28 +157,40 @@ oc.Main.prototype.start = function() {
     });
 
     // search box
-    /*
-    $("#menu input").focusin(function() {
-        $(this).next('span').addClass('light');
+    var searchInput = goog.dom.query('#menu input')[0];
+    var searchOver = goog.dom.getNextElementSibling(searchInput);
+    goog.events.listen(searchInput,goog.events.EventType.FOCUSIN,function() {
+       goog.dom.classes.add(searchOver,'light');
     });
-    $("#menu input").focusout(function() {
-        if ($(this).val() == '')
-            $(this).next('span').show();
-        $(this).next('span').removeClass('light');
+    goog.events.listen(searchInput,goog.events.EventType.FOCUSOUT,function() {
+        if (this.value == '')
+            goog.style.showElement(searchOver,true);
+        goog.dom.classes.remove(searchOver,'light'); 
     });
-    $("#menu input").keypress(function() {
-        $(this).next('span').hide();
+    goog.events.listen(searchInput,goog.events.EventType.KEYPRESS,function() {
+        goog.style.showElement(searchOver,false);
     });
-    $("#menu .search span").mousedown(function() {
-        $(this).prev('input').focus();
-        return false;
+    goog.events.listen(searchOver,goog.events.EventType.MOUSEDOWN,function(e) {
+        searchInput.focus();        
+        e.preventDefault();
     });
-    */
 
     var newConvoCallback = function(close) {
     };
     var ov = oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],newConvoCallback);
 
+    /**
+     * frequently asked questions.
+     */
+    var faqLink = goog.dom.getElement('faq_link');
+    goog.events.listen(faqLink,goog.events.EventType.CLICK,function(e) {
+        var faqPage = goog.dom.getElement("faq");
+        oc.Nav.setTitle('FAQ');
+        oc.Nav.hideAll();
+        goog.style.showElement(faqPage,true);
+        
+        e.preventDefault();
+    });
 
     /**
       * new conversation box.
@@ -189,8 +206,6 @@ oc.Main.prototype.start = function() {
 	    contentArea.value = '';
             goog.net.XhrIo.send('/post', function() {
                 
-                // TODO CLOSE BOX
-                //goog.style.showElement(goog.dom.getElement('newConversation'),);
                  },'POST',goog.uri.utils.buildQueryDataFromMap({'area':self.categoryView.category.name,
                     'title':title,
                     'content':content})

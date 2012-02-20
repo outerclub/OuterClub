@@ -213,6 +213,20 @@ body{
 }
 
 /**
+ * FAQ
+ */
+#faq .question {
+    color: #6092c6;
+    font-size: 180%;
+    margin-bottom: 10px;
+}
+#faq .answer {
+    font-size: 120%;
+    line-height: 20px;
+    margin-bottom: 15px;
+}
+
+/**
  * Frames
  */
 .content_wrapper{

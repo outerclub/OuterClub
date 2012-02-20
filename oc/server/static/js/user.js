@@ -113,7 +113,7 @@ oc.User.View.prototype.init =  function() {
     goog.net.XhrIo.send('/user/'+id,function(e) {
         var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
         self.user = new oc.User(u['user_id'],u['name'],u['avatar_image'],u['cover_image'],u['prestige'],u['guilds'],u['admin'],u['blurbs']);
-        self.socket.init('http://'+window.location.hostname+':8080/sock',
+        self.socket.init('http://'+window.location.hostname+':'+window['RTG_WEBPORT']+'/sock',
             function() {
                 self.socket.send({'user_id':self.user.id,'key':self.key});
                 self.socket.send({'register':['/happening','/user/'+self.user.id]});

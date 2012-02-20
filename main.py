@@ -1,2 +1,3 @@
+import config
 from oc.server import server
-server.start()
+server.start(config.WebserverConfig)

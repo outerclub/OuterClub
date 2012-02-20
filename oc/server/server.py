@@ -7,7 +7,6 @@ from flask import render_template
 from flask import Flask,request
 
 import util
-from config import DefaultConfig
 from datetime import datetime
 import hashlib
 import random
@@ -22,22 +21,12 @@ from thrift.transport import TSocket
 from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 import os
- 
-# setup rtg
-transport = TSocket.TSocket(DefaultConfig.rtg_server,DefaultConfig.rtg_server_port)
-transport = TTransport.TBufferedTransport(transport)
-protocol = TBinaryProtocol.TBinaryProtocol(transport)
-
-client = RtgService.Client(protocol)
 
 # setup app
 app = Flask(__name__)
-
-pool = PooledDB(creator=MySQLdb,mincached=10,host=DefaultConfig.mysql_server,user=DefaultConfig.mysql_user,passwd=DefaultConfig.mysql_password,db=DefaultConfig.mysql_database)
-
-globalAuths = {}
+ 
 def isLoggedIn():
-    return 'user_id' in request.cookies and 'key' in request.cookies and int(request.cookies['user_id']) in globalAuths and globalAuths[int(request.cookies['user_id'])] == request.cookies['key']
+    return 'user_id' in request.cookies and 'key' in request.cookies and int(request.cookies['user_id']) in app.config['globalAuths'] and app.config['globalAuths'][int(request.cookies['user_id'])] == request.cookies['key']
 
 def displaySignup():
     return flask.redirect(flask.url_for('signup'))
@@ -49,7 +38,7 @@ def getUid():
 def index():
     if not isLoggedIn():
         return displaySignup()
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
     res = cur.execute('select name,image from category where private=false order by cat_id asc') 
     categories = []
@@ -57,7 +46,7 @@ def index():
         cat = c[0]
         categories.append({'name':util.formatCategoryName(cat),'image':c[1]})
     
-    g = {'debug': DefaultConfig.debug}
+    g = {}
     uid = getUid()
     user = db.fetchUser(cur,uid)
     g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige']})
@@ -86,7 +75,7 @@ def category(category):
 
     # fetch the category id/visibility from the name
     category = category.replace('+',' ')
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
     cur.execute('select cat_id,private,icon from category where name=%s', (category,))
     row = cur.fetchone()
@@ -121,7 +110,7 @@ def conversation(id):
         return ''
 
     # fetch the main conversation metadata
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
     res = cur.execute('select title,postDate,content,cat_id,user_id from conversation where d_id=%s',(id,))
     conversation = cur.fetchone()
@@ -168,7 +157,7 @@ def conversation(id):
 def trending():
     if not isLoggedIn():
         return ''
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
 
     d = db.fetchTrendingConversations(cur)
@@ -180,7 +169,7 @@ def trending():
 def leaderboard():
     if not isLoggedIn():
         return ''
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
 
     d = db.fetchLeaderboard(cur)
@@ -200,16 +189,16 @@ def covers():
                 covers.append(f)
         return flask.jsonify(covers=covers)
     else:
-        conn = pool.connection()
+        conn = app.config['pool'].connection()
         cur = conn.cursor()
         cur.execute('update user set cover_image=%s where user_id=%s',(request.form['cover'],getUid()))
         conn.commit()
         cur.close()
         conn.close()
 
-        transport.open()
-        client.userModified(getUid())
-        transport.close()
+        app.config['transport'].open()
+        app.config['client'].userModified(getUid())
+        app.config['transport'].close()
         
         return ''
 
@@ -225,16 +214,16 @@ def avatars():
                 avatars.append(f)
         return flask.jsonify(avatars=avatars)
     else:
-        conn = pool.connection()
+        conn = app.config['pool'].connection()
         cur = conn.cursor()
         cur.execute('update user set avatar_image=%s where user_id=%s',(request.form['avatar'],getUid()))
         conn.commit()
         cur.close()
         conn.close()
 
-        transport.open()
-        client.userModified(getUid())
-        transport.close()
+        app.config['transport'].open()
+        app.config['client'].userModified(getUid())
+        app.config['transport'].close()
         
         return ''
     
@@ -242,7 +231,7 @@ def avatars():
 def user(id):
     if not isLoggedIn():
         return ''
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
     user = db.fetchUser(cur,id)
     cur.close()
@@ -255,7 +244,7 @@ def post():
         return ''
 
     # fetch the category information
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
     cur.execute('select cat_id,image from category where name=%s', (request.form['area'],))
     res = cur.fetchone()
@@ -271,9 +260,9 @@ def post():
     cur.close()
     conn.close()
 
-    transport.open()
-    client.conversation(d_id)
-    transport.close()
+    app.config['transport'].open()
+    app.config['client'].conversation(d_id)
+    app.config['transport'].close()
     
     return ''
 
@@ -284,7 +273,7 @@ def reply():
     d_id = int(request.form['d_id'])
     data = request.form['data'].encode('utf-8')
 
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
 
     error = None
@@ -308,9 +297,9 @@ def reply():
     cur.close()
     conn.close()
 
-    transport.open()
-    client.response(r_id)
-    transport.close()
+    app.config['transport'].open()
+    app.config['client'].response(r_id)
+    app.config['transport'].close()
 
     return '{}'
 
@@ -322,7 +311,7 @@ def upvote():
     d_id = int(request.form['d_id'])
     object_id = int(request.form['user_id'])
 
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
     uid = getUid() 
     cur.execute('select COUNT(*) from upvote where user_id=%s and context_id=%s and object_id=%s and type=%s',(uid,d_id,object_id,util.Upvote.UserType))
@@ -334,9 +323,9 @@ def upvote():
         cur.execute('update user set prestige=%s where user_id=%s',(cur.fetchone()[0]+1,object_id))
         conn.commit()
 
-        transport.open()
-        client.userModified(object_id);
-        transport.close()
+        app.config['transport'].open()
+        app.config['client'].userModified(object_id);
+        app.config['transport'].close()
     cur.close()
     conn.close()
     return ''
@@ -345,11 +334,11 @@ def initAuth(id,redir):
     auth = TAuth()
     auth.user_id = id
     auth.key = str(uuid.uuid4())
-    transport.open()
-    client.auth(auth)
-    transport.close()
+    app.config['transport'].open()
+    app.config['client'].auth(auth)
+    app.config['transport'].close()
 
-    globalAuths[id] = auth.key
+    app.config['globalAuths'][id] = auth.key
     if (redir):
         redir = flask.redirect(flask.url_for('index'))
         response = app.make_response(redir)
@@ -365,7 +354,7 @@ def login():
         return flask.redirect(flask.url_for('index'))
 
     # check to see if user exists
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
     cur.execute('select user_id,avatar_image,password from user where name=%s and password=%s', (request.form['l_username'],hashlib.sha224(request.form['l_password']).hexdigest()))
     test = cur.fetchone()
@@ -390,7 +379,7 @@ def signup():
         return render_template('signup.html')
 
     error = None
-    conn = pool.connection()
+    conn = app.config['pool'].connection()
     cur = conn.cursor()
     
     if len(request.form['email']) == 0:
@@ -407,12 +396,15 @@ def signup():
     
     # test for user
     if not error:
+        print 'rawr'
         if len(request.form['username']) == 0:
             error = "Username cannot be empty."
         elif len(request.form['username']) <= 2:
             error = "Username must be greater than 2 characters long."
         elif not re.match("^\w+$",request.form['username']):
             error = "Username can only contain alphanumeric characters or underscores."
+        elif request.form['password'] != request.form['confirm']:
+            error = "Passwords did not match."
 
         else:
             # check to see if user exists
@@ -448,8 +440,19 @@ def logout():
     resp.set_cookie('key',expires=datetime.now())
     return resp
 
-app.debug = DefaultConfig.debug
-app.secret_key = os.urandom(32)
+def start(config):
+    # setup rtg
+    transport = TSocket.TSocket(config.RTG_SERVER,config.RTG_SERVER_PORT)
+    transport = TTransport.TBufferedTransport(transport)
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    app.config.from_object(config)
 
-def start():
-    app.run(host=DefaultConfig.bind_address,port=DefaultConfig.port)
+    app.config['transport'] = transport
+    app.config['client'] = RtgService.Client(protocol)
+
+    app.config['pool'] = PooledDB(creator=MySQLdb,mincached=10,host=config.MYSQL_SERVER,user=config.MYSQL_USER,passwd=config.MYSQL_PASSWORD,db=config.MYSQL_DATABASE)
+
+    app.config['globalAuths'] = {}
+    app.debug = config.DEBUG
+    app.secret_key = os.urandom(32)
+    app.run(host=config.BIND_ADDRESS,port=config.PORT)

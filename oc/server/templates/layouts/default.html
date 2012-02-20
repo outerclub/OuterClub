@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>{% block title %} Unknown {% endblock %} - OuterClub</title>
-{% if debug %}
+{% if config['DEBUG'] %}
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/reset.css') }}"/>
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/misc.css') }}"/>
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/footer.css') }}"/>
@@ -18,24 +18,33 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/layout.compiled.css') }}"/>
 {% endif %}
 {% block headers %} {% endblock %}
+{% if not config['DEBUG'] %}
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-29349455-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+{% endif %}
 </head>
 <body>
-
 <div id="menu">
 <ul>
 <li id="miniLogo"><a class="active" href="#welcome"></a></li>
 <li class="link"><a href="#categories">CATEGORIES</a></li>
-<!--<li class="link"><a href="#guilds">GUILDS</a></li>-->
 <li class="link"><a href="#trending">TRENDING NOW</a></li>
 <li class="link"><a href="#leaderboard">LEADERBOARD</a></li>
 </ul>
 <div class="right">
-<!--
 <div class="search">
 <input type="text" name="search" />
 <span>Search</span>
 <button />
--->
 </div>
 </div>
 </div>
@@ -55,8 +64,11 @@
 {% block content %} {% endblock %}
 </div>
 {% include 'partials/footer.html' %}
-    <script type="text/javascript" src="/static/sockjs-0.1.2.js"></script>
-{% if debug %}
+<script type="text/javascript">
+window['RTG_WEBPORT'] = {{ config['RTG_WEBPORT'] }};
+</script>
+    <script type="text/javascript" src="/static/sockjs-0.1.2.min.js"></script>
+{% if config['DEBUG'] %}
     <script type="text/javascript" src="http://localhost:9810/compile?id=outerclub"></script>
 {% else %}
     <script type="text/javascript" src="/static/js/all.compiled.js"></script>
