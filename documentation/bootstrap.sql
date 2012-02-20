@@ -22,7 +22,7 @@ CREATE TABLE `category` (
   KEY `name_index` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-INSERT INTO `category` VALUES (2,'general','general.png',0,'general.jpg','general_thumb.jpg'),(3,'current events','currentEvents.png',0,NULL,'currentevents_thumb.jpg'),(4,'high school','highSchool.png',0,'highschool.jpg','highschool_thumb.jpg'),(5,'college','college.png',0,'college.jpg','college_thumb.jpg'),(6,'love clinic','loveClinic.png',0,'love.jpg','love_thumb.jpg'),(7,'sports','sports.png',0,'sports.jpg','sports_thumb.jpg'),(8,'philosophy','philosophy.png',0,'philosophy.jpg','philosophy_thumb.jpg'),(9,'adulthood','adulthood.png',0,'adult.jpg','adult_thumb.jpg'),(10,'technology','technology.png',0,'tech.png','technology_thumb.jpg'),(11,'video & computer games','videoCG.png',0,NULL,'videogame_thumb.jpg'),(12,'fashion','fashion.png',0,'fashion.jpg','fashion_thumb.jpg'),(13,'tv & movies','tvMovies.png',0,'tv.jpg','tv_thumb.jpg'),(14,'music','music.png',0,'music.jpg','music_thumb.jpg'),(16,'question of the week',NULL,1,NULL,NULL);
+INSERT INTO `category` VALUES (2,'general','general.png',0,NULL,'general_thumb.jpg'),(3,'current events','currentEvents.png',0,NULL,'currentevents_thumb.jpg'),(4,'high school','highSchool.png',0,NULL,'highschool_thumb.jpg'),(5,'college','college.png',0,NULL,'college_thumb.jpg'),(6,'love clinic','loveClinic.png',0,NULL,'love_thumb.jpg'),(7,'sports','sports.png',0,NULL,'sports_thumb.jpg'),(8,'pop culture','popculture.png',0,NULL,'popculture.jpg'),(9,'philosophy','philosophy.png',0,NULL,'philosophy_thumb.jpg'),(10,'adulthood','adulthood.png',0,NULL,'adult_thumb.jpg'),(11,'technology','technology.png',0,NULL,'technology_thumb.jpg'),(12,'travel','travel.png',0,NULL,'travel.jpg'),(13,'video & computer games','videoCG.png',0,NULL,'videogame_thumb.jpg'),(14,'fashion','fashion.png',0,NULL,'fashion_thumb.jpg'),(15,'tv & movies','tvMovies.png',0,NULL,'tv_thumb.jpg'),(16,'food','food.png',0,NULL,'food.jpg'),(17,'music','music.png',0,NULL,'music_thumb.jpg'),(20,'question of the week',NULL,1,NULL,NULL);
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `conversation` (
@@ -34,7 +34,15 @@ CREATE TABLE `conversation` (
   `content` tinytext NOT NULL,
   PRIMARY KEY (`d_id`),
   KEY `cat_id_index` (`cat_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=78 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `invite_key` (
+  `email` varchar(255) NOT NULL,
+  `code` varchar(255) NOT NULL,
+  KEY `code_index` (`code`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -46,7 +54,7 @@ CREATE TABLE `response` (
   `content` tinytext NOT NULL,
   PRIMARY KEY (`r_id`),
   KEY `d_id_index` (`d_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
@@ -82,7 +90,17 @@ CREATE TABLE `user` (
   `admin` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`user_id`),
   KEY `name_index` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_category_blurb` (
+  `cat_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `text` tinytext,
+  KEY `cat_id_index` (`cat_id`),
+  KEY `user_id_index` (`user_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;

@@ -6,6 +6,8 @@
  * @param isMe
  * @param name
  * @param blurbs
+ * @param categories
+ * @param categoryIds
  */
 {template .show}
     <a rel="#cover">
@@ -18,9 +20,11 @@
             src="/static/images/avatars/{$avatar_image}" />
     </a>
 <h2>{$name}</h2>
-{foreach $blurb in $blurbs}
+<h3>{if $isMe}Your {/if}Blurbs</h3>
+{foreach $cat_id in $categoryIds}
 <div class="blurb">
-blurbit
+<label style="display:none" for="{$cat_id}">{$categories[$cat_id].name}</label> <input {if not $isMe}disabled="disabled"{/if} size="50" maxlength="50" type="text" name="{$cat_id}" 
+{if $blurbs[$cat_id]}value="{$blurbs[$cat_id]}"{/if}/>
 </div>
 {/foreach}
 {/template}

@@ -33,19 +33,43 @@ oc.Main = function() {
     this.socket = new oc.Socket();
 
     /**
+     * @type {Object.<oc.Category>}
+     */
+    this.categories = {};
+
+    var self = this;
+    goog.net.XhrIo.send('/categories',function(e) {
+        var data = goog.json.unsafeParse(e.target.getResponseText())['categories'];
+        var ordered = [];
+        goog.array.forEach(data,function(cat) {
+            var obj = oc.Category.extractFromJson(cat);
+            ordered.push(obj);
+            self.categories[obj.id] = obj; 
+        });
+        goog.dom.query('#categories div')[0].innerHTML = oc.Templates.Category.categoryList({categories:ordered});
+        goog.array.forEach(goog.dom.query('#categories a'),function(category) {
+            goog.events.listen(category,goog.events.EventType.CLICK,function(e) {
+                var name = this.getAttribute('title');
+                self.categoryView.go(name);
+                e.preventDefault();
+            });
+        });
+    
+    });
+    /**
      * @type {oc.User.View}
      */
-    this.userView = new oc.User.View(this.socket);
+    this.userView = new oc.User.View(this.categories,this.socket);
 
     /**
      * @type {oc.Category.View}
      */
-    this.categoryView = new oc.Category.View(this.socket,this.userView);
+    this.categoryView = new oc.Category.View(this.categories,this.socket,this.userView);
 
     /**
      * @type {oc.Trending}
      */
-    this.trending = new oc.Trending(this.categoryView.conversationView);
+    this.trending = new oc.Trending(this.categories,this.categoryView.conversationView);
 
     /**
      * @type {oc.Leaderboard}
@@ -122,13 +146,6 @@ oc.Main.prototype.start = function() {
         goog.array.forEach(data,function(h,i) {
 	    if (i < self.happeningItems)
             	createHappening(h,false);
-        });
-    });
-    goog.array.forEach(goog.dom.query('#categories a'),function(category) {
-        goog.events.listen(category,goog.events.EventType.CLICK,function(e) {
-            var name = this.getAttribute('title');
-            self.categoryView.go(name);
-            e.preventDefault();
         });
     });
     // gate to another section
@@ -242,11 +259,6 @@ oc.Main.prototype.start = function() {
 
     goog.events.listen(window,goog.events.EventType.RESIZE,oc.Main.Resize);
     oc.Main.Resize();
-    /*
-    var newGuildCallback = function(close) {
-    }
-    oc.overlay(goog.dom.query('#guilds button')[0],newGuildCallback);
-    */
 };
 oc.Main.Resize = function() {
     var size = goog.dom.getViewportSize();

@@ -6,7 +6,7 @@ goog.require('goog.array');
 ;
 
 /**
- * @param {oc.Category} category
+ * @param {number} categoryId
  * @param {oc.User} user
  * @param {string} date
  * @param {number} id
@@ -17,11 +17,11 @@ goog.require('goog.array');
  * @constructor
  * @extends {oc.Conversation.Response}
  */
-oc.Conversation = function(category,user,date,id,title,content,responses,votableUsers) {
+oc.Conversation = function(categoryId,user,date,id,title,content,responses,votableUsers) {
     /**
-     * @type {oc.Category}
+     * @type {number}
      */
-    this.category = category;
+    this.categoryId = categoryId;
 
     /**
      * @type {Array}
@@ -99,7 +99,7 @@ oc.Conversation.extractFromJson = function(json) {
         responses.push(oc.Conversation.Response.extractFromJson(r));
     });
     return new oc.Conversation(
-        new oc.Category(json['category_id'],json['category_name'],json['category_icon']),
+        json['cat_id'],
         oc.User.extractFromJson(json['conversation']['user']),
         json['conversation']['date'],
         json['conversation']['id'],

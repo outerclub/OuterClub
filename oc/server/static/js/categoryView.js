@@ -24,11 +24,12 @@ goog.require('goog.uri.utils');
 goog.require('oc.Tracking');
 
 /**
+ * @param {Object.<oc.Category>} categories
  * @param {oc.Socket} socket
  * @param {oc.User.View} userView
  * @constructor
  */
-oc.Category.View = function(socket,userView) {
+oc.Category.View = function(categories,socket,userView) {
     /**
      * @type {oc.Category}
      */
@@ -48,6 +49,12 @@ oc.Category.View = function(socket,userView) {
      * @type {oc.Conversation.View}
      */
     this.conversationView = new oc.Conversation.View(this,socket,userView);
+
+    /**
+     * @type {Object.<oc.Category>}
+     */
+    this.categories = categories;
+
 };
 
 /**
@@ -71,7 +78,7 @@ oc.Category.View.prototype.go = function(name) {
         goog.style.showElement(dynamic,true);
 
         var canCreate = !categoryData['private'] || self.userView.user.admin;
-        self.showHeading(name,categoryData['id'],categoryData['icon'],!categoryData['private']);
+        self.showHeading(categoryData['id'],!categoryData['private']);
         self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/category/'+categoryData['id']]});
     });
     this.socket.addCallback('conversation',function(data) {
@@ -112,26 +119,24 @@ oc.Category.View.prototype.convoHandle = function(convos) {
 };
 
 /**
- * @param {string} name
  * @param {number} id
- * @param {string} icon
  * @param {boolean=} canCreate
  */
-oc.Category.View.prototype.showHeading = function(name,id,icon,canCreate) {
+oc.Category.View.prototype.showHeading = function(id,canCreate) {
     canCreate = goog.isBoolean(canCreate) ? canCreate : true;
     // change to the new category
-    this.category = new oc.Category(id,name,icon);
+    this.category = this.categories[id];
 
     // show category head
-    goog.dom.query('.heading h2')[0].innerHTML = name;
+    goog.dom.query('.heading h2')[0].innerHTML = this.category.name;
     var link = goog.dom.query('.heading a')[0];
     goog.style.showElement(goog.dom.query('.heading')[0],true);
     var img = goog.dom.query('.heading img')[0];
-    if (!goog.isDefAndNotNull(icon) || icon == '')
+    if (!goog.isDefAndNotNull(this.category.icon) || this.category.icon == '')
     {
         goog.style.showElement(img,false);
     } else {
-        img.setAttribute('src','/static/images/categories/'+icon);
+        img.setAttribute('src','/static/images/categories/'+this.category.icon);
         goog.style.showElement(img,true);
     }
     
@@ -141,7 +146,7 @@ oc.Category.View.prototype.showHeading = function(name,id,icon,canCreate) {
     goog.events.removeAll(link);
     var self = this;
     goog.events.listen(link,goog.events.EventType.CLICK,function(e) {
-        self.go(name,id,icon);
+        self.go(this.category.name);
         e.preventDefault();
     });
 };
@@ -175,7 +180,7 @@ oc.Conversation.View = function(category_view,socket,userView) {
 };
 
 /**
- * @param {string} id
+ * @param {number} id
  */
 oc.Conversation.View.prototype.go = function(id) {
     oc.Tracking.page('/conversation/'+id);
@@ -193,7 +198,7 @@ oc.Conversation.View.prototype.go = function(id) {
             oc.Nav.setTitle(self.conversation.title); 
 
             // show category head
-            self.categoryView.showHeading(self.conversation.category.name,self.conversation.category.id,self.conversation.category.icon);
+            self.categoryView.showHeading(self.conversation.categoryId);
 
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
             self.socket.addCallback('response',function(data) {
@@ -280,7 +285,7 @@ oc.Conversation.View.prototype.go = function(id) {
             oc.Nav.setTitle(self.conversation.title); 
 
             // show category head
-            self.categoryView.showHeading(self.conversation.category.name,self.conversation.category.id,self.conversation.category.icon);
+            self.categoryView.showHeading(self.conversation.categoryId);
             goog.style.showElement(conversationDiv,true);
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
     }

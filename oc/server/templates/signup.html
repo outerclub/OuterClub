@@ -262,7 +262,8 @@ $(document).ready(function() {
                 type:'POST',
                 url:'/signup',
                 data: { username: $("input[name='username']").val(), email: $("input[name='email']").val(),
-                    password: $("input[name='password']").val(),confirm:$("input[name='confirm']").val() },
+                    password: $("input[name='password']").val(),confirm:$("input[name='confirm']").val(),
+                    k: '{{ k }}' },
                 success:function(data) {
                     if ('error' in data) {
                         showError(data['error']);

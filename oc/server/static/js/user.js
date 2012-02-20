@@ -15,6 +15,7 @@ goog.require('goog.style');
 goog.require('goog.fx.dom');
 goog.require('goog.fx.Transition');
 goog.require('goog.uri.utils');
+goog.require('goog.object');
 goog.require('oc.Tracking');
 
 /**
@@ -79,10 +80,16 @@ oc.User.extractFromJson = function(json) {
 }
 
 /**
+ * @param {Object.<oc.Category>} categories
  * @param {oc.Socket} socket
  * @constructor
  */
-oc.User.View = function(socket) {
+oc.User.View = function(categories,socket) {
+    /**
+     * @type {Object.<oc.Category>}
+     */
+    this.categories = categories;
+
     /**
      * @type {oc.User}
      */
@@ -184,12 +191,45 @@ oc.User.View.prototype.go = function(user_id) {
         goog.style.showElement(dynamic,true); 
         goog.dom.classes.add(dynamic,'profile');
 
+        var categoryIds = goog.object.getKeys(self.categories);
+
         // write the profile HTML
-        var html = oc.Templates.User.show({cover_image:u.cover_image,avatar_image:u.avatar_image,name:u.name,isMe:isMe,blurbs:[]});
+        var html = oc.Templates.User.show({cover_image:u.cover_image,avatar_image:u.avatar_image,name:u.name,isMe:isMe,blurbs:u.blurbs,categories:self.categories,categoryIds:categoryIds});
         dynamic.innerHTML = html;
+
+        // display default text if necessary
+        var blurbInputs = goog.dom.query('.blurb input',dynamic);
+        goog.array.forEach(blurbInputs,function(input) {
+            if (input.value == '')
+            {
+               goog.style.showElement(goog.dom.getPreviousElementSibling(input),true);
+            }
+        });
 
         // allow profile customization if isMe
         if (isMe) {
+            // click handlers for blurbs
+            goog.array.forEach(blurbInputs,function(input) {
+                var label = goog.dom.getPreviousElementSibling(input);
+                goog.events.listen(input,goog.events.EventType.FOCUSIN,function() {
+                   goog.dom.classes.add(label,'light');
+                });
+                goog.events.listen(input,goog.events.EventType.FOCUSOUT,function() {
+                    if (this.value == '')
+                        goog.style.showElement(label,true);
+                    goog.dom.classes.remove(label,'light'); 
+                    goog.net.XhrIo.send('/blurb',function() {},'POST',goog.uri.utils.buildQueryDataFromMap({'blurb':input.value,'cat_id':input.getAttribute('name')}));
+                });
+                goog.events.listen(input,goog.events.EventType.KEYPRESS,function() {
+                    goog.style.showElement(label,false);
+                });
+                goog.events.listen(label,goog.events.EventType.MOUSEDOWN,function(e) {
+                    input.focus();
+                    e.preventDefault();
+                });
+            });
+
+            // cover overlay
             var coverOverlay = goog.dom.htmlToDocumentFragment('<div id="cover" class="overlay">'+
                     '<div class="border"><h2>Select Cover</h2><div class="center"></div></div></div>');
             

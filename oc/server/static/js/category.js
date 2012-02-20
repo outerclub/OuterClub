@@ -3,10 +3,12 @@ goog.provide('oc.Category');
 /**
  * @param {number} id
  * @param {string} name
- * @param {string} icon
+ * @param {string=} image
+ * @param {string=} thumb
+ * @param {string=} icon
  * @constructor
  */
-oc.Category = function(id,name,icon) {
+oc.Category = function(id,name,image,thumb,icon) {
     /**
      * @type {string}
      */
@@ -18,7 +20,17 @@ oc.Category = function(id,name,icon) {
     this.id = id;
 
     /**
-     * @type {string}
+     * @type {string|undefined}
+     */
+    this.image = image;
+
+    /**
+     * @type {string|undefined}
+     */
+    this.thumb = thumb;
+
+    /**
+     * @type {string|undefined}
      */
     this.icon = icon;
 };
@@ -42,5 +54,5 @@ oc.Category.toUrl = function(name) {
  * @return {oc.Category}
  */
 oc.Category.extractFromJson = function(json) {
-    return new oc.Category(json['id'],json['name'],json['icon']);
+    return new oc.Category(json['id'],json['name'],json['image'],json['thumb'],json['icon']);
 };

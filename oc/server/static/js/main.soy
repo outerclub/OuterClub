@@ -39,12 +39,13 @@
 
 /**
  * @param conversations
+ * @param categories
  */
 {template .trending}
 {foreach $c in $conversations}
 <div class="entry">
     <div class="number"><span>{$c['rank']}</span></div>
-    <img src="/static/images/categories/{$c['image']}" height="90" />
+    <img src="/static/images/categories/{$categories[$c['cat_id']].thumb}" height="90" />
     <div class="text">
         <h2><a href="/conversation/{$c['id']}" name="{$c['id']}">{$c['title']}</a></h2>
         <div class="date">{$c['date']}</div>

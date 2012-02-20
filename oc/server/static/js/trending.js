@@ -1,5 +1,6 @@
 goog.provide('oc.Trending');
 goog.require('oc.Nav');
+goog.require('oc.Category.View');
 goog.require('oc.Conversation.View');
 goog.require('goog.array');
 goog.require('goog.dom');
@@ -11,9 +12,16 @@ goog.require('goog.events.EventType');
 goog.require('oc.Templates.Main');
 
 /**
+ * @param {Object.<oc.Category>} categories
+ * @param {oc.Conversation.View} conversationView
  * @constructor
  */
-oc.Trending = function(conversationView) {
+oc.Trending = function(categories,conversationView) {
+    /**
+     * @type {Object.<oc.Category>}
+     */
+    this.categories = categories;
+
     /**
      * @type {oc.Conversation.View}
      */
@@ -25,7 +33,7 @@ oc.Trending.prototype.go = function() {
         var conversations = goog.json.unsafeParse(e.target.getResponseText())['conversations'];
         var trending = goog.dom.getElement('trending');
         oc.Nav.setTitle(trending.getAttribute('title'));
-        var html = oc.Templates.Main.trending({conversations:conversations});
+        var html = oc.Templates.Main.trending({conversations:conversations,categories:self.categories});
             
         goog.array.forEach(goog.dom.query('.entry',trending),function(e) {
             goog.dom.removeNode(e);

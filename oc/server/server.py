@@ -40,20 +40,15 @@ def index():
         return displaySignup()
     conn = app.config['pool'].connection()
     cur = conn.cursor()
-    res = cur.execute('select name,image from category where private=false order by cat_id asc') 
-    categories = []
-    for c in cur.fetchall():
-        cat = c[0]
-        categories.append({'name':util.formatCategoryName(cat),'image':c[1]})
     
     g = {}
     uid = getUid()
     user = db.fetchUser(cur,uid)
     g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige']})
-    g.update({'categories':categories,'tab':'categories'})
+    g.update({'categories':[]})
 
     g.update({'announcements':db.fetchAnnouncements(cur)})
-    g.update({'tasks':db.fetchTasks(cur,user['user_id'])})
+    #g.update({'tasks':db.fetchTasks(cur,user['user_id'])})
 
     g.update({'question':db.fetchQuestion(cur)})
     cur.close()
@@ -67,6 +62,18 @@ def about():
         return displaySignup()
 
     return render_template('about.html')
+
+@app.route('/categories')
+def categories():
+    conn = app.config['pool'].connection()
+    cur = conn.cursor()
+    res = cur.execute('select cat_id,name,image,icon,thumb from category where private=false order by cat_id asc') 
+    categories = []
+    for c in cur.fetchall():
+        categories.append({'id':c[0],'name':util.formatCategoryName(c[1]),'image':c[2],'icon':c[3],'thumb':c[4]})
+    cur.close()
+    conn.close()
+    return flask.jsonify(categories=categories)
 
 @app.route('/category/<category>')
 def category(category):
@@ -115,10 +122,6 @@ def conversation(id):
     res = cur.execute('select title,postDate,content,cat_id,user_id from conversation where d_id=%s',(id,))
     conversation = cur.fetchone()
     cat_id = conversation[3]
-    cur.execute('select name,icon from category where cat_id=%s',(cat_id,))
-    categoryData = cur.fetchone()
-    categoryName = categoryData[0]
-    c_icon = categoryData[1]
 
     # populate the data object 
     conversation = {'id': id, 'title':conversation[0], \
@@ -150,8 +153,7 @@ def conversation(id):
     cur.close()
     conn.close()
 
-    categoryName = util.formatCategoryName(categoryName)
-    return flask.jsonify(votableUsers=list(user_ids),conversation=conversation,responses=responses,category_name=categoryName,category_id=cat_id,category_icon=c_icon)
+    return flask.jsonify(votableUsers=list(user_ids),conversation=conversation,responses=responses,cat_id=cat_id)
 
 @app.route('/trending')
 def trending():
@@ -176,6 +178,33 @@ def leaderboard():
     cur.close()
     conn.close()
     return flask.jsonify(users=d)
+
+@app.route('/blurb',methods=['POST'])
+def blurb():
+    if not isLoggedIn():
+        return ''
+
+    cat_id = request.form['cat_id']
+    blurb = request.form['blurb']
+    uid = getUid()
+
+    conn = app.config['pool'].connection()
+    cur = conn.cursor()
+    cur.execute('select * from user_category_blurb where user_id=%s and cat_id=%s',(uid,cat_id))
+    # exists?
+    if (cur.fetchone()):
+        if len(blurb) == 0:
+            cur.execute('delete from user_category_blurb where user_id=%s and cat_id=%s',(uid,cat_id))
+        else:
+            cur.execute('update user_category_blurb set text=%s where user_id=%s and cat_id=%s',(blurb,uid,cat_id))
+    else:
+        cur.execute('insert into user_category_blurb (user_id,cat_id,text) values (%s,%s,%s)',(uid,cat_id,blurb))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    return ''
+    
 
 @app.route('/covers',methods=['GET','POST'])
 def covers():
@@ -376,31 +405,49 @@ def signup():
 
     # display the page?
     if request.method == 'GET':
-        return render_template('signup.html')
+        # write the key, if exists
+        k = ''
+        if ('k' in request.args):
+            k = request.args['k'] 
+        return render_template('signup.html',k=k)
 
     error = None
     conn = app.config['pool'].connection()
     cur = conn.cursor()
-    
-    if len(request.form['email']) == 0:
-        error = "E-mail cannot be empty."
-    elif not util.emailValid(request.form['email']):
-        error = "E-mail was not valid."
+
+    # do we require an invite key?
+    if not app.debug:
+        # did the user provide an invite key?
+        if not ('k' in request.form):
+            error = "Sorry, OuterClub is not accepting signups at this time."
+        else:
+            cur.execute('select email,code from invite_key where code=%s',(request.form['k'],))
+            row = cur.fetchone()
+            if (not row):
+                error = "Sorry, OuterClub is not accepting signups at this time."
+
+    if not error:
+
+        if len(request.form['email']) == 0:
+            error = "E-mail cannot be empty."
+        elif not util.emailValid(request.form['email']):
+            error = "E-mail was not valid."
+            
+        # check to see if email exists
+        cur.execute('select user_id from user where email=%s', (request.form['email'],))
+        test = cur.fetchone()
         
-    # check to see if email exists
-    cur.execute('select user_id from user where email=%s', (request.form['email'],))
-    test = cur.fetchone()
-    
-    if (test != None):
-        error = "E-mail already in use."
+        if (test != None):
+            error = "E-mail already in use."
     
     # test for user
     if not error:
-        print 'rawr'
         if len(request.form['username']) == 0:
             error = "Username cannot be empty."
         elif len(request.form['username']) <= 2:
             error = "Username must be greater than 2 characters long."
+        elif len(request.form['username']) > 12:
+            error = "Username was too long."
         elif not re.match("^\w+$",request.form['username']):
             error = "Username can only contain alphanumeric characters or underscores."
         elif request.form['password'] != request.form['confirm']:
@@ -417,20 +464,32 @@ def signup():
             elif len(request.form['password']) == 0:
                 error = "Password cannot be empty."
     
+    # any errors?
     if (error):
-        cur.close()
-        conn.close()
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
         return flask.jsonify(error=error)
     else:
         avatar = 'generic.png'
         cover = 'default.jpg'
         # process the form submission
         res = cur.execute('insert into user (name,email,password,avatar_image,prestige,cover_image) values (%s,%s,%s,%s,0,%s)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar,cover))
+
+        uid = cur.lastrowid
+
+        # delete the invite key
+        res = cur.execute('delete from invite_key where code=%s',(request.form['k'],))
+
         conn.commit()
-        key = initAuth(cur.lastrowid,False)
         cur.close()
         conn.close()
-        return flask.jsonify(success=True,user_id=cur.lastrowid,key=key)
+
+        # initialize the user
+        key = initAuth(uid,False)
+
+        return flask.jsonify(success=True,user_id=uid,key=key)
     
 @app.route('/logout')
 def logout():

@@ -55,33 +55,9 @@ Welcome
         </div>
         <div id="categories" title="Categories" style="display: none">
             <div align="center">
-            <table id="nav">
-            {% set x = 0 %}
-            {% for c in categories %}
-                {% if x == 0 or x == 4 or x == 7 or x == 10 %}
-                <tr>
-                {% endif %}
-                <td {% if x == 5 or x == 9 or x == 11 %} colspan="2" {% endif %}>
-                    <a title="{{ c.name }}" href="#"><img src="{{ url_for('static',filename='images/categories/'+c.image) }}" /></a>
-                </td>
-                {% set x = x + 1 %}
-            {% endfor %}
-            </table>
             </div>
         </div>
-        <!--
-        <div id="guilds" title="Guilds" style="display: none">
-            <button rel="#newGuild" class="decorated">Start a Guild</button>
-            <div id="newGuild" class="overlay">
-                <div class="border">
-                <h2>New Guild</h2>
-                </div>
-            </div>
-        </div>
-        -->
         <div id="trending" title="Trending" style="display: none">
-            <!--<a><img src="/static/images/trending/discussions_hover.png" /></a>
-            <div class="clear">&nbsp;</div>-->
         </div>
         <div id="leaderboard" title="Leaderboard" style="display: none">
         </div>
@@ -113,35 +89,33 @@ Welcome
         </div>
         <div id="faq" style="display:none">
         <ul>
-<li><div class="question">What is prestige?</div>
-<div class="answer">Prestige is a metric used to indicate your likability, popularity, and general quality of contributions. Prestige points are earned when you create posts or when your posts are up voted. When enough prestige points are earned, you increase to the next prestige level.</div></li>
-<li><div class="question">How many prestige levels are there?</div>
-<div class="answer">Prestige levels are from 1 to 100. With every prestige level increase, the requirements for prestige points increases.</div></li>
-<li><div class="question">What are the benefits to having high prestige?</div>
-<div class="answer">Higher exposure and popularity by being on the leader board, as well as wielding more power. Users with higher prestige have greater influence through up votes.</div></li>
-<li><div class="question">Will there be new categories?</div>
-<div class="answer">Yes, depending on demand for new categories.</div></li>
-<li><div class="question">What is tagging?</div>
-<div class="answer">Tagging allows you to place your conversations into sub-categories, known as &quot;tags&quot;. When you click on a particular tag, all of those conversations in that sub-category appear. This allows us to organize our site better for you.</div></li>
-<li><div class="question">What is Question of the Week?</div>
-<div class="answer">Every week an open-ended conversation topic will be chosen. These questions are meant to stimulate community and social interaction.</div></li>
-<li><div class="question">What determines the Suggested Tasks?</div>
-<div class="answer">Suggested tasks are our recommendations to you based upon your viewing and posting history. Sometimes you may get recommendations from categories you frequently visit. Other times you might be encouraged to visit conversations you don’t explore often.</div></li>
-<li><div class="question">When should users give a &quot;coffee&quot; up vote?</div>
-<div class="answer">The coffee up vote is our representation of a &quot;thumbs up&quot;. Posts that you feel are significant or insightful to the conversation should be up voted. However, judging a post for quality is ultimately up to each user. Playful or short posts can sometimes be just as good as longer ones!</div></li>
-<li><div class="question">How does flagging work?</div>
-<div class="answer">You can opt to flag a post that you deem is inappropriate, spam, offensive, or bad manner in some way. When enough flags have been voted by the community, the post will shut down automatically. With every flag, the post loses transparency.</div></li>
-<li><div class="question">Who are the moderators?</div>
-<div class="answer">Currently the only moderators are the co-founders. As the site expands, we will gradually add qualified moderators. Maintaining a safe and mature community means everything to us.</div></li>
-<li><div class="question">Will users be able to change their avatars?</div>
-<div class="answer">Certainly. At the moment, only a limited selection is available. However, we will allow you to upload your own avatar in the near future.</div></li>
-<li><div class="question">Who creates the visuals for OuterClub?</div>
-<div class="answer">They’re great, aren’t they? Our lovely graphic designer, Uliya is in charge of all the graphics. The background is photography by Rob Sheridan.</div></li>
-<li><div class="question">When will OuterClub complete beta?</div>
-<div class="answer">We are busy making new additions and adjustments on a daily basis. The best answer is: when we feel that the product is finally ready with enough of our intended features. Oh, and of course when it’s bug-free.</div></li>
-<li><div class="question">What new features can we expect in the future?</div>
-<div class="answer">We have tons of stuff planned for you guys! This includes: more user customization, better real-time features, conversation facilitation mechanisms, interesting prestige/virtual goods incentives, and so much more.</div> </li>
-</ul>
+            <li><div class="question">What is prestige?</div>
+            <div class="answer">Prestige is a metric used to indicate your likability, popularity, and general quality of contributions. Prestige points are earned when you create posts or when your posts are up voted. When enough prestige points are earned, you increase to the next prestige level.</div></li>
+            <li><div class="question">How many prestige levels are there?</div>
+            <div class="answer">Prestige levels are from 1 to 100. With every prestige level increase, the requirements for prestige points increases.</div></li>
+            <li><div class="question">What are the benefits to having high prestige?</div>
+            <div class="answer">Higher exposure and popularity by being on the leader board, as well as wielding more power. Users with higher prestige have greater influence through up votes.</div></li>
+            <li><div class="question">Will there be new categories?</div>
+            <div class="answer">Yes, depending on demand for new categories.</div></li>
+            <li><div class="question">What is Question of the Week?</div>
+            <div class="answer">Every week an open-ended conversation topic will be chosen. These questions are meant to stimulate community and social interaction.</div></li>
+            <li><div class="question">What determines the Suggested Tasks?</div>
+            <div class="answer">Suggested tasks are our recommendations to you based upon your viewing and posting history. Sometimes you may get recommendations from categories you frequently visit. Other times you might be encouraged to visit conversations you don’t explore often.</div></li>
+            <li><div class="question">When should users give a &quot;coffee&quot; up vote?</div>
+            <div class="answer"> The coffee up vote is our representation of a &quot;thumbs up&quot;. Our take on up voting is based on people, and not on the actual content itself. Each user can be upvoted once within each conversation. You determine which users deserve your upvote, whether they are: helpful, friendly, spontaneous, badass, or whatever else! In the future, our up vote system will be more elaborate.</div></li>
+            <li><div class="question">How does flagging work?</div>
+            <div class="answer">You can opt to flag a post that you deem is inappropriate, spam, offensive, or bad manner in some way. When enough flags have been voted by the community, the post will shut down automatically. With every flag, the post loses transparency.</div></li>
+            <li><div class="question">Who are the moderators?</div>
+            <div class="answer">Currently the only moderators are the co-founders. As the site expands, we will gradually add qualified moderators. Maintaining a safe and mature community means everything to us.</div></li>
+            <li><div class="question">Will users be able to change their avatars?</div>
+            <div class="answer">Certainly. At the moment, only a limited selection is available. However, we will allow you to upload your own avatar in the near future.</div></li>
+            <li><div class="question">Who creates the visuals for OuterClub?</div>
+            <div class="answer">They’re great, aren’t they? Our lovely graphic designer, Uliya is in charge of all the graphics. The background is photography by Rob Sheridan.</div></li>
+            <li><div class="question">When will OuterClub complete beta?</div>
+            <div class="answer">We are busy making new additions and adjustments on a daily basis. The best answer is: when we feel that the product is finally ready with enough of our intended features. Oh, and of course when it’s bug-free.</div></li>
+            <li><div class="question">What new features can we expect in the future?</div>
+            <div class="answer">We have tons of stuff planned for you guys! This includes: more user customization, better real-time features, conversation facilitation mechanisms, interesting prestige/virtual goods incentives, and so much more.</div> </li>
+        </ul>
         </div>
 
     </div>

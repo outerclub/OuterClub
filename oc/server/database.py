@@ -4,18 +4,24 @@ def fetchResponses(cursor,d_id,user_id):
     cursor.execute('select r_id,user_id,replyDate,content from response where d_id=%s order by replyDate asc', (d_id,))
     
     responses = []
+    users = dict()
     for resp in cursor.fetchall():
-        responses.append({'r_id':resp[0],'user':fetchUser(cursor,resp[1]), \
+        # cache users
+        if not (resp[1] in users):
+            users[resp[1]] = fetchUser(cursor,resp[1])
+
+        responses.append({'r_id':resp[0],'user':users[resp[1]], \
                           'date': util.dateFormat(resp[2]), 'content': util.replaceMentions(cursor,util.escape(resp[3]))})
     return responses
 
 def fetchTrendingConversations(cursor):
-    cursor.execute('select d_id,thumb,user_id,title,postDate,content from conversation inner join category using (cat_id) limit 10')
+    # a simple order by most recent date
+    cursor.execute('select d_id,cat_id,user_id,title,postDate,content from conversation order by postDate desc limit 10')
     
     conversations = []
     i=1
     for d in cursor.fetchall():
-        conversations.append({'rank':i,'id': d[0],'image':d[1],'title':d[3],'date':util.dateFormat(d[4]),'content':util.escape(d[5])})
+        conversations.append({'rank':i,'id': d[0],'cat_id':d[1],'title':d[3],'date':util.dateFormat(d[4]),'content':util.escape(d[5])})
         i += 1
     return conversations
 
@@ -54,6 +60,13 @@ def fetchUser(cursor,user_id):
     for guild in cursor.fetchall():
         guilds[guild[0]] = guild[1]
     userData['guilds'] = guilds
+
+    res = cursor.execute('select cat_id,text from user_category_blurb where user_id=%s',(user_id,))
+    blurbs = dict()
+    for r in cursor.fetchall():
+        blurbs[r[0]] = r[1]
+    userData['blurbs'] = blurbs
+
     return userData
 
 def fetchQuestion(cursor):

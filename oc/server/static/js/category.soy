@@ -1,6 +1,25 @@
 {namespace oc.Templates.Category}
 
 /**
+ * @param categories
+ */
+{template .categoryList}
+<table id="nav">
+{foreach $cat in $categories}
+    {if index($cat) % 4 == 0 }
+    <tr>
+    {/if}
+    <td>
+        <a title="{$cat.name}" href="#"><img src="/static/images/categories/{$cat.image}" /></a>
+    </td>
+    {if index($cat) % 4 == 3 }
+    </tr>
+    {/if}
+{/foreach}
+</table>
+{/template}
+
+/**
  * @param hide
  * @param conversationList
  */
