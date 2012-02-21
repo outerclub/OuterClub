@@ -421,10 +421,6 @@ def invite():
     
 @app.route('/signup',methods=['GET','POST'])
 def signup():
-    # don't let the user sign up if he's logged in
-    if isLoggedIn():
-        return flask.redirect(flask.url_for('index'))
-
     # display the page?
     if request.method == 'GET':
         # write the key, if exists
