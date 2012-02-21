@@ -8,7 +8,7 @@ class WebserverConfig:
     MYSQL_PASSWORD = 'asdfgh'
     MYSQL_DATABASE = 'oc'
 
-    BIND_ADDRESS = '0.0.0.0'
+    BIND_ADDRESS = '127.0.0.1'
     PORT = 5000
     DEBUG = True
 
