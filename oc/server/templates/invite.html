@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>OuterClub Invitation</title>
+<style type="text/css">
+body {
+    background: url(http://outerclub.com/static/images/invitation.png) no-repeat;
+}
+#name {
+    position:absolute;
+    z-index:1;
+    top:120px;
+    left:104px;
+    font-weight:bold;
+    font-family:Arial, sans-serif;
+    color: #406c84;
+    font-size: 20px;
+}
+a {
+    position:absolute;
+    top:328px;
+    left:220px;
+    display:block;
+    width: 205px;
+    height: 54px;
+    background: url(http://outerclub.com/static/images/invitation_button.png) no-repeat;
+}
+</style>
+</head>
+<body>
+<div id="name">{{ name }}</div>
+<a href="http://outerclub.com/signup?k={{ key }}" />
+</body>
+</html>

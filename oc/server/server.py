@@ -396,6 +396,28 @@ def login():
     else:
         flask.flash('User or password was not valid.');
         return displaySignup()
+
+@app.route('/invite')
+def invite():
+    if not isLoggedIn():
+        return ''
+    conn = app.config['pool'].connection()
+    cur = conn.cursor()
+    cur.execute('select admin from user where user_id=%s',(getUid(),))    
+    isAdmin = cur.fetchone()[0]
+    if not isAdmin:
+        cur.close()
+        conn.close()
+        return ''
+
+    name = 'unknown name'
+    if 'name' in request.args:
+        name = request.args['name'] 
+    key = str(uuid.uuid4())[:7]
+    cur.execute('insert into invite_key (email,code,myDate) values ("",%s,NOW())',(key,))
+    cur.close()
+    conn.close()
+    return render_template('invite.html',name=name,key=key)
     
 @app.route('/signup',methods=['GET','POST'])
 def signup():

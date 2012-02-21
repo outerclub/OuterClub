@@ -217,6 +217,7 @@ oc.Main.prototype.start = function() {
             oc.Nav.setTitle(a.innerHTML);
             oc.Nav.hideAll();
             goog.style.showElement(page,true);
+            window.scrollTo(0,0);
             
             e.preventDefault();
         });

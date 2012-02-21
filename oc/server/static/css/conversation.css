@@ -78,6 +78,9 @@
 .content .section {
     clear: both;
 }
+.content .section img {
+    vertical-align:middle;
+}
 .conversation .content .date {
     float:right;
     font-size: 12px;

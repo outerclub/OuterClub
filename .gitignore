@@ -1,6 +1,7 @@
 *.swp
 *.pyc
 *.log
+logs
 *.DS_Store
 *.compiled.*
 *.project
