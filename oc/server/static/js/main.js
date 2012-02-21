@@ -120,8 +120,17 @@ oc.Main.prototype.start = function() {
         var scroller = goog.dom.query('.scroll',slideShow)[0];
         goog.dom.insertChildAt(scroller,element,0);
 
+        // clickhandler for conversation
         goog.events.listen(element,goog.events.EventType.CLICK,function(e) {
             self.categoryView.conversationView.go(p['d_id']);
+        });
+
+        // clickhandler for @mentions
+        goog.array.forEach(goog.dom.query('a',element),function(a) {
+            goog.events.listen(a,goog.events.EventType.CLICK,function(e) {
+                self.userView.go(a.getAttribute('name'));
+                e.preventDefault();
+            });
         });
         
         (new goog.fx.dom.FadeInAndShow(element,500)).play();
@@ -199,17 +208,18 @@ oc.Main.prototype.start = function() {
     var ov = oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],newConvoCallback);
 
     /**
-     * frequently asked questions.
+     * Bottom links
      */
-    var faqLink = goog.dom.getElement('faq_link');
-    goog.events.listen(faqLink,goog.events.EventType.CLICK,function(e) {
-        oc.Tracking.page('/faq');
-        var faqPage = goog.dom.getElement("faq");
-        oc.Nav.setTitle('FAQ');
-        oc.Nav.hideAll();
-        goog.style.showElement(faqPage,true);
-        
-        e.preventDefault();
+    goog.array.forEach(goog.dom.query('.footer_menu_left .staticLink'),function(a) {
+        goog.events.listen(a,goog.events.EventType.CLICK,function(e) {
+            oc.Tracking.page(a.getAttribute('href'));
+            var page = goog.dom.getElement(a.getAttribute('href').substring(1));
+            oc.Nav.setTitle(a.innerHTML);
+            oc.Nav.hideAll();
+            goog.style.showElement(page,true);
+            
+            e.preventDefault();
+        });
     });
 
     /**

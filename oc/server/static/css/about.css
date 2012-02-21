@@ -1,50 +1,44 @@
-.aboutus{
-	height:auto;
-	padding-bottom: 145px;
-}
-.aboutus h2 {
-   color: white; 
-	font-family: BebasRegular;
-	font-size:24px;
-}
 .about{
-	padding: 22px 19px 26px 19px;
     background-color: #fff;
     border-radius: 10px 10px 10px 10px;
     box-shadow: 5px 5px 10px #000;
-    width: 932px;
     margin: 0 auto;
 }
 .about img{
 	display: block;
 }
-.about h2{
-	width:280px;
-    color: #4b74ba;
+.about .left {
+    float:left;
 	text-align: right;
+	width:280px;
+	margin-left: 40px;
+}
+.about .right {
+	width:500px;
+	float: left;
+    margin-left:40px;
+    margin-top: 5px;
+}
+.about h2{
+	font-family: BebasRegular;
+	font-size:24px;
+    color: #4b74ba;
 	line-height: 30px;
-	padding:0 10px 0 0;
-	margin-left: 20px;
 }
-.about_content p{
-	width:600px;
+.about_content {
 	color:#969696;
-	float: right;
-	margin:0px 10px 5px;
 }
-.about ul{
-	width:600px;
-	color:#969696;
-	float: right;
-	padding:0;
-	margin:20px 0 0;
+.about ul {
+    margin-top: 3px;
 }
 .about ul li{
-	margin-left:10px;
+	margin-left:20px;
+    list-style-type: disc;
 }
 .about_content{
     padding-top: 20px;
     padding-bottom: 20px;
+    overflow:hidden;
 }
 .about .odd{
 	background:#151515;
@@ -53,18 +47,18 @@
 	background:#282828;
 }
 .about .last{
-	padding-bottom:10px;
+	padding-bottom:70px;
 }
 .friendship{
 	background:transparent url(/static/images/friendship_bg.png) repeat 0 0;
-	margin:-10px 0;
+	margin:-10px 0 0px;
     border-color: #4C4C4C #5A5A5A #949494;
     border-style: solid;
     border-width: 1px;
 	-webkit-border-radius: 10px;
 	-moz-border-radius: 10px;
 	border-radius: 10px;
-    padding-top: 52px
+    padding-top: 30px
 }
 .friendship h2{
 	font-family: BebasRegular;
@@ -73,15 +67,14 @@
 	text-align: left;
 	width:370px;
 	float:left;
-	margin: 10px 0 0 33px;
+	margin: 5px 0 0 30px;
 	text-shadow: 1px 1px 0 #FFFFFF;
 }
 .friendship .quote{
 	color:#d8d8d8;
-    display: inline-block;
-	width:364px;
-	margin:0;
-	padding:12px 129px 12px 18px;
+    float:left;
+	width:350px;
+	padding:12px 130px 12px 18px;
 	background:#6a6a6a;
 	border-bottom: 1px solid #D7D7D7;
 	-webkit-border-radius: 10px 0 0 10px;
@@ -95,9 +88,9 @@
     color: #555;
 }
 .friendship_content{
-    clear: both;
     padding: 30px;
     border-bottom: 1px solid gray;
+    overflow:hidden;
 }
 .friendship_content img{
 	background: #6a6a6a;
@@ -116,10 +109,10 @@
 }
 .friendship_content_right {
     float: left;
+    width: 600px;
 }
 .friendship_content_right span {
     font-family: BebasRegular;
-    font-weight: bold;
     display: block;
     padding-bottom: 10px;
     border-bottom: 1px solid gray;
@@ -128,26 +121,26 @@
     color: #555;
     text-shadow: 2px 2px 0 #ccc;
 }
-.friends{
-	border-bottom:none;
-	height: auto;
+.friends_list {
+    overflow:hidden;
+    float:left;
+    margin: 0 6px 0 6px;
 }
-.friends_list{
-    clear: both;
+.friends_list img {
+    float:left;
 }
-.friends_list p{
-    width: 110px;
-    padding: 12px 14px 9px 0;
-	font-size:15px;
-}
-.friendship_content_right{
-    float: left; 
-    width: 600px;
+.friends_list .quote {
+    width:initial;
+    padding-right: 10px;
+    padding-left:10px;
+	-webkit-border-radius: 0 10px 10px 0p;
+	-moz-border-radius: 0 10px 10px 0;
+	border-radius: 0 10px 10px 0;
+    margin-top:35px;
 }
 .friendship_content_right h4{
     color: #202020;
     font-size: 18px;
-    font-weight: normal;
-    margin: 0;
+    margin: 10px 0 5px;
 }
 

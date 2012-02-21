@@ -434,7 +434,7 @@ def signup():
             error = "E-mail was not valid."
             
         # check to see if email exists
-        cur.execute('select user_id from user where email=%s', (request.form['email'],))
+        cur.execute('select user_id from user where LCASE(email)=%s', (request.form['email'],))
         test = cur.fetchone()
         
         if (test != None):
@@ -455,7 +455,7 @@ def signup():
 
         else:
             # check to see if user exists
-            cur.execute('select user_id,avatar_image from user where name=%s', (request.form['username'],))
+            cur.execute('select user_id,avatar_image from user where LCASE(name)=%s', (request.form['username'],))
             test = cur.fetchone()
     
             # if the user exists

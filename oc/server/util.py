@@ -33,23 +33,34 @@ def escape(s):
 
 def replaceMentions(cur,data):
     users = findMentions(cur,data)
-    accum = data
     isAction = data.startswith('/me')
-    for name in users:
-        if isAction:
-            accum = accum.replace('@'+name,'<a name="%s" href="/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (users[name]['user_id'],users[name]['user_id'],users[name]['avatar_image']))
+    
+    accum = ''
+    for segment in re.split('(@\w+)',data):
+        if (segment.startswith('@')):
+            name = segment[1:]
+            u = users[name.lower()] 
+            
+            if isAction:
+                accum += '<a name="%s" href="/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (u['user_id'],u['user_id'],u['avatar_image'])
+            else:
+                accum += '<a name="%s" href="/user/%s">@%s</a>' % (u['user_id'],u['user_id'],name)
         else:
-            accum = accum.replace('@'+name,'<a name="%s" href="/user/%s">@%s</a>' % (users[name]['user_id'],users[name]['user_id'],name))
+            accum += segment
     return accum
 
 def findMentions(cur,data):
     mentions = re.findall('@(\w+)',data)
+
+    # convert to lowercase.
+    mentions = map(lambda x: x.lower(),mentions)
+
     users = dict()
     if (len(mentions) > 0):
         replacements = map(lambda x:'%s',mentions)
-        cur.execute('select name,user_id,avatar_image from user where name in (%s)' % ','.join(replacements),tuple(mentions))
+        cur.execute('select name,user_id,avatar_image from user where LCASE(name) in (%s)' % ','.join(replacements),tuple(mentions))
         for u in cur.fetchall():
-            users[u[0]] = {'user_id':u[1],'avatar_image':u[2]}
+            users[u[0].lower()] = {'user_id':u[1],'avatar_image':u[2]}
         for n in mentions:
             if not (n in users):
                 users[n] = None

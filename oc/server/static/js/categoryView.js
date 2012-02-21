@@ -337,7 +337,7 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
         e.preventDefault();
     };
 
-    var content = response.content.replace(/\n/g,'<br />');
+    var content = goog.string.newLineToBr(response.content);
     var isAction = content.indexOf('/me') === 0;
     var lastDiscussion = goog.dom.query(".conversation:last-child");
     // combine the postings or create new one?
