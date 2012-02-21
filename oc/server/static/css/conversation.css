@@ -54,6 +54,9 @@
     padding: 6px 0 6px 8px;
     float: left;
 }
+.conversation .description div {
+    clear:both;
+}
 .conversation .description a{
     vertical-align:middle;
     color: white;
