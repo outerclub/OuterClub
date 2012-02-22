@@ -1,5 +1,7 @@
 import re
 import cgi
+import smtplib
+from email.mime.text import MIMEText
 
 qtext = '[^\\x0d\\x22\\x5c\\x80-\\xff]'
 dtext = '[^\\x0d\\x5b-\\x5d\\x80-\\xff]'
@@ -69,5 +71,18 @@ def findMentions(cur,data):
 
 class Upvote:
     UserType = 0
-                
+
+def send(to,subject,msg):
+    m = MIMEText(msg,'html')
+    fro = '"OuterClub" <outerclub@gmail.com>'
+    m['From'] = fro
+    m['To'] = to
+    m['Subject'] = subject
+    username = 'outerclub'
+    password = 'stayfr3sh'
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    server.starttls()
+    server.login(username,password)
+    server.sendmail(fro,to,m.as_string())
+    server.quit()
 

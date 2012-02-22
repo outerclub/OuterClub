@@ -1,33 +1,15 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> <html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>OuterClub Invitation</title>
-<style type="text/css">
-body {
-    background: url(http://outerclub.com/static/images/invitation.png) no-repeat;
-}
-#name {
-    position:absolute;
-    z-index:1;
-    top:120px;
-    left:104px;
-    font-weight:bold;
-    font-family:Arial, sans-serif;
-    color: #406c84;
-    font-size: 20px;
-}
-a {
-    position:absolute;
-    top:328px;
-    left:220px;
-    display:block;
-    width: 205px;
-    height: 54px;
-    background: url(http://outerclub.com/static/images/invitation_button.png) no-repeat;
-}
-</style>
-</head>
-<body>
-<div id="name">{{ name }}</div>
-<a href="http://outerclub.com/signup?k={{ key }}" />
+<html>
+<body  style="margin:0;padding:0;background-color:white">
+
+<table style=" height: 725px; width: 648px;background-color: white;">
+<tr><td valign="top" background="http://outerclub.com/static/images/invitation.png">
+<div style="padding: 110px 0 0 50px; font-family:Arial,sans-serif;font-size:20px;color:#799aac;line-height:21px;width:550px">Hello, <b style="color: #406c84">{{ name }}</b><br /><br />Ed, Kyle, Mike and Phil would like to personally invite you to join them on their newly-created social website! <b>OuterClub</b> is a live, lounge-like environment that promotes a real-time community experience which allows you to have conversations about your favorite interests while exploring new interests.<br /><b>We're currently undergoing closed beta so we're excited to have you. We hope to see you there!</b></div>
+<div style="padding: 15px 0 340px 220px">
+<table style="height:54px; width:205px;background-color:white;">
+<tr><td align="center" valign="top" style="padding-top:14px;padding-bottom:17px" background="http://outerclub.com/static/images/invitation_button.png"><a style="font-family: Arial;font-size: 20px;font-weight:bold;text-decoration:none;color:#799aac" target="_blank" href="http://outerclub.com/signup?k={{ key }}">Sign up</a>
+</td></tr>
+</div>
+</td></tr>
+</table>
 </body>
 </html>

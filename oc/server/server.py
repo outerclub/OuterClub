@@ -16,6 +16,7 @@ import re
 from ..rtg.t_rtg import RtgService
 from ..rtg.t_rtg.ttypes import *
 
+import smtplib
 from thrift import Thrift
 from thrift.transport import TSocket
 from thrift.transport import TTransport
@@ -397,8 +398,9 @@ def login():
         flask.flash('User or password was not valid.');
         return displaySignup()
 
-@app.route('/invite')
+@app.route('/invite',methods=['GET','POST'])
 def invite():
+    #return render_template('invite.html',name='test')
     if not isLoggedIn():
         return ''
     conn = app.config['pool'].connection()
@@ -409,15 +411,25 @@ def invite():
         cur.close()
         conn.close()
         return ''
+    
+    if request.method == 'GET': 
+        return render_template('sender.html')
 
-    name = 'unknown name'
-    if 'name' in request.args:
-        name = request.args['name'] 
-    key = str(uuid.uuid4())[:7]
-    cur.execute('insert into invite_key (email,code,myDate) values ("",%s,NOW())',(key,))
-    cur.close()
-    conn.close()
-    return render_template('invite.html',name=name,key=key)
+    ret = ''
+    if 'name' in request.form and 'email' in request.form:
+        name = request.form['name'] 
+        email = request.form['email']
+
+        key = str(uuid.uuid4())[:7]
+        cur.execute('insert into invite_key (email,code,myDate) values (%s,%s,NOW())',(email,key))
+        cur.close()
+        conn.close()
+        
+        data = render_template('invite.html',name=name,key=key)
+        util.send(email,'%s, welcome to OuterClub!' % (name),data)
+        return 'sent to %s<br /><br /><br /><br />%s' % (email,data)
+    return ret
+         
     
 @app.route('/signup',methods=['GET','POST'])
 def signup():
