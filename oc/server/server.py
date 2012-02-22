@@ -277,14 +277,10 @@ def post():
     # fetch the category information
     conn = app.config['pool'].connection()
     cur = conn.cursor()
-    cur.execute('select cat_id,image from category where name=%s', (request.form['area'],))
-    res = cur.fetchone()
-    cat_id = res[0]
-    cat_image = res[1]
 
     user = db.fetchUser(cur,getUid())
     # insert the post
-    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(cat_id,user['user_id'],request.form['title'].encode('utf-8'),request.form['content'].encode('utf-8')))
+    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(request.form['area'],user['user_id'],request.form['title'].encode('utf-8'),request.form['content'].encode('utf-8')))
     conn.commit()
 
     d_id = cur.lastrowid

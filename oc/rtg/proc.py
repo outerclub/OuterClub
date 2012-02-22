@@ -5,6 +5,7 @@ import event
 import threading
 import Queue
 import json
+import pickle
 
 class QueueProc(threading.Thread):
     auth = dict()
@@ -18,8 +19,20 @@ class QueueProc(threading.Thread):
     users = dict()
 
     @staticmethod
+    def save():
+        f = open('.store.cache','w')
+        pickle.dump(QueueProc.happening,f)
+        f.close() 
+
+    @staticmethod
     def init(config):
         QueueProc.pool = PooledDB(creator=MySQLdb,mincached=10,host=config.MYSQL_SERVER,user=config.MYSQL_USER,passwd=config.MYSQL_PASSWORD,db=config.MYSQL_DATABASE)
+        try:
+            h = pickle.load(open('.store.cache','r'))
+            QueueProc.happening = h
+            print 'RTG: reloaded store'
+        except Exception as e:
+            pass
         
     
     # convert a list of connections to keys
@@ -154,6 +167,7 @@ class QueueProc(threading.Thread):
                         # limit the stored happening nows
                         if (len(self.happening) > 6):
                             self.happening = self.happening[1:]
+                        QueueProc.save()
                     else:
                         for conn in self.paths[msg.path]['conns']: 
                             p = msg.payload

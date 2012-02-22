@@ -2,7 +2,7 @@ import config
 from ConfigParser import SafeConfigParser
 from oc.server import server
 app = server.app
-if config.WebserverConfig.DEBUG:
+if not config.WebserverConfig.DEBUG:
     parser = SafeConfigParser()
     parser.read('.c.properties')
     cfg = config.WebserverConfig.COMPILE = dict()

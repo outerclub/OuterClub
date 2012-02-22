@@ -58,15 +58,13 @@ oc.Category.View = function(categories,socket,userView) {
 };
 
 /**
- * @param {string} name
+ * @param {string} url
  */
-oc.Category.View.prototype.go = function(name) {
-    oc.Tracking.page('/category/'+oc.Category.toUrl(name));
-    oc.Nav.setTitle(name);
-
+oc.Category.View.prototype.go = function(url) {
     var self = this;
-    goog.net.XhrIo.send('/category/'+oc.Category.toUrl(name),function(e) {
+    goog.net.XhrIo.send('/category/'+url,function(e) {
         var categoryData = goog.json.unsafeParse(e.target.getResponseText());
+        
         var posts = categoryData['posts'];
         var dynamic = goog.dom.getElement('dynamic');
         dynamic.innerHTML = '<div class="posts"></div>';
@@ -78,7 +76,9 @@ oc.Category.View.prototype.go = function(name) {
         goog.style.showElement(dynamic,true);
 
         var canCreate = !categoryData['private'] || self.userView.user.admin;
-        self.showHeading(categoryData['id'],!categoryData['private']);
+        self.setCategory(categoryData['id'],!categoryData['private']);
+        
+        oc.Nav.setTitle(self.category.name);
         self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/category/'+categoryData['id']]});
     });
     this.socket.addCallback('conversation',function(data) {
@@ -104,15 +104,9 @@ oc.Category.View.prototype.createConversations = function(hide,d_list) {
  */
 oc.Category.View.prototype.convoHandle = function(convos) {
     var self = this;
-    goog.array.forEach(goog.dom.query('.convo',convos),function(c) {
+    goog.array.forEach(goog.dom.query('.convo,.block a',convos),function(c) {
         goog.events.listen(c,goog.events.EventType.CLICK,function(e) {
-            self.conversationView.go(this.getAttribute('name'));
-            e.preventDefault();
-        });
-    });
-    goog.array.forEach(goog.dom.query('.block a',convos),function(c) {
-        goog.events.listen(c,goog.events.EventType.CLICK,function(e) {
-            self.userView.go(this.getAttribute('name'));
+            oc.Nav.go(this.getAttribute('href'));
             e.preventDefault();
         });
     });
@@ -122,7 +116,7 @@ oc.Category.View.prototype.convoHandle = function(convos) {
  * @param {number} id
  * @param {boolean=} canCreate
  */
-oc.Category.View.prototype.showHeading = function(id,canCreate) {
+oc.Category.View.prototype.setCategory = function(id,canCreate) {
     canCreate = goog.isBoolean(canCreate) ? canCreate : true;
     // change to the new category
     this.category = this.categories[id];
@@ -130,6 +124,8 @@ oc.Category.View.prototype.showHeading = function(id,canCreate) {
     // show category head
     goog.dom.query('.heading h2')[0].innerHTML = this.category.name;
     var link = goog.dom.query('.heading a')[0];
+    link.setAttribute('href','/category/'+this.category.url);
+
     goog.style.showElement(goog.dom.query('.heading')[0],true);
     var img = goog.dom.query('.heading img')[0];
     if (!goog.isDefAndNotNull(this.category.icon) || this.category.icon == '')
@@ -146,7 +142,7 @@ oc.Category.View.prototype.showHeading = function(id,canCreate) {
     goog.events.removeAll(link);
     var self = this;
     goog.events.listen(link,goog.events.EventType.CLICK,function(e) {
-        self.go(self.category.name);
+        oc.Nav.go(this.getAttribute('href'));
         e.preventDefault();
     });
 };
@@ -198,7 +194,7 @@ oc.Conversation.View.prototype.go = function(id) {
             oc.Nav.setTitle(self.conversation.title); 
 
             // show category head
-            self.categoryView.showHeading(self.conversation.categoryId);
+            self.categoryView.setCategory(self.conversation.categoryId);
 
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
             self.socket.addCallback('response',function(data) {
@@ -227,7 +223,7 @@ oc.Conversation.View.prototype.go = function(id) {
                         var userView = /** @type {!Element} */ goog.dom.htmlToDocumentFragment(html);
                         goog.style.showElement(userView,false);
                         goog.events.listen(userView,goog.events.EventType.CLICK,function(e) {
-                            self.userView.go(this.getAttribute('name'));
+                            oc.Nav.go(this.getAttribute('href'));
                             e.preventDefault();
                         });
                         goog.dom.append(usersView,userView);
@@ -285,7 +281,7 @@ oc.Conversation.View.prototype.go = function(id) {
             oc.Nav.setTitle(self.conversation.title); 
 
             // show category head
-            self.categoryView.showHeading(self.conversation.categoryId);
+            self.categoryView.setCategory(self.conversation.categoryId);
             goog.style.showElement(conversationDiv,true);
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
     }
@@ -333,7 +329,7 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
 
     var self = this;
     var userLinkHandler = function(e) {
-        self.userView.go(this.getAttribute('name'));
+        oc.Nav.go(this.getAttribute('href'));
         e.preventDefault();
     };
 
@@ -368,12 +364,12 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
         goog.style.showElement(element,false);
         goog.dom.append(goog.dom.query('.responses')[0],element);
         
-        // add clickhandlers for users
+        // add clickhandlers for users in description
         goog.array.forEach(goog.dom.query('.description a:first-child',element),function(userLink) {
             goog.events.listen(userLink,goog.events.EventType.CLICK,userLinkHandler);
         });
         
-        goog.array.forEach(goog.dom.query('.section > a',element),function(link) {
+        goog.array.forEach(goog.dom.query('.section a',element),function(link) {
             goog.events.listen(link,goog.events.EventType.CLICK,userLinkHandler);
         });
         if (fadeIn) {

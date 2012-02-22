@@ -46,7 +46,7 @@ oc.Trending.prototype.go = function() {
         var trendingLinks = goog.dom.query('#trending h2 a');
         goog.array.forEach(trendingLinks,function(link) {
             goog.events.listen(link,goog.events.EventType.CLICK,function(e) {
-                self.conversationView.go(link.getAttribute('name'));
+                oc.Nav.go(link.getAttribute('href'));
                 e.preventDefault();
             });
         });

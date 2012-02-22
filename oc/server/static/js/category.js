@@ -15,6 +15,11 @@ oc.Category = function(id,name,image,thumb,icon) {
     this.name = name;
 
     /**
+     * @type {string}
+     */
+    this.url = this.toUrl();
+
+    /**
      * @type {number}
      */
     this.id = id;

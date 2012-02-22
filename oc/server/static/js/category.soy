@@ -10,7 +10,7 @@
     <tr>
     {/if}
     <td>
-        <a title="{$cat.name}" href="#"><img src="/static/images/categories/{$cat.image}" /></a>
+        <a title="{$cat.name}" href="/category/{$cat.url}"><img src="/static/images/categories/{$cat.image}" /></a>
     </td>
     {if index($cat) % 4 == 3 }
     </tr>
@@ -27,14 +27,14 @@
 {foreach $c in $conversationList}
 <div title="{$c['title']}" class="post" style="{if $hide}display: none{/if}">
     <div class="inner">
-        <a class="convo" href="/conversation/{$c['id']}" name="{$c['id']}">
+        <a class="convo" href="/conversation/{$c['id']}">
             <img width="285" src="/static/images/covers/{$c['user']['cover_image']}" />
             <h1>{$c['title']}</h1>
         </a>
         <img height="40" src="/static/images/avatars/{$c['user']['avatar_image']}" class="right" />
         <div class="block">
             {$c['date']} by{sp}
-            <a href="/user/{$c['user']['user_id']}" name="{$c['user']['user_id']}">
+            <a href="/user/{$c['user']['user_id']}">
                 {$c['user']['name']}</a>
         </div>
     </div>
@@ -46,7 +46,7 @@
  * @param response
  */
 {template .actionMe}
-<a href="/user/{$response.user.id}" name="{$response.user.id}">
+<a href="/user/{$response.user.id}">
 <img width="30" height="30" src="/static/images/avatars/{$response.user.avatar_image}" />
 </a>
 {/template}
@@ -73,7 +73,7 @@
 {if not $isAction}
     <div class="user">
         <div class="description">
-            <h2><a href="/user/{$response.user.id}" name="{$response.user.id}">{$response.user.name}</a>{if $canVote}<a name="upvote" href="#"><img width="25 height="25" name="{$response.user.id}" src="/static/images/coffee.png" /></a>{/if}</h2>
+            <h2><a href="/user/{$response.user.id}">{$response.user.name}</a>{if $canVote}<a name="upvote" href="#"><img width="25" height="25" name="{$response.user.id}" src="/static/images/coffee.png" /></a>{/if}</h2>
              <div>Prestige: {$response.user.prestige}</div>
          </div>
          <img src="/static/images/avatars/thumbs/{$response.user.avatar_image}" />
@@ -92,5 +92,5 @@
  * @param avatar_image
  */
 {template .viewerIcon}
-<a href="/users/{$user_id}" name="{$user_id}"><img id="v_{$user_id}"src="/static/images/avatars/thumbs/{$avatar_image}" /></a>
+<a href="/user/{$user_id}"><img id="v_{$user_id}"src="/static/images/avatars/thumbs/{$avatar_image}" /></a>
 {/template}

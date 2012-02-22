@@ -16,67 +16,69 @@ goog.require('goog.fx.dom');
 goog.require('goog.fx.Transition');
 goog.require('goog.uri.utils');
 goog.require('goog.object');
-goog.require('oc.Tracking');
 
 /**
  * @param {number} id
- * @param {string} name
- * @param {string} avatar_image
- * @param {string} cover_image
- * @param {number} prestige
- * @param {Object} guilds
- * @param {boolean} admin
- * @param {Object} blurbs
  * @constructor
  */
-oc.User = function(id,name,avatar_image,cover_image,prestige,guilds,admin,blurbs) {
-    /**
-     * @type {number}
-     */
+oc.User = function(id) {
     this.id = id;
-
-    /**
-     * @type {string}
-     */
-    this.name = name;
-
-    /**
-     * @type {string}
-     */
-    this.avatar_image = avatar_image;
-
-    /**
-     * @type {string}
-     */
-    this.cover_image = cover_image;
-
-    /**
-     * @type {number}
-     */
-    this.prestige = prestige;
-
-    /**
-     * @type {Object}
-     */
-    this.guilds = guilds; 
-
-    /**
-     * @type {boolean}
-     */
-    this.admin = admin;
-
-    /**
-     * @type {Object}
-     */
-    this.blurbs = blurbs;
 }
+
+/**
+ * @type {number}
+ */
+oc.User.prototype.id;
+
+/**
+ * @type {string}
+ */
+oc.User.prototype.name;
+
+/**
+ * @type {string}
+ */
+oc.User.prototype.avatar_image;
+
+/**
+ * @type {string}
+ */
+oc.User.prototype.cover_image;
+
+/**
+ * @type {number}
+ */
+oc.User.prototype.prestige;
+
+/**
+ * @type {Object}
+ */
+oc.User.prototype.guilds;
+
+/**
+ * @type {boolean}
+ */
+oc.User.prototype.admin;
+
+/**
+ * @type {Object}
+ */
+oc.User.prototype.blurbs;
 
 /**
  * @param {Object} json
  * @return {oc.User}
  */
 oc.User.extractFromJson = function(json) {
-    return new oc.User(json['user_id'],json['name'],json['avatar_image'],json['cover_image'],json['prestige'],json['guilds'],json['admin'],json['blurbs']);
+    var u =new oc.User(json['user_id']);
+    u.name = json['name'];
+    u.avatar_image = json['avatar_image'];
+    u.cover_image = json['cover_image'];
+    u.prestige = json['prestige'];
+    u.guilds = json['guilds'];
+    u.admin = json['admin'];
+    u.blurbs = json['blurbs'];
+    return u;
 }
 
 /**
@@ -112,15 +114,15 @@ oc.User.View.prototype.init =  function() {
      goog.array.forEach(document.cookie.split("; "),function(cookie) {
         var spl = cookie.split('=');
         if (spl[0] == 'user_id')
-            id = spl[1];
+            self.user = new oc.User(spl[1]);
         else if (spl[0] == 'key')
             self.key = spl[1];
     });
 
     // load the user details
-    goog.net.XhrIo.send('/user/'+id,function(e) {
+    goog.net.XhrIo.send('/user/'+self.user.id,function(e) {
         var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
-        self.user = new oc.User(u['user_id'],u['name'],u['avatar_image'],u['cover_image'],u['prestige'],u['guilds'],u['admin'],u['blurbs']);
+        self.user = oc.User.extractFromJson(u);
         self.socket.init('http://'+window.location.hostname+':'+window['RTG_WEBPORT']+'/sock',
             function() {
                 self.socket.send({'user_id':self.user.id,'key':self.key});
@@ -146,7 +148,7 @@ oc.User.View.prototype.init =  function() {
             goog.style.setStyle(h2,'color','white');
         });
         goog.events.listen(p,goog.events.EventType.CLICK,function(e) {
-            self.go(self.user.id); 
+            oc.Nav.go('/user/'+self.user.id);
             e.preventDefault();
         }); 
     });
@@ -179,7 +181,6 @@ oc.User.View.prototype.changeCover = function(newCover) {
  * @param {string} user_id
  */
 oc.User.View.prototype.go = function(user_id) {
-    oc.Tracking.page('/user/'+user_id);
     var self = this;
     var isMe = (self.user.id == user_id);
     goog.net.XhrIo.send('/user/'+user_id,function(e) {

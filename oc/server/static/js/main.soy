@@ -47,7 +47,7 @@
     <div class="number"><span>{$c['rank']}</span></div>
     <img src="/static/images/categories/{$categories[$c['cat_id']].thumb}" height="90" />
     <div class="text">
-        <h2><a href="/conversation/{$c['id']}" name="{$c['id']}">{$c['title']}</a></h2>
+        <h2><a href="/conversation/{$c['id']}">{$c['title']}</a></h2>
         <div class="date">{$c['date']}</div>
         <p>{$c['content']|noAutoescape}</p>
     </div>
@@ -62,10 +62,10 @@
 {foreach $u in $users}
 <div class="entry">
     <div class="number"><span>{$u['rank']}</span></div>
-    <img name="{$u['user_id']}" style="cursor: pointer" src="/static/images/avatars/{$u['avatar_image']}" height="90" width="90"/>
+    <img src="/static/images/avatars/{$u['avatar_image']}" height="90" width="90"/>
     <div class="text">
         <h2>
-            <a href="/user/{$u['user_id']}" name="{$u['user_id']}">
+            <a href="/user/{$u['user_id']}">
             {$u['name']}</a>
         </h2>
         <p class="strong">Prestige: <strong>{$u['prestige']}</strong></p>

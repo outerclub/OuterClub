@@ -35,9 +35,9 @@ oc.Leaderboard.prototype.go = function() {
         oc.Nav.hideAll();
 
         goog.style.showElement(leaderboard,true);
-        goog.array.forEach(goog.dom.query('#leaderboard h2 a,#leaderboard img'),function(clickable) {
+        goog.array.forEach(goog.dom.query('#leaderboard h2 a'),function(clickable) {
             goog.events.listen(clickable,goog.events.EventType.CLICK,function(e) {
-                self.userView.go(this.getAttribute('name'));
+                oc.Nav.go(this.getAttribute('href'));
                 e.preventDefault();
             });
         });
