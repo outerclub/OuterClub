@@ -38,7 +38,6 @@ def getUid():
 
 @app.route('/')
 def index():
-    print app.config['globalAuths']
     if not isLoggedIn():
         return displaySignup()
     conn = app.config['pool'].connection()

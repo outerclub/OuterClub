@@ -21,4 +21,5 @@ def compile():
     f.write('[js]\nfile=%s\n' % (js_file))
     f.close()
     
-    local(' cp -r %s/* /var/www' % (BASE_DIR))
+    local('mkdir -p /var/www')
+    local('cp -r %s /var/www' % (BASE_DIR))

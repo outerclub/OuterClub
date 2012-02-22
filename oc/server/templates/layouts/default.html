@@ -15,8 +15,8 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/categories.css') }}"/>
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/category.css') }}"/>
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/conversation.css') }}"/>
-    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/{{ config['COMPILE']['css']['file'] }}"/>
 {% else %}
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/{{ config['COMPILE']['css']['file'] }}"/>
 {% endif %}
 {% if not config['DEBUG'] %}
 <script type="text/javascript">
