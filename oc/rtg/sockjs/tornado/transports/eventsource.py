@@ -8,10 +8,10 @@
 
 from tornado.web import asynchronous
 
-from sockjs.tornado.transports import pollingbase
+from sockjs.tornado.transports import streamingbase
 
 
-class EventSourceTransport(pollingbase.PollingTransportBase):
+class EventSourceTransport(streamingbase.StreamingTransportBase):
     name = 'eventsource'
 
     @asynchronous
@@ -33,8 +33,10 @@ class EventSourceTransport(pollingbase.PollingTransportBase):
             self.session.flush()
 
     def send_pack(self, message):
+        msg = 'data: %s\r\n\r\n' % message
+
         try:
-            self.write('data: %s\r\n\r\n' % message)
+            self.write(msg)
             self.flush()
         except IOError:
             # If connection dropped, make sure we close offending session instead
@@ -42,4 +44,7 @@ class EventSourceTransport(pollingbase.PollingTransportBase):
             self.session.delayed_close()
             self._detach()
 
-        # TODO: Close connection based on amount of data transferred
+        # Close connection based on amount of data transferred
+        if self.should_finish(len(msg)):
+            self._detach()
+            self.safe_finish()

@@ -79,7 +79,7 @@ class QueueProc(threading.Thread):
             elif isinstance(msg,event.Register):
                 conn_id = msg.conn.session.session_id
                 if 'uid' in self.conns[conn_id]:
-                    print '%s, %s, register: %s' % (conn_id,self.conns[conn_id]['uid'],msg.paths)
+                    #print '%s, %s, register: %s' % (conn_id,self.conns[conn_id]['uid'],msg.paths)
                     reg=[]
                     for p in msg.paths:
                         if not p in self.conns[conn_id]['paths']:
@@ -142,21 +142,20 @@ class QueueProc(threading.Thread):
                         del self.uid_sessions[myConn['uid']]
                 del self.conns[conn_id]
             elif isinstance(msg,event.Message):
-                print msg.path
                 # distribute to path
                 if (msg.path in self.paths):
-                    for conn in self.paths[msg.path]['conns']: 
-                        # new response or conversation
-                        # new happening now event
-                        if msg.etype == 'happening':
-                            p = msg.payload
-                            happening_data = {'type':p['type'],'data':p['data']}
+                    print 'distribute %s' % (msg.path)
+                    p = msg.payload
+                    if msg.etype == 'happening':
+                        happening_data = {'type':p['type'],'data':p['data']}
+                        for conn in self.paths[msg.path]['conns']: 
                             self.send(conn,[msg.etype,happening_data])
-                            self.happening.append(happening_data)
-                            # limit the stored happening nows
-                            if (len(self.happening) > 6):
-                                self.happening = self.happening[1:]
-                        else:
+                        self.happening.append(happening_data)
+                        # limit the stored happening nows
+                        if (len(self.happening) > 6):
+                            self.happening = self.happening[1:]
+                    else:
+                        for conn in self.paths[msg.path]['conns']: 
                             p = msg.payload
                             self.send(conn,[msg.etype,p])
                     

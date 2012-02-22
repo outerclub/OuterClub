@@ -1,3 +1,10 @@
+.entry strong {
+    font-weight:bold;
+    font-size: 160%;
+}
+.entry p.strong {
+    font-size:120%;
+}
 .number,div .active {
     background-color: #6092c6;
     color: white;

@@ -15,10 +15,9 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/categories.css') }}"/>
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/category.css') }}"/>
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/conversation.css') }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/{{ config['COMPILE']['css']['file'] }}"/>
 {% else %}
-    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/layout.compiled.css') }}"/>
 {% endif %}
-{% block headers %} {% endblock %}
 {% if not config['DEBUG'] %}
 <script type="text/javascript">
   var _gaq = _gaq || [];
@@ -57,6 +56,7 @@
 <p>Prestige: <span class="prestige">{{ prestige }}</span></p>
 </div>
 </div>
+
 <div class="slide_show" style="display: none">
 		<h2>Happening Right Now</h2>
         <div class="scroll">
@@ -70,11 +70,11 @@
 window['RTG_WEBPORT'] = {{ config['RTG_WEBPORT'] }};
 window['DEBUG'] = {% if config['DEBUG'] %}true{% else %}false{% endif%};
 </script>
-    <script type="text/javascript" src="/static/sockjs-0.1.2.min.js"></script>
+    <script type="text/javascript" src="/static/sockjs-0.2.1.min.js"></script>
 {% if config['DEBUG'] %}
-    <script type="text/javascript" src="http://localhost:9810/compile?id=outerclub"></script>
+   <script type="text/javascript" src="http://localhost:9810/compile?id=outerclub"></script>
 {% else %}
-    <script type="text/javascript" src="/static/js/all.compiled.js"></script>
+    <script type="text/javascript" src="/static/js/{{ config['COMPILE']['js']['file'] }}"></script>
 {% endif %}
 {% block footers %} {% endblock %}
 </body>

@@ -3,7 +3,7 @@
 *.log
 logs
 *.DS_Store
-*.compiled.*
+*.c.*
 *.project
 .settings
 *.pydevproject

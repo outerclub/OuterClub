@@ -21,6 +21,7 @@ goog.require('goog.net.XhrIo');
 goog.require('goog.uri.utils');
 goog.require('oc.Templates.Main');
 goog.require('oc.Tracking');
+goog.require('goog.events.KeyCodes');
 
 /**
  *
@@ -167,10 +168,11 @@ oc.Main.prototype.start = function() {
             goog.dom.classes.add(menuItem,'active');
 
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id]});
-            oc.Tracking.page(menuItem.getAttribute('href'));
-            if (menuItem.getAttribute('href') == '/trending')
+            var href = menuItem.getAttribute('href');
+            oc.Tracking.page(href);
+            if (href == '/trending')
                self.trending.go(); 
-            else if (menuItem.getAttribute('href') == '/leaderboard')
+            else if (href == '/leaderboard')
                 self.leaderboard.go();
             else
             {
@@ -211,15 +213,19 @@ oc.Main.prototype.start = function() {
      * Bottom links
      */
     goog.array.forEach(goog.dom.query('.footer_menu_left .staticLink'),function(a) {
-        goog.events.listen(a,goog.events.EventType.CLICK,function(e) {
-            oc.Tracking.page(a.getAttribute('href'));
-            var page = goog.dom.getElement(a.getAttribute('href').substring(1));
-            oc.Nav.setTitle(a.innerHTML);
-            oc.Nav.hideAll();
-            goog.style.showElement(page,true);
-            window.scrollTo(0,0);
+        goog.events.listen(a,goog.events.EventType.CLICK,function(m) {
+            var href = a.getAttribute('href');
+            goog.net.XhrIo.send(href,function(e) {
+                oc.Tracking.page(href);
+                var page = goog.dom.getElement('dynamic');
+                page.innerHTML = e.target.getResponseText();
+                oc.Nav.setTitle(a.innerHTML);
+                oc.Nav.hideAll();
+                goog.style.showElement(page,true);
+                window.scrollTo(0,0);
+            });
             
-            e.preventDefault();
+            m.preventDefault();
         });
     });
 
@@ -270,6 +276,18 @@ oc.Main.prototype.start = function() {
 
     goog.events.listen(window,goog.events.EventType.RESIZE,oc.Main.Resize);
     oc.Main.Resize();
+
+    // prevent escape
+    goog.events.listen(window,goog.events.EventType.KEYDOWN,function(e) {
+        if (e.keyCode == goog.events.KeyCodes.ESC)
+        {
+            // grab something to focus on
+            var object = goog.dom.query('#miniLogo a')[0];
+            object.focus();
+            object.blur();
+            e.preventDefault();
+        }
+    });
 };
 oc.Main.Resize = function() {
     var size = goog.dom.getViewportSize();

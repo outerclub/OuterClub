@@ -23,11 +23,15 @@ DEFAULT_SETTINGS = {
     'disabled_transports': [],
     # SockJS location
     'sockjs_url': 'http://cdn.sockjs.org/sockjs-0.1.2.min.js',
+    # Max response body size
+    'response_limit': 128 * 1024,
+    # Enable or disable JSESSIONID cookie handling
+    'jsessionid': True,
     # Should sockjs-tornado flush messages immediately or queue then and
     # flush on next ioloop tick
     'immediate_flush': True,
     # Enable or disable Nagle for persistent transports
-    'disable_nagle': False, 
+    'disable_nagle': False
     }
 
 GLOBAL_HANDLERS = [
@@ -46,7 +50,9 @@ TRANSPORTS = {
 
 STATIC_HANDLERS = {
     '/chunking_test': static.ChunkingTestHandler,
+    '/info': static.InfoHandler,
     '/iframe[0-9-.a-z_]*.html': static.IFrameHandler,
+    '/websocket': transports.RawWebSocketTransport,
     '/?': static.GreetingsHandler
 }
 
@@ -71,6 +77,9 @@ class SockJSRouter(object):
         self.settings = DEFAULT_SETTINGS.copy()
         if user_settings:
             self.settings.update(user_settings)
+
+        self.websockets_enabled = 'websocket' not in self.settings['disabled_transports']
+        self.cookie_needed = self.settings['jsessionid']
 
         # Sessions
         self._sessions = sessioncontainer.SessionContainer()
@@ -143,3 +152,6 @@ class SockJSRouter(object):
         """Get session by session id
         """
         return self._sessions.get(session_id)
+
+    def get_connection_class(self):
+        return self._connection

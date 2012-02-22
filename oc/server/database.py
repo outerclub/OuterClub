@@ -26,7 +26,7 @@ def fetchTrendingConversations(cursor):
     return conversations
 
 def fetchLeaderboard(cursor):
-    cursor.execute('select user_id,name,prestige,avatar_image from user order by prestige desc')
+    cursor.execute('select user_id,name,prestige,avatar_image from user order by prestige desc limit 10')
 
     users = []
     i=1

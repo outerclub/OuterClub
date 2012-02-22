@@ -9,7 +9,7 @@
 from tornado.web import asynchronous
 
 from sockjs.tornado import proto
-from sockjs.tornado.transports import pollingbase
+from sockjs.tornado.transports import streamingbase
 
 # HTMLFILE template
 HTMLFILE_HEAD = r'''
@@ -30,8 +30,11 @@ HTMLFILE_HEAD += ' ' * (1024 - len(HTMLFILE_HEAD) + 14)
 HTMLFILE_HEAD += '\r\n\r\n'
 
 
-class HtmlFileTransport(pollingbase.PollingTransportBase):
+class HtmlFileTransport(streamingbase.StreamingTransportBase):
     name = 'htmlfile'
+
+    def initialize(self, server):
+        super(HtmlFileTransport, self).initialize(server)
 
     @asynchronous
     def get(self, session_id):
@@ -63,9 +66,11 @@ class HtmlFileTransport(pollingbase.PollingTransportBase):
             self.session.flush()
 
     def send_pack(self, message):
+        # TODO: Just do escaping
+        msg = '<script>\np(%s);\n</script>\r\n' % proto.json_encode(message)
+
         try:
-            # TODO: Just do escaping
-            self.write('<script>\np(%s);\n</script>\r\n' % proto.json_encode(message))
+            self.write(msg)
             self.flush()
         except IOError:
             # If connection dropped, make sure we close offending session instead
@@ -73,4 +78,7 @@ class HtmlFileTransport(pollingbase.PollingTransportBase):
             self.session.delayed_close()
             self._detach()
 
-        # TODO: Close connection based on amount of data transferred
+        # Close connection based on amount of data transferred
+        if self.should_finish(len(msg)):
+            self._detach()
+            self.safe_finish()

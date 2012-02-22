@@ -1,3 +1,4 @@
 import config
 from oc.rtg import rtg
-rtg.start(config.RtgConfig)
+rtg.config(config.RtgConfig)
+rtg.run()

@@ -6,8 +6,6 @@
     Polling transports base
 """
 
-from tornado.web import asynchronous
-
 from sockjs.tornado.basehandler import PreflightHandler
 
 
@@ -56,6 +54,9 @@ class PollingTransportBase(PreflightHandler):
         self._detach()
 
     def on_connection_close(self):
-        self._detach()
+        # If connection was dropped by the client, close session.
+        # In all other cases, connection will be closed by the server.
+        if self.session is not None:
+            self.session.close(1002, 'Connection interrupted')
 
         super(PollingTransportBase, self).on_connection_close()

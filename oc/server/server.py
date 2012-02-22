@@ -12,6 +12,7 @@ import hashlib
 import random
 import uuid
 import re
+from werkzeug.contrib.fixers import ProxyFix
  
 from ..rtg.t_rtg import RtgService
 from ..rtg.t_rtg.ttypes import *
@@ -37,6 +38,7 @@ def getUid():
 
 @app.route('/')
 def index():
+    print app.config['globalAuths']
     if not isLoggedIn():
         return displaySignup()
     conn = app.config['pool'].connection()
@@ -386,7 +388,7 @@ def login():
     # check to see if user exists
     conn = app.config['pool'].connection()
     cur = conn.cursor()
-    cur.execute('select user_id,avatar_image,password from user where name=%s and password=%s', (request.form['l_username'],hashlib.sha224(request.form['l_password']).hexdigest()))
+    cur.execute('select user_id,avatar_image,password from user where email=%s and password=%s', (request.form['l_email'],hashlib.sha224(request.form['l_password']).hexdigest()))
     test = cur.fetchone()
     cur.close()
     conn.close()
@@ -395,7 +397,7 @@ def login():
         return initAuth(test[0],True)
     # user doesn't exist!
     else:
-        flask.flash('User or password was not valid.');
+        flask.flash('E-mail or password was not valid.');
         return displaySignup()
 
 @app.route('/invite',methods=['GET','POST'])
@@ -529,7 +531,7 @@ def logout():
     resp.set_cookie('key',expires=datetime.now())
     return resp
 
-def start(config):
+def config(config):
     # setup rtg
     transport = TSocket.TSocket(config.RTG_SERVER,config.RTG_SERVER_PORT)
     transport = TTransport.TBufferedTransport(transport)
@@ -543,5 +545,8 @@ def start(config):
 
     app.config['globalAuths'] = {}
     app.debug = config.DEBUG
+    app.wsgi_app = ProxyFix(app.wsgi_app) 
     app.secret_key = os.urandom(32)
-    app.run(host=config.BIND_ADDRESS,port=config.PORT)
+
+def run():
+    app.run(host=app.config['BIND_ADDRESS'],port=app.config['PORT'])

@@ -148,7 +148,7 @@ button.dot {
      <div class="footer_menu">
         <div class="footer_menu_left">
             <form action="/login" method="post">
-            Username <input type="text" name="l_username" size="16" /> &nbsp;Password <input type="password" name="l_password" size="16" />
+            E-mail <input type="text" name="l_email" size="16" /> &nbsp;Password <input type="password" name="l_password" size="16" />
             <button type="submit" name="login" class="default">Log In</button><div class="error">
             {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -173,7 +173,7 @@ button.dot {
         </div>
         <div class="wrap">
             <input type="text" name='username' />
-            <span>USERNAME</span>
+            <span>ALIAS</span>
         </div>
         <div class="wrap">
             <input type="password" name='password'/>

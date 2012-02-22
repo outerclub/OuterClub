@@ -51,6 +51,10 @@ class BaseHandler(RequestHandler):
         self.set_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
 
     def handle_session_cookie(self):
+        # If JSESSIONID support is disabled in the settings, ignore cookie logic
+        if not self.server.settings['jsessionid']:
+            return
+
         cookie = self.cookies.get('JSESSIONID')
 
         if not cookie:
@@ -82,10 +86,11 @@ class PreflightHandler(BaseHandler):
         self.preflight()
 
         if self.verify_origin():
-            self.set_status(204)
+            allowed_methods = getattr(self, 'access_methods', 'OPTIONS, POST')
+            self.set_header('Access-Control-Allow-Methods', allowed_methods)
+            self.set_header('Allow', allowed_methods)
 
-            self.set_header('Access-Control-Allow-Methods', 'OPTIONS, POST')
-            self.set_header('Allow', 'OPTIONS, POST')
+            self.set_status(204)
         else:
             # Set forbidden
             self.set_status(403)

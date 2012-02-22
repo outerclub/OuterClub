@@ -8,10 +8,10 @@
 
 from tornado.web import asynchronous
 
-from sockjs.tornado.transports import pollingbase
+from sockjs.tornado.transports import streamingbase
 
 
-class XhrStreamingTransport(pollingbase.PollingTransportBase):
+class XhrStreamingTransport(streamingbase.StreamingTransportBase):
     name = 'xhr_streaming'
 
     @asynchronous
@@ -22,7 +22,8 @@ class XhrStreamingTransport(pollingbase.PollingTransportBase):
         self.set_header('Content-Type', 'application/javascript; charset=UTF-8')
 
         # Send prelude and flush any pending messages
-        self.send_pack('h' * 2048)
+        self.write('h' * 2048 + '\n')
+        self.flush()
 
         if not self._attach_session(session_id, False):
             self.finish()
@@ -41,4 +42,7 @@ class XhrStreamingTransport(pollingbase.PollingTransportBase):
             self.session.delayed_close()
             self._detach()
 
-        # TODO: Close connection based on amount of data transferred
+        # Close connection based on amount of data transferred
+        if self.should_finish(len(message) + 1):
+            self._detach()
+            self.safe_finish()

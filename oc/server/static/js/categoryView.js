@@ -146,7 +146,7 @@ oc.Category.View.prototype.showHeading = function(id,canCreate) {
     goog.events.removeAll(link);
     var self = this;
     goog.events.listen(link,goog.events.EventType.CLICK,function(e) {
-        self.go(this.category.name);
+        self.go(self.category.name);
         e.preventDefault();
     });
 };

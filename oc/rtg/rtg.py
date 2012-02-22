@@ -77,11 +77,16 @@ class TRtgHandler:
         QueueProc.put(event.Message('/user/%d' % user_id,'user',user))
 
 
-def start(config):
-    EventRouter = SockJSRouter(EventConnection,'/sock')
+EventRouter = SockJSRouter(EventConnection,'/sock')
+app = tornado.web.Application(EventRouter.urls)
+ext = External()
+qu = QueueProc()
+server = None
 
-    app = tornado.web.Application(EventRouter.urls)
-    app.listen(config.WEBPORT)
+def config(config):
+    global server
+
+    app.settings['WEBPORT'] = config.WEBPORT
     External.ioloop = tornado.ioloop.IOLoop.instance()
 
     handler = TRtgHandler(config)
@@ -89,14 +94,14 @@ def start(config):
     transport = TSocket.TServerSocket(port=config.PORT)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
-
     server = TServer.TThreadPoolServer(processor, transport, tfactory, pfactory,daemon=True)
 
-    ext = External()
-    ext.start()
-
-    qu = QueueProc()
     qu.init(config)
+
+def run():
+    print 'Starting RTG...'
+    app.listen(app.settings['WEBPORT'])
+    ext.start()
     qu.start()
     try:
         server.serve()
