@@ -286,7 +286,7 @@ oc.Main.prototype.start = function() {
             });
         } else if (t == '!/welcome' || t == '!/trending' || t== '!/categories' || t== '!/leaderboard') {
             var menuItems = goog.dom.query('#menu ul a'); 
-            var menuItem = goog.dom.query('#menu a[href="'+t.substring(1)+'"]')[0];
+            var menuItem = goog.dom.query('#menu a[href="#'+t+'"]')[0];
              goog.array.forEach(menuItems,function(i) {
                 goog.dom.classes.remove(i,'active');
             });
@@ -300,7 +300,7 @@ oc.Main.prototype.start = function() {
             else
             {
                 oc.Nav.hideAll();
-                var element = goog.dom.query(menuItem.getAttribute('href').replace('/','#'))[0];
+                var element = goog.dom.query(menuItem.getAttribute('href').replace('!/','#'))[0];
                 goog.style.showElement(element,true);
                 oc.Nav.setTitle(element.getAttribute('title'));
             }

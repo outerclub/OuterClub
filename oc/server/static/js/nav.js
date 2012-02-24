@@ -24,7 +24,11 @@ oc.Nav.setTitle = function(t) {
  * @param {string} href
  */
 oc.Nav.go = function(href) {
-    oc.Nav.history.setToken('!'+href);
+    if (href.indexOf('#!') == 0)
+        href = href.substring(1);
+    else if (href.indexOf('!') != 0)
+        href= '!'+href;
+    oc.Nav.history.setToken(href);
 };
 
 /**

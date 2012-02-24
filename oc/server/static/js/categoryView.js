@@ -22,7 +22,6 @@ goog.require('goog.style');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.uri.utils');
-goog.require('oc.Tracking');
 
 /**
  * @param {Object.<oc.Category>} categories
@@ -125,7 +124,7 @@ oc.Category.View.prototype.setCategory = function(id,canCreate) {
     // show category head
     goog.dom.query('.heading h2')[0].innerHTML = this.category.name;
     var link = goog.dom.query('.heading a')[0];
-    link.setAttribute('href','/category/'+this.category.url);
+    link.setAttribute('href','#!/category/'+this.category.url);
 
     goog.style.showElement(goog.dom.query('.heading')[0],true);
     var img = goog.dom.query('.heading img')[0];
@@ -180,112 +179,97 @@ oc.Conversation.View = function(category_view,socket,userView) {
  * @param {number} id
  */
 oc.Conversation.View.prototype.go = function(id) {
-    oc.Tracking.page('/conversation/'+id);
    var self = this;
     var conversationDiv = goog.dom.getElement('conversation');
-    // only proceed if changing conversation
-   if (this.conversation == undefined ||  this.conversation.id != id) 
-    {
-        var usersView = goog.dom.query('#conversation .users')[0];
-        usersView.innerHTML = '';
-        goog.net.XhrIo.send('/conversation/'+id,function(e) {
-            var data = goog.json.unsafeParse(e.target.getResponseText());
-            self.conversation = oc.Conversation.extractFromJson(data);
-            oc.Nav.hideAll();
-            oc.Nav.setTitle(self.conversation.title); 
+    var usersView = goog.dom.query('#conversation .users')[0];
+    usersView.innerHTML = '';
+    goog.net.XhrIo.send('/conversation/'+id,function(e) {
+        var data = goog.json.unsafeParse(e.target.getResponseText());
+        self.conversation = oc.Conversation.extractFromJson(data);
+        oc.Nav.hideAll();
+        oc.Nav.setTitle(self.conversation.title); 
 
-            // show category head
-            self.categoryView.setCategory(self.conversation.categoryId);
+        // show category head
+        self.categoryView.setCategory(self.conversation.categoryId);
 
-            self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
-            self.socket.addCallback('response',function(data) {
-                self.createResponse(true,oc.Conversation.Response.extractFromJson(data),self.conversation.categoryId);
-            });
-            self.socket.addCallback('viewers',function(viewers) {
-                // scan for removals
-                var toRemove = [];
-                for (var v in self.conversation.viewers)
+        self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
+        self.socket.addCallback('response',function(data) {
+            self.createResponse(true,oc.Conversation.Response.extractFromJson(data),self.conversation.categoryId);
+        });
+        self.socket.addCallback('viewers',function(viewers) {
+            // scan for removals
+            var toRemove = [];
+            for (var v in self.conversation.viewers)
+            {
+                if (!(v in viewers))
                 {
-                    if (!(v in viewers))
-                    {
-                        var vElement = goog.dom.getElement('v_'+v);
-                        var anim = new goog.fx.dom.FadeOutAndHide(vElement,500); 
-                        goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
-                            goog.dom.removeNode(vElement);
-                        });
-                        anim.play();
-                        delete self.conversation.viewers[v];
-                    }
+                    var vElement = goog.dom.getElement('v_'+v);
+                    var anim = new goog.fx.dom.FadeOutAndHide(vElement,500); 
+                    goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+                        goog.dom.removeNode(vElement);
+                    });
+                    anim.play();
+                    delete self.conversation.viewers[v];
                 }
-                // scan for insertions
-                for (v in viewers) {
-                    if (!(v in self.conversation.viewers)) {
-                        var html = oc.Templates.Category.viewerIcon({user_id:v,avatar_image:viewers[v]});
-                        var userView = /** @type {!Element} */ goog.dom.htmlToDocumentFragment(html);
-                        goog.style.showElement(userView,false);
-                        goog.events.listen(userView,goog.events.EventType.CLICK,function(e) {
-                            oc.Nav.go(this.getAttribute('href'));
-                            e.preventDefault();
-                        });
-                        goog.dom.append(usersView,userView);
-                        (new goog.fx.dom.FadeInAndShow(userView,500)).play();
-                        self.conversation.viewers[v] = '';
-                    }
+            }
+            // scan for insertions
+            for (v in viewers) {
+                if (!(v in self.conversation.viewers)) {
+                    var html = oc.Templates.Category.viewerIcon({user_id:v,avatar_image:viewers[v]});
+                    var userView = /** @type {!Element} */ goog.dom.htmlToDocumentFragment(html);
+                    goog.style.showElement(userView,false);
+                    goog.events.listen(userView,goog.events.EventType.CLICK,function(e) {
+                        oc.Nav.go(this.getAttribute('href'));
+                        e.preventDefault();
+                    });
+                    goog.dom.append(usersView,userView);
+                    (new goog.fx.dom.FadeInAndShow(userView,500)).play();
+                    self.conversation.viewers[v] = '';
                 }
-            });
-            
-            goog.dom.query('#conversation .cover')[0].innerHTML = '<img width="905" src="/static/images/covers/'+self.conversation.user.cover_image+'" />';
-            goog.dom.query('#conversation .room h2')[0].innerHTML = goog.string.htmlEscape(self.conversation.title,false);
+            }
+        });
+        
+        goog.dom.query('#conversation .cover')[0].innerHTML = '<img width="905" src="/static/images/covers/'+self.conversation.user.cover_image+'" />';
+        goog.dom.query('#conversation .room h2')[0].innerHTML = goog.string.htmlEscape(self.conversation.title,false);
 
-            goog.array.forEach(goog.dom.query('#conversation .conversation'),function(c) {
-                goog.dom.removeNode(c);
-            });
-            self.createResponse(false,new oc.Conversation.Response(-1,self.conversation.date,self.conversation.content,self.conversation.user),self.conversation.categoryId);
+        goog.array.forEach(goog.dom.query('#conversation .conversation'),function(c) {
+            goog.dom.removeNode(c);
+        });
+        self.createResponse(false,new oc.Conversation.Response(-1,self.conversation.date,self.conversation.content,self.conversation.user),self.conversation.categoryId);
 
-            /**
-             * Reply
-             */
-            var replyButton = goog.dom.query('.reply button')[0];
-            goog.events.removeAll(replyButton);
-            goog.events.listen(replyButton,goog.events.EventType.CLICK,function(e) {
-                var content = goog.dom.query('.reply textarea')[0].value;
-                goog.net.XhrIo.send('/reply',function(e) {
-                    var data = goog.json.unsafeParse(e.target.getResponseText());
-                    var errorView = goog.dom.query('.reply .error')[0];
-                    if ('error' in data) {
-                        errorView.innerHTML = data['error'];
-                        (new goog.fx.dom.FadeInAndShow(errorView,500)).play();
-                    } else {
-                        (new goog.fx.dom.FadeOut(errorView,500)).play();
-                        var textarea = goog.dom.query('.reply textarea')[0];
-                        textarea.value = '';
-                        textarea.focus();
-                    }
-                 },
-                'POST',goog.uri.utils.buildQueryDataFromMap({
-                        'd_id':self.conversation.id,
-                        'data':content}));
-            });
+        /**
+         * Reply
+         */
+        var replyButton = goog.dom.query('.reply button')[0];
+        goog.events.removeAll(replyButton);
+        goog.events.listen(replyButton,goog.events.EventType.CLICK,function(e) {
+            var content = goog.dom.query('.reply textarea')[0].value;
+            goog.net.XhrIo.send('/reply',function(e) {
+                var data = goog.json.unsafeParse(e.target.getResponseText());
+                var errorView = goog.dom.query('.reply .error')[0];
+                if ('error' in data) {
+                    errorView.innerHTML = data['error'];
+                    (new goog.fx.dom.FadeInAndShow(errorView,500)).play();
+                } else {
+                    (new goog.fx.dom.FadeOut(errorView,500)).play();
+                    var textarea = goog.dom.query('.reply textarea')[0];
+                    textarea.value = '';
+                    textarea.focus();
+                }
+             },
+            'POST',goog.uri.utils.buildQueryDataFromMap({
+                    'd_id':self.conversation.id,
+                    'data':content}));
+        });
 
-            // create all the responses
-            goog.array.forEach(self.conversation.responses,function(r) {
-                self.createResponse(false,r,self.conversation.categoryId);
-            });
-            
-            goog.style.showElement(conversationDiv,true);
+        // create all the responses
+        goog.array.forEach(self.conversation.responses,function(r) {
+            self.createResponse(false,r,self.conversation.categoryId);
+        });
+        
+        goog.style.showElement(conversationDiv,true);
 
-        }); 
-    // switch to display (conversation already cached)
-    } else if (this.conversation.id == id && !goog.style.isElementShown(conversationDiv))
-    {
-            oc.Nav.hideAll();
-            oc.Nav.setTitle(self.conversation.title); 
-
-            // show category head
-            self.categoryView.setCategory(self.conversation.categoryId);
-            goog.style.showElement(conversationDiv,true);
-            self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
-    }
+    }); 
 };
 
 /**

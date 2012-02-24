@@ -29,15 +29,12 @@ oc.Socket = function() {
 
 /**
  * @param {string} loc
- * @param {function()} fopen
  */
-oc.Socket.prototype.init = function(loc,fopen) {
+oc.Socket.prototype.init = function(loc) {
     var self = this;
     this.conn = new window['SockJS'](loc);
-    fopen = fopen || function() {};
     this.conn.onopen = function() {
         self.open = true;
-        fopen();
         goog.array.forEach(self.openQueue,function(d) {
             self.conn.send(d);
         });
