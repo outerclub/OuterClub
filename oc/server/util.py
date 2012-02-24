@@ -44,9 +44,9 @@ def replaceMentions(cur,data):
             u = users[name.lower()] 
             
             if isAction:
-                accum += '<a href="/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (u['user_id'],u['avatar_image'])
+                accum += '<a class="mention" href="/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (u['user_id'],u['avatar_image'])
             else:
-                accum += '<a href="/user/%s">@%s</a>' % (u['user_id'],name)
+                accum += '<a class="mention" href="/user/%s">@%s</a>' % (u['user_id'],name)
         else:
             accum += segment
     return accum

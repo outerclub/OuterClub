@@ -132,9 +132,15 @@ oc.Main.prototype.happening = function() {
             createHappening(data,true);
     });
     this.socket.addCallback('happening_init',function(data) {
+        // create the initial happening now items
         goog.array.forEach(data,function(h,i) {
-	    if (i < self.happeningItems)
-            	createHappening(h,false);
+            if (i < self.happeningItems)
+                    createHappening(h,false);
+        });
+
+        // reveal everything
+        goog.array.forEach(goog.dom.query('.content_wrapper,#miniProfile,#menu,.footer'),function(item) {
+            (new goog.fx.dom.FadeInAndShow(item,500)).play();
         });
     });
 };

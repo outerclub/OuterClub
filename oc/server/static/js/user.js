@@ -219,7 +219,10 @@ oc.User.View.prototype.go = function(user_id) {
                     if (this.value == '')
                         goog.style.showElement(label,true);
                     goog.dom.classes.remove(label,'light'); 
-                    goog.net.XhrIo.send('/blurb',function() {},'POST',goog.uri.utils.buildQueryDataFromMap({'blurb':input.value,'cat_id':input.getAttribute('name')}));
+
+                    var cat_id = input.getAttribute('name');
+                    self.user.blurbs[cat_id] = input.value;
+                    goog.net.XhrIo.send('/blurb',function() {},'POST',goog.uri.utils.buildQueryDataFromMap({'blurb':input.value,'cat_id': cat_id}));
                 });
                 goog.events.listen(input,goog.events.EventType.KEYPRESS,function() {
                     goog.style.showElement(label,false);

@@ -2,6 +2,7 @@ goog.provide('oc.Trending');
 goog.require('oc.Nav');
 goog.require('oc.Category.View');
 goog.require('oc.Conversation.View');
+goog.require('oc.Util');
 goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.net.XhrIo');
@@ -33,6 +34,9 @@ oc.Trending.prototype.go = function() {
         var conversations = goog.json.unsafeParse(e.target.getResponseText())['conversations'];
         var trending = goog.dom.getElement('trending');
         oc.Nav.setTitle(trending.getAttribute('title'));
+        goog.array.forEach(conversations,function(c) {
+            c['content'] = oc.Util.replaceLinks(c['content']);
+        });
         var html = oc.Templates.Main.trending({conversations:conversations,categories:self.categories});
             
         goog.array.forEach(goog.dom.query('.entry',trending),function(e) {

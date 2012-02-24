@@ -1,8 +1,15 @@
 #conversation {
     overflow: hidden;
+    position: relative;
 }
 #conversation a:hover img {
     opacity: 0.7;
+}
+#conversation .tooltip {
+    position: absolute;
+    width:190px;
+    padding:5px 10px 5px 10px;
+    background-color: rgba(0,0,0,0.7);
 }
 
 /**
@@ -35,6 +42,7 @@
 .responses {
     overflow: auto;
     padding: 5px 0 5px 0;
+    position:relative;
 }
 .conversation {
     overflow: hidden;
@@ -46,10 +54,18 @@
     float: left;
     width: 210px;
    }
+.conversation .user:hover {
+    background-color: rgba(91,144,194,0.3);
+}
 
 .conversation .user img {
     float: right;
 }
+
+.conversation .user:hover img {
+    opacity: 0.7;
+}
+
 .conversation .description {
     padding: 6px 0 6px 8px;
     float: left;

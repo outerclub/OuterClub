@@ -4,6 +4,7 @@ goog.provide('oc.Conversation.View');
 goog.require('oc.Socket');
 goog.require('oc.Category');
 goog.require('oc.Nav');
+goog.require('oc.Util');
 goog.require('oc.User');
 goog.require('oc.User.View');
 goog.require('oc.Conversation');
@@ -198,7 +199,7 @@ oc.Conversation.View.prototype.go = function(id) {
 
             self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
             self.socket.addCallback('response',function(data) {
-                self.createResponse(true,oc.Conversation.Response.extractFromJson(data));
+                self.createResponse(true,oc.Conversation.Response.extractFromJson(data),self.conversation.categoryId);
             });
             self.socket.addCallback('viewers',function(viewers) {
                 // scan for removals
@@ -239,7 +240,7 @@ oc.Conversation.View.prototype.go = function(id) {
             goog.array.forEach(goog.dom.query('#conversation .conversation'),function(c) {
                 goog.dom.removeNode(c);
             });
-            self.createResponse(false,new oc.Conversation.Response(-1,self.conversation.date,self.conversation.content,self.conversation.user));
+            self.createResponse(false,new oc.Conversation.Response(-1,self.conversation.date,self.conversation.content,self.conversation.user),self.conversation.categoryId);
 
             /**
              * Reply
@@ -268,7 +269,7 @@ oc.Conversation.View.prototype.go = function(id) {
 
             // create all the responses
             goog.array.forEach(self.conversation.responses,function(r) {
-                self.createResponse(false,r);
+                self.createResponse(false,r,self.conversation.categoryId);
             });
             
             goog.style.showElement(conversationDiv,true);
@@ -291,7 +292,7 @@ oc.Conversation.View.prototype.go = function(id) {
  * @param {boolean} fadeIn
  * @param {oc.Conversation.Response} response
  */
-oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
+oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categoryId) {
     var previousD = goog.dom.query('.conversation');
     // get last full date
     var lastDateSplit = null;
@@ -311,6 +312,8 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
             break;
         }
     }
+
+    // display shortened date?
     var date = response.date;
     if (lastDateSplit != null)
     {
@@ -326,17 +329,17 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
     }
 
     // create right float
-
     var self = this;
     var userLinkHandler = function(e) {
         oc.Nav.go(this.getAttribute('href'));
         e.preventDefault();
     };
 
-    var content = goog.string.newLineToBr(response.content);
+    var content = oc.Util.replaceLinks(goog.string.newLineToBr(response.content));
     var isAction = content.indexOf('/me') === 0;
     var lastDiscussion = goog.dom.query(".conversation:last-child");
-    // combine the postings or create new one?
+
+    // combine this posting and the previous one?
     if (!isAction && lastDiscussion.length == 1 && !goog.dom.classes.has(lastDiscussion[0],'action') && goog.dom.query('.user h2 a',lastDiscussion[0])[0].getAttribute('name') == response.user.id)
     {
         var html = oc.Templates.Category.responseContent({date:date,content:content});
@@ -349,10 +352,11 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
         }else
             goog.style.showElement(section,true);
         
-        goog.array.forEach(goog.dom.query('a',section),function(mention) {
+        // clickhandler for mentions
+        goog.array.forEach(goog.dom.query('.mention',section),function(mention) {
             goog.events.listen(mention,goog.events.EventType.CLICK,userLinkHandler);
         });
-    } else {
+    } else { // create a brand new posting
         // strip away /me and convert to an icon
         if (isAction)
             content = content.replace(/^\/me/,oc.Templates.Category.actionMe({response:response}));
@@ -362,14 +366,32 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response) {
 
         var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
         goog.style.showElement(element,false);
-        goog.dom.append(goog.dom.query('.responses')[0],element);
+
+        var responsesElement = goog.dom.query('.responses')[0];
+        goog.dom.appendChild(responsesElement,element);
+
+        // generate the tooltip
+        if (categoryId in response.user.blurbs)
+        {
+            var tooltip = goog.dom.createDom('div','tooltip',response.user.blurbs[categoryId]);
+            var conversation = goog.dom.getElement('conversation');
+            goog.dom.appendChild(conversation,tooltip);
+            goog.style.showElement(tooltip,false);
+
+            var userElement = goog.dom.query('.user',element)[0];
+            var prestigeElement = goog.dom.query('.description div',userElement)[0];
+            goog.events.listen(userElement,goog.events.EventType.MOUSEOVER,function(e) {
+                var pos = goog.style.getRelativePosition(userElement,conversation);
+                goog.style.setPosition(tooltip,pos.x,pos.y+50);
+                goog.style.showElement(tooltip,true);
+            });
+            goog.events.listen(userElement,goog.events.EventType.MOUSEOUT,function(e) {
+                goog.style.showElement(tooltip,false);
+            });
+        }
         
-        // add clickhandlers for users in description
-        goog.array.forEach(goog.dom.query('.description a:first-child',element),function(userLink) {
-            goog.events.listen(userLink,goog.events.EventType.CLICK,userLinkHandler);
-        });
-        
-        goog.array.forEach(goog.dom.query('.section a',element),function(link) {
+        // clickhandler for mentions and user description
+        goog.array.forEach(goog.dom.query('.section .mention, .description a:first-child',element),function(link) {
             goog.events.listen(link,goog.events.EventType.CLICK,userLinkHandler);
         });
         if (fadeIn) {
