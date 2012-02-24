@@ -116,6 +116,9 @@ oc.Main.prototype.happening = function() {
         (new goog.fx.dom.FadeInAndShow(element,500)).play();
     };
 
+    this.socket.addCallback('users',function(num) {
+        goog.dom.query('.online span')[0].innerHTML = num;
+    });
     this.socket.addCallback('happening',function(data) {
         var items = goog.dom.query('.slide_show .item');
         

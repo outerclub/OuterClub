@@ -31,8 +31,6 @@ class QueueProc(threading.Thread):
         self.conns = dict()
         self.paths = dict() 
 
-        self.users = dict()
-        
     
     # convert a list of connections to keys
     def connsToUids(self,arr):
@@ -54,6 +52,11 @@ class QueueProc(threading.Thread):
         cur.close()
         conn.close()
         return ret
+    def updateOnline(self):
+        users = len(self.uid_sessions.keys())
+        if '/happening' in self.paths:
+            for conn in self.paths['/happening']['conns']: 
+                self.send(conn,['users',users])
 
     def updateViewers(self,path,conn_id):
         viewers = self.fetchViewerInfo(self.connsToUids(self.paths[path]['conns']))
@@ -87,7 +90,7 @@ class QueueProc(threading.Thread):
                     self.uid_sessions[msg.uid].append(conn_id)
                 else:
                     self.send(conn_id,['authRejected']);
-                    pass
+                self.updateOnline()
             elif isinstance(msg,event.Register):
                 conn_id = msg.conn.session.session_id
                 if 'uid' in self.conns[conn_id]:
@@ -128,6 +131,8 @@ class QueueProc(threading.Thread):
                                 self.updateViewers(path,conn_id)
                         elif (path.startswith('/happening')):
                             self.send(conn_id,['happening_init',self.happening])
+                            users = len(self.uid_sessions.keys())
+                            self.send(conn_id,['users',users])
                 
             elif isinstance(msg,event.Close):
                 conn_id = msg.conn.session.session_id
@@ -152,6 +157,7 @@ class QueueProc(threading.Thread):
                     self.uid_sessions[myConn['uid']].remove(conn_id)
                     if len(self.uid_sessions[myConn['uid']]) == 0:
                         del self.uid_sessions[myConn['uid']]
+                    self.updateOnline()
                 del self.conns[conn_id]
             elif isinstance(msg,event.Message):
                 # distribute to path

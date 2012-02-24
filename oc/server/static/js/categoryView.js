@@ -340,7 +340,9 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categor
     var lastDiscussion = goog.dom.query(".conversation:last-child");
 
     // combine this posting and the previous one?
-    if (!isAction && lastDiscussion.length == 1 && !goog.dom.classes.has(lastDiscussion[0],'action') && goog.dom.query('.user h2 a',lastDiscussion[0])[0].getAttribute('name') == response.user.id)
+    if (!isAction && lastDiscussion.length == 1 &&
+        !goog.dom.classes.has(lastDiscussion[0],'action') &&
+        goog.dom.query('.user h2 a',lastDiscussion[0])[0].getAttribute('href').split('/')[2] == response.user.id)
     {
         var html = oc.Templates.Category.responseContent({date:date,content:content});
         var section = goog.dom.createDom('div','section',goog.dom.htmlToDocumentFragment(html));

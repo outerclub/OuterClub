@@ -46,7 +46,7 @@ body{
 #menu {
     width: 100%;
     background: rgba(0,0,0,0.65);
-    color: #ddd;
+    color: white;
     overflow: hidden;
     position: fixed;
     z-index: 999;
@@ -76,6 +76,11 @@ body{
 
 #menu li {
     float:left
+}
+#menu .online {
+    float:left;
+    margin: 15px 11px;
+    font-weight:bold;
 }
 .search {
     float: left;
