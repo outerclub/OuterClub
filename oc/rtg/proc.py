@@ -8,31 +8,30 @@ import json
 import pickle
 
 class QueueProc(threading.Thread):
-    auth = dict()
-
-    uid_sessions= dict()
-    conns = dict()
-    paths = dict() 
-    queue = Queue.Queue()
-    happening = []
-
-    users = dict()
-
-    @staticmethod
-    def save():
+    MAX_HAPPENING = 5
+    def save(self):
         f = open('.store.cache','w')
-        pickle.dump(QueueProc.happening,f)
+        pickle.dump(self.happening,f)
         f.close() 
 
-    @staticmethod
-    def init(config):
-        QueueProc.pool = PooledDB(creator=MySQLdb,mincached=10,host=config.MYSQL_SERVER,user=config.MYSQL_USER,passwd=config.MYSQL_PASSWORD,db=config.MYSQL_DATABASE)
+    def init(self,config):
+        self.pool = PooledDB(creator=MySQLdb,mincached=10,host=config.MYSQL_SERVER,user=config.MYSQL_USER,passwd=config.MYSQL_PASSWORD,db=config.MYSQL_DATABASE)
         try:
             h = pickle.load(open('.store.cache','r'))
-            QueueProc.happening = h
+            self.happening = h
+            if len(self.happening) > QueueProc.MAX_HAPPENING:
+                self.happening = self.happening[-QueueProc.MAX_HAPPENING:]
             print 'RTG: reloaded store'
         except Exception as e:
-            pass
+            self.happening = []
+        self.queue = Queue.Queue()
+        self.auth = dict()
+
+        self.uid_sessions= dict()
+        self.conns = dict()
+        self.paths = dict() 
+
+        self.users = dict()
         
     
     # convert a list of connections to keys
@@ -165,9 +164,9 @@ class QueueProc(threading.Thread):
                             self.send(conn,[msg.etype,happening_data])
                         self.happening.append(happening_data)
                         # limit the stored happening nows
-                        if (len(self.happening) > 6):
+                        if (len(self.happening) > QueueProc.MAX_HAPPENING):
                             self.happening = self.happening[1:]
-                        QueueProc.save()
+                        self.save()
                     else:
                         for conn in self.paths[msg.path]['conns']: 
                             p = msg.payload
@@ -176,11 +175,9 @@ class QueueProc(threading.Thread):
             if msg == event.QueueKill:
                 break
 
-    @staticmethod
-    def put(msg):
-        QueueProc.queue.put(msg)
+    def put(self,msg):
+        self.queue.put(msg) 
 
-    @staticmethod
-    def stop():
-        QueueProc.put(event.QueueKill)
+    def stop(self):
+        self.put(event.QueueKill)
 

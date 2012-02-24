@@ -27,8 +27,9 @@ class External(threading.Thread):
         External.ioloop.start()
 
 class TRtgHandler:
-    def __init__(self,config):
+    def __init__(self,config,queue):
         self.pool = PooledDB(creator=MySQLdb,mincached=10,host=config.MYSQL_SERVER,user=config.MYSQL_USER,passwd=config.MYSQL_PASSWORD,db=config.MYSQL_DATABASE)
+        self.queue = queue
 
     def response(self,r_id):
         conn = self.pool.connection()
@@ -43,10 +44,10 @@ class TRtgHandler:
         conn.close()
         
         payload = {'date':util.dateFormat(res[2]),'content':newContent,'user':user,'r_id':r_id}
-        QueueProc.put(event.Message('/conversation/%d' % (res[0]), 'response',payload))
+        self.queue.put(event.Message('/conversation/%d' % (res[0]), 'response',payload))
 
         happening_data = {'user':user,'date':util.hourDateFormat(res[2]),'category_image':res[5],'category_id':res[4],'d_id':res[0],'title': res[6],'r_id':r_id,'content':newContent}
-        QueueProc.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
+        self.queue.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
 
     def conversation(self,d_id):
         conn = self.pool.connection()
@@ -59,13 +60,13 @@ class TRtgHandler:
         conn.close()
 
         payload = {'d_id':d_id,'date':util.dateFormat(convo[1]),'title':convo[5],'user':user}
-        QueueProc.put(event.Message('/category/%d' % (convo[4]),'conversation',payload))
+        self.queue.put(event.Message('/category/%d' % (convo[4]),'conversation',payload))
 
         happening_data = {'user':user,'date':util.hourDateFormat(convo[1]),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':util.escape(convo[2])}
-        QueueProc.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
+        self.queue.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
 
     def auth(self,auth):
-        QueueProc.put(event.NewAuthKey(auth.user_id,auth.key))
+        self.queue.put(event.NewAuthKey(auth.user_id,auth.key))
 
     def userModified(self,user_id):
         conn = self.pool.connection()
@@ -74,7 +75,7 @@ class TRtgHandler:
         cur.close()
         conn.close()
 
-        QueueProc.put(event.Message('/user/%d' % user_id,'user',user))
+        self.queue.put(event.Message('/user/%d' % user_id,'user',user))
 
 
 EventRouter = SockJSRouter(EventConnection,'/sock')
@@ -83,13 +84,17 @@ ext = External()
 qu = QueueProc()
 server = None
 
+class StaticQueue:
+    instance = None
+StaticQueue.instance = qu
+
 def config(config):
     global server
 
     app.settings['WEBPORT'] = config.WEBPORT
     External.ioloop = tornado.ioloop.IOLoop.instance()
 
-    handler = TRtgHandler(config)
+    handler = TRtgHandler(config,qu)
     processor = RtgService.Processor(handler)
     transport = TSocket.TServerSocket(port=config.PORT)
     tfactory = TTransport.TBufferedTransportFactory()
