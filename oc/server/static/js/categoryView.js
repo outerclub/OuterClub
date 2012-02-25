@@ -348,7 +348,7 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categor
             content = content.replace(/^\/me/,oc.Templates.Category.actionMe({response:response}));
 
         var canVote = goog.array.contains(self.conversation.votableUsers,response.user.id);
-        var html = oc.Templates.Category.response({response:response,content:content,date:date,canVote:canVote});
+        var html = oc.Templates.Category.response({isAction:isAction,response:response,content:content,date:date,canVote:canVote});
 
         var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
         goog.style.showElement(element,false);
@@ -356,24 +356,46 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categor
         var responsesElement = goog.dom.query('.responses')[0];
         goog.dom.appendChild(responsesElement,element);
 
-        // generate the tooltip
-        if (categoryId in response.user.blurbs)
+        if (!isAction)
         {
-            var tooltip = goog.dom.createDom('div','tooltip',response.user.blurbs[categoryId]);
-            var conversation = goog.dom.getElement('conversation');
-            goog.dom.appendChild(conversation,tooltip);
-            goog.style.showElement(tooltip,false);
-
-            var userElement = goog.dom.query('.user',element)[0];
-            var prestigeElement = goog.dom.query('.description div',userElement)[0];
-            goog.events.listen(userElement,goog.events.EventType.MOUSEOVER,function(e) {
-                var pos = goog.style.getRelativePosition(userElement,conversation);
-                goog.style.setPosition(tooltip,pos.x,pos.y+50);
-                goog.style.showElement(tooltip,true);
-            });
-            goog.events.listen(userElement,goog.events.EventType.MOUSEOUT,function(e) {
+            // generate the tooltip
+            if (categoryId in response.user.blurbs)
+            {
+                var tooltip = goog.dom.createDom('div','tooltip',response.user.blurbs[categoryId]);
+                var conversation = goog.dom.getElement('conversation');
+                goog.dom.appendChild(conversation,tooltip);
                 goog.style.showElement(tooltip,false);
-            });
+
+                var userElement = goog.dom.query('.user',element)[0];
+                var prestigeElement = goog.dom.query('.description div',userElement)[0];
+                goog.events.listen(userElement,goog.events.EventType.MOUSEOVER,function(e) {
+                    var pos = goog.style.getRelativePosition(userElement,conversation);
+                    goog.style.setPosition(tooltip,pos.x,pos.y+50);
+                    goog.style.showElement(tooltip,true);
+                });
+                goog.events.listen(userElement,goog.events.EventType.MOUSEOUT,function(e) {
+                    goog.style.showElement(tooltip,false);
+                });
+            }
+            // process a vote?
+            if (canVote)
+            {
+                var coffee = goog.dom.query('.conversation:last-child a[name="upvote"]')[0];
+                goog.events.listen(coffee,goog.events.EventType.CLICK,function(e) {
+                    goog.net.XhrIo.send('/upvote',function() {
+                        goog.array.remove(self.conversation.votableUsers,response.user.id);
+                        goog.array.forEach(goog.dom.query('a[name="upvote"] > img'),function(img) {
+                            if (goog.string.toNumber(img.getAttribute('name')) == response.user.id)
+                            {
+                                (new goog.fx.dom.FadeOutAndHide(img.parentNode,500)).play();
+                            }
+                        });
+                    },
+                    'POST',
+                    goog.uri.utils.buildQueryDataFromMap({ 'd_id':self.conversation.id,'user_id': response.user.id }));
+                    e.preventDefault(); 
+                });
+            }
         }
         
         // clickhandler for mentions and user description
@@ -384,25 +406,6 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categor
             (new goog.fx.dom.FadeInAndShow(element,500)).play();
         } else {
             goog.style.showElement(element,true);
-        }
-        // process a vote?
-        if (canVote)
-        {
-            var coffee = goog.dom.query('.conversation:last-child a[name="upvote"]')[0];
-            goog.events.listen(coffee,goog.events.EventType.CLICK,function(e) {
-                goog.net.XhrIo.send('/upvote',function() {
-                    goog.array.remove(self.conversation.votableUsers,response.user.id);
-                    goog.array.forEach(goog.dom.query('a[name="upvote"] > img'),function(img) {
-                        if (goog.string.toNumber(img.getAttribute('name')) == response.user.id)
-                        {
-                            (new goog.fx.dom.FadeOutAndHide(img.parentNode,500)).play();
-                        }
-                    });
-                },
-                'POST',
-                goog.uri.utils.buildQueryDataFromMap({ 'd_id':self.conversation.id,'user_id': response.user.id }));
-                e.preventDefault(); 
-            });
         }
     }
 
