@@ -63,7 +63,6 @@ oc.Main = function(categories) {
      * @type {number}
      */
     this.happeningItems = 5;
-
 };
 
 oc.Main.prototype.happening = function() {
@@ -292,7 +291,13 @@ oc.Main.prototype.start = function() {
             });
             goog.dom.classes.add(menuItem,'active');
 
-            self.socket.send({'register':['/happening','/user/'+self.userView.user.id]});
+            // register for events
+            var registrations = ['/happening','/user/'+self.userView.user.id];
+            if (t == '!/welcome')
+            {
+            }
+            self.socket.send({'register':registrations});
+
             if (t == '!/trending')
                self.trending.go(); 
             else if (t == '!/leaderboard')
