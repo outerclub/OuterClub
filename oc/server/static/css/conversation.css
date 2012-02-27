@@ -88,6 +88,7 @@
     width: 575px;
     color: white;
     min-height: 30px;
+    font-size: 110%;
 }
 
 .content .section {
@@ -146,7 +147,7 @@
 .reply textarea {
     display:block;
     border: 0;
-    font-size:100%;
+    font-size:110%;
 }
 .reply button {
     cursor: pointer;
