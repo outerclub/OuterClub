@@ -79,7 +79,7 @@
     font-family: BebasRegular;
 }
 .conversation .user h2 {
-   font-size: 140%;
+   font-size: 130%;
     margin-bottom: 2px;
 }
 .conversation .content {
@@ -87,7 +87,6 @@
     float: left;
     width: 575px;
     color: white;
-    font-size: 16px;
     min-height: 30px;
 }
 
@@ -99,7 +98,6 @@
 }
 .conversation .content .date {
     float:right;
-    font-size: 12px;
     font-weight: bold;
     color: #bbb;
 }
@@ -148,7 +146,7 @@
 .reply textarea {
     display:block;
     border: 0;
-    font-size: 16px;
+    font-size:100%;
 }
 .reply button {
     cursor: pointer;
@@ -160,7 +158,7 @@
     border: 0;
     font-weight: bold;
     padding: 10px;
-    font-size: 16px;
+    font-size: 120%;
 }
 .reply button:hover {
     color: rgba(91,144,194,1);
