@@ -18,6 +18,9 @@
 .room {
     position: relative;
 }
+.room .cover img {
+    display:block;
+}
 .room h2 {
     color: white;
     padding: 10px;
@@ -39,6 +42,11 @@
 /**
  * The actual conversation.
  */
+#conversation .underlay {
+    overflow:hidden;
+    background-color:rgba(0,0,0,0.5);
+    padding-bottom:10px;
+}
 .responses {
     overflow: auto;
     padding: 5px 0 5px 0;
@@ -88,7 +96,7 @@
     width: 575px;
     color: white;
     min-height: 30px;
-    font-size: 110%;
+    font-size: 120%;
 }
 
 .content .section {
@@ -101,6 +109,8 @@
     float:right;
     font-weight: bold;
     color: #bbb;
+    font-size: 80%;
+    margin: 6px 0 5px 5px;
 }
 .conversation .date a {
     float:right;
@@ -108,7 +118,6 @@
 }
 .conversation .date span {
     float: left;
-    margin-top: 6px;
 }
 .conversation .date a:hover {
     opacity: 1
@@ -147,13 +156,13 @@
 .reply textarea {
     display:block;
     border: 0;
-    font-size:110%;
+    font-size:120%;
 }
 .reply button {
     cursor: pointer;
     width:100%;
     display:block;
-    background-color: #1b2127;
+    background-color: #3b4147;
     text-align: right;
     color: white;
     border: 0;

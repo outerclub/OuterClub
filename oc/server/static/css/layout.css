@@ -266,6 +266,7 @@ textarea, input {
     font-family: Arial;
 }
 button.decorated{
+    cursor: pointer;
     display: inline-block;
     font-family: BebasRegular;
     font-size: 14px;
