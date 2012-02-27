@@ -63,7 +63,7 @@ def index():
 
 @app.route('/twitter')
 def twitter():
-    if not 'twitter' in app.config or (datetime.now()-app.config['twitter']['time']).minutes >= 30:
+    if not 'twitter' in app.config or (datetime.now()-app.config['twitter']['time']).seconds >= 60*30:
         data = urllib2.urlopen('http://api.twitter.com/1/statuses/user_timeline.json?screen_name=outerclub&include_rts=true&include_entities=true&count=5').read()
         app.config['twitter'] = {'data':data,'time':datetime.now()}
     return app.config['twitter']['data']

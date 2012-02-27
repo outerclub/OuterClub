@@ -156,13 +156,13 @@ oc.Main.prototype.happening = function() {
 };
 
 oc.Main.prototype.start = function() {
+    this.happening();
     this.userView.init();
     
     var self = this;
     this.socket.addCallback('authRejected',function() {
         window.location = '/logout';
     });
-    this.happening();
 
     // gate to another section
     var menuItems = goog.dom.query('#menu ul a'); 
