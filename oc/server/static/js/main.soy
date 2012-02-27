@@ -28,7 +28,7 @@
  */
 {template .happening_text}
 <h2>{$title}</h2>
-<span class="user">{$user.name}</span>{sp}
+<a class="user" href="#!/user/{$user.id}">{$user.name}</a>{sp}
     {if $type == 'post'}
         posted
     {elseif $type == 'response'}
@@ -74,3 +74,18 @@
 {/foreach}
 {/template}
 
+
+/**
+ * @param date
+ * @param content
+ */
+{template .newsItem}
+<div class="item">
+    <div class="date">
+        {$date}
+    </div>
+    <div class="content">
+        {$content|noAutoescape}
+    </div>
+</div>
+{/template}

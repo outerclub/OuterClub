@@ -43,10 +43,10 @@ class TRtgHandler:
         cur.close()
         conn.close()
         
-        payload = {'date':util.dateFormat(res[2]),'content':newContent,'user':user,'r_id':r_id}
+        payload = {'date':res[2].isoformat(),'content':newContent,'user':user,'r_id':r_id}
         self.queue.put(event.Message('/conversation/%d' % (res[0]), 'response',payload))
 
-        happening_data = {'user':user,'date':util.hourDateFormat(res[2]),'category_image':res[5],'category_id':res[4],'d_id':res[0],'title': res[6],'r_id':r_id,'content':newContent}
+        happening_data = {'user':user,'date':res[2].isoformat(),'category_image':res[5],'category_id':res[4],'d_id':res[0],'title': res[6],'r_id':r_id,'content':newContent}
         self.queue.put(event.Message('/happening','happening',{'type':'response','data':happening_data}))
 
     def conversation(self,d_id):
@@ -59,10 +59,10 @@ class TRtgHandler:
         cur.close()
         conn.close()
 
-        payload = {'d_id':d_id,'date':util.dateFormat(convo[1]),'title':convo[5],'user':user}
+        payload = {'id':d_id,'date':convo[1].isoformat(),'title':convo[5],'user':user}
         self.queue.put(event.Message('/category/%d' % (convo[4]),'conversation',payload))
 
-        happening_data = {'user':user,'date':util.hourDateFormat(convo[1]),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':util.escape(convo[2])}
+        happening_data = {'user':user,'date':convo[1].isoformat(),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':util.escape(convo[2])}
         self.queue.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
 
     def auth(self,auth):
@@ -78,7 +78,7 @@ class TRtgHandler:
         self.queue.put(event.Message('/user/%d' % user_id,'user',user))
 
 
-EventRouter = SockJSRouter(EventConnection,'/sock')
+EventRouter = SockJSRouter(EventConnection,'/sock',user_settings=dict(disabled_transports=['websocket']))
 app = tornado.web.Application(EventRouter.urls)
 ext = External()
 qu = QueueProc()

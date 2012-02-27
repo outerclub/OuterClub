@@ -12,6 +12,9 @@
 }
 a{
 	text-decoration:none;
+    color:#77A1CC;
+}
+a.mention {
 	color:#ff8211;
 }
 a:hover {
@@ -216,6 +219,9 @@ body{
     top: 0;
     height: 45px;
     width: 45px;
+}
+.slide_show a.user {
+    color:#bbb;
 }
 
 /**

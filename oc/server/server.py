@@ -9,10 +9,13 @@ from flask import Flask,request
 import util
 from datetime import datetime
 import hashlib
+import json
 import random
 import uuid
 import re
 from werkzeug.contrib.fixers import ProxyFix
+
+import urllib2
  
 from ..rtg.t_rtg import RtgService
 from ..rtg.t_rtg.ttypes import *
@@ -57,6 +60,30 @@ def index():
     conn.close()
 
     return render_template('index.html',**g)
+
+@app.route('/twitter')
+def twitter():
+    if not 'twitter' in app.config or (datetime.now()-app.config['twitter']['time']).minutes >= 30:
+        data = urllib2.urlopen('http://api.twitter.com/1/statuses/user_timeline.json?screen_name=outerclub&include_rts=true&include_entities=true&count=5').read()
+        app.config['twitter'] = {'data':data,'time':datetime.now()}
+    return app.config['twitter']['data']
+
+
+@app.route('/news')
+def news():
+    if not isLoggedIn():
+        return displaySignup()
+    conn = app.config['pool'].connection()
+    cur = conn.cursor()
+    
+    uid = getUid()
+    news = db.fetchNews(cur,uid)
+    for item in news:
+        item['date'] = (item['date']).isoformat()
+
+    cur.close()
+    conn.close()
+    return flask.jsonify(news=news)
 
 @app.route('/about')
 def about():
@@ -103,7 +130,7 @@ def category(category):
         for conversation in cur.fetchall():
             posts.append({'id':conversation[0], 'title':conversation[1],  \
                           'user':db.fetchUser(cur,conversation[3]), \
-                          'date': util.dateFormat(conversation[2])})
+                          'date': (conversation[2]).isoformat()})
         cur2.close()
         cur.close()
         conn.close()
@@ -128,7 +155,7 @@ def conversation(id):
     # populate the data object 
     conversation = {'id': id, 'title':conversation[0], \
                   'user':db.fetchUser(cur,conversation[4]), \
-                   'date': util.dateFormat(conversation[1]), \
+                   'date': (conversation[1]).isoformat(), \
                    'content': util.replaceMentions(cur,util.escape(conversation[2])), \
                   }
     myUid = getUid()
@@ -201,7 +228,7 @@ def blurb():
             cur.execute('update user_category_blurb set text=%s where user_id=%s and cat_id=%s',(blurb,uid,cat_id))
     else:
         cur.execute('insert into user_category_blurb (user_id,cat_id,text) values (%s,%s,%s)',(uid,cat_id,blurb))
-
+    
     conn.commit()
     cur.close()
     conn.close()
@@ -220,16 +247,18 @@ def covers():
                 covers.append(f)
         return flask.jsonify(covers=covers)
     else:
+        uid = getUid()
         conn = app.config['pool'].connection()
         cur = conn.cursor()
-        cur.execute('update user set cover_image=%s where user_id=%s',(request.form['cover'],getUid()))
+        cur.execute('update user set cover_image=%s where user_id=%s',(request.form['cover'],uid))
         conn.commit()
         cur.close()
         conn.close()
 
         app.config['transport'].open()
-        app.config['client'].userModified(getUid())
+        app.config['client'].userModified(uid)
         app.config['transport'].close()
+        
         
         return ''
 
@@ -245,15 +274,16 @@ def avatars():
                 avatars.append(f)
         return flask.jsonify(avatars=avatars)
     else:
+        uid = getUid()
         conn = app.config['pool'].connection()
         cur = conn.cursor()
-        cur.execute('update user set avatar_image=%s where user_id=%s',(request.form['avatar'],getUid()))
+        cur.execute('update user set avatar_image=%s where user_id=%s',(request.form['avatar'],uid))
         conn.commit()
         cur.close()
         conn.close()
 
         app.config['transport'].open()
-        app.config['client'].userModified(getUid())
+        app.config['client'].userModified(uid)
         app.config['transport'].close()
         
         return ''
@@ -307,17 +337,44 @@ def reply():
     if len(data) == 0:
         error = 'Please enter some text before responding.'
 
+    uid = getUid()
+
     # ensure that any mentions are valid
     mentions = util.findMentions(cur,data)
     for name in mentions:
         if mentions[name] == None:
             error = "@%s didn't match to a user." % name
+        elif mentions[name]['user_id'] == uid:
+            error = "You can only mention other people."
+        
 
     if (error):
         return flask.jsonify(error=error)
+
+    user = db.fetchUser(cur,uid)
     
+    cur.execute('select title,user_id from conversation where d_id=%s',(d_id,))  
+    res = cur.fetchone()
+    convo_title = res[0]
+    convo_creator = res[1]
+    # insert mention news
+    if (len(mentions) > 0):
+        # process newsfeed
+        for name in mentions:
+            db.insertNews(cur,mentions[name]['user_id'],{'content':'<a href="#!/user/%s"><img height="30" src="/static/images/avatars/%s" /> %s</a> mentioned you in <a href="#!/conversation/%s">%s</a>.' % (user['user_id'],user['avatar_image'],user['name'],d_id,convo_title)})
+
+    # add news to other participants
+    cur.execute('select user_id from response where d_id=%s',(d_id,))
+    participants = set()
+    for u in cur.fetchall():
+        participants.add(u[0]) 
+    participants.add(convo_creator)
+    for u in participants:
+        if u != uid:
+            db.insertNews(cur,u,{'content':'<a href="#!/user/%s"><img height="30" src="/static/images/avatars/%s" /> %s</a> replied in <a href="#!/conversation/%s"> %s</a>.' % (uid,user['avatar_image'],user['name'],d_id,convo_title)})
+     
     # insert the response
-    cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,getUid(),data))
+    cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,uid,data))
     conn.commit()
     r_id = cur.lastrowid
     
@@ -348,6 +405,9 @@ def upvote():
         cur.execute('insert into upvote (user_id, context_id,object_id, type) values (%s,%s,%s,%s)',(uid,d_id,object_id,util.Upvote.UserType))
         cur.execute('select prestige from user where user_id=%s',(object_id,))
         cur.execute('update user set prestige=%s where user_id=%s',(cur.fetchone()[0]+1,object_id))
+        
+        self = db.fetchUser(cur,uid)
+        db.insertNews(cur,object_id,{'content':'<a href="#!/user/%s"><img height="30" src="/static/images/avatars/%s" /> %s</a> gave you a coffee!' % (uid,self['avatar_image'],self['name'])})
         conn.commit()
 
         app.config['transport'].open()
@@ -423,7 +483,7 @@ def invite():
         conn.close()
         
         data = render_template('invite.html',name=name,key=key)
-        util.send(email,'%s, welcome to OuterClub!' % (name),data)
+        util.send(app.config,email,'%s, welcome to OuterClub!' % (name),data)
         return 'sent to %s<br /><br /><br /><br />%s' % (email,data)
     return ret
          
@@ -542,6 +602,17 @@ def config(config):
     app.debug = config.DEBUG
     app.wsgi_app = ProxyFix(app.wsgi_app) 
     app.secret_key = os.urandom(32)
+
+    if not app.debug:
+        import logging
+        from logging.handlers import SMTPHandler
+        mail_handler = SMTPHandler(app.config['MAIL_SERVER'],app.config['EMAIL_ADDRESS'],[app.config['ERROR_EMAIL']],'OuterClub Exception',credentials=(app.config['EMAIL_USER'],app.config['EMAIL_PASSWORD']),secure=())
+        mail_handler.setLevel(logging.ERROR)
+        app.logger.addHandler(mail_handler)
+        from logging.handlers import RotatingFileHandler
+        handler = RotatingFileHandler('logs/app.log')
+        handler.setLevel(logging.WARNING)
+        app.logger.addHandler(handler)
 
 def run():
     app.run(host=app.config['BIND_ADDRESS'],port=app.config['PORT'])

@@ -3,6 +3,7 @@ goog.provide('oc.Main');
 goog.require('oc.Socket');
 goog.require('oc.Category.View');
 goog.require('oc.Nav');
+goog.require('oc.News.View');
 goog.require('oc.User');
 goog.require('oc.User.View');
 goog.require('oc.Trending');
@@ -22,6 +23,7 @@ goog.require('goog.uri.utils');
 goog.require('oc.Templates.Main');
 goog.require('oc.Tracking');
 goog.require('goog.events.KeyCodes');
+goog.require('goog.date');
 
 /**
  *
@@ -63,6 +65,12 @@ oc.Main = function(categories) {
      * @type {number}
      */
     this.happeningItems = 5;
+
+    /**
+     * @type {oc.News.View}
+     */
+    this.newsView = new oc.News.View(this.socket);
+
 };
 
 oc.Main.prototype.happening = function() {
@@ -87,7 +95,7 @@ oc.Main.prototype.happening = function() {
         var html = oc.Templates.Main.happening({
                 user:oc.User.extractFromJson(p['user']),
                 category_image:p['category_image'],
-                date:p['date'],
+                date:(goog.date.fromIsoString(p['date']).toUsTimeString()),
                 title:p['title'],
                 type:data['type'],
                 content:p['content']});
@@ -295,6 +303,8 @@ oc.Main.prototype.start = function() {
             var registrations = ['/happening','/user/'+self.userView.user.id];
             if (t == '!/welcome')
             {
+                registrations.push('/news');
+                self.newsView.refresh();
             }
             self.socket.send({'register':registrations});
 

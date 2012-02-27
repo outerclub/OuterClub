@@ -1,8 +1,11 @@
+#welcome {
+    overflow: hidden;
+}
 #welcome h1 {
     color: #77a1cc;
     font-family: BebasRegular;
     font-size: 200%;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 #welcome h1 span {
     color: white;
@@ -19,6 +22,44 @@
 }
 #welcome blockquote .author {
     color: #888
+}
+.news,.twitter {
+    width:342px;
+    margin-left:3px;
+    float:right;
+}
+.news .item {
+    overflow:hidden;
+    margin-bottom:3px
+}
+.news .date {
+    float:left;
+    font-weight:bold;
+}
+.news .content {
+    float:left;
+    margin-left:5px;
+    color: #bbb;
+}
+.news img {
+    vertical-align: middle;
+}
+.twitter {
+    clear: right;
+}
+.twitter .tweet {
+    margin-top:5px;
+}
+.twitter .tweet .hi {
+    color: #77a1cc;
+} 
+.twitter .date {
+    color: #bbb;
+    font-style:italic;
+}
+.announcements {
+    width: 500px;
+    float:left;
 }
 .announcements img {
     float: left;

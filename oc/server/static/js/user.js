@@ -119,13 +119,15 @@ oc.User.View.prototype.init =  function() {
             self.key = spl[1];
     });
 
+    // initialize the socket
+    self.socket.init('http://'+window.location.hostname+':'+window['RTG_WEBPORT']+'/sock');
+    self.socket.send({'user_id':self.user.id,'key':self.key});
+    self.socket.send({'register':['/happening','/user/'+self.user.id]});
+
     // load the user details
     goog.net.XhrIo.send('/user/'+self.user.id,function(e) {
         var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
         self.user = oc.User.extractFromJson(u);
-        self.socket.init('http://'+window.location.hostname+':'+window['RTG_WEBPORT']+'/sock');
-        self.socket.send({'user_id':self.user.id,'key':self.key});
-        self.socket.send({'register':['/happening','/user/'+self.user.id]});
     });
     self.socket.addCallback('user',function(data) {
         // increase prestige

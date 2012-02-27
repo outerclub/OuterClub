@@ -11,6 +11,7 @@ goog.require('goog.style');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('oc.Templates.Main');
+goog.require('goog.date');
 
 /**
  * @param {Object.<oc.Category>} categories
@@ -36,6 +37,7 @@ oc.Trending.prototype.go = function() {
         oc.Nav.setTitle(trending.getAttribute('title'));
         goog.array.forEach(conversations,function(c) {
             c['content'] = oc.Util.replaceLinks(c['content']);
+            c['date'] = oc.Util.prettyDate(goog.date.fromIsoString(c['date']));
         });
         var html = oc.Templates.Main.trending({conversations:conversations,categories:self.categories});
             

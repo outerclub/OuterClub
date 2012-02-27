@@ -22,6 +22,7 @@ goog.require('goog.style');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
 goog.require('goog.uri.utils');
+goog.require('goog.date');
 
 /**
  * @param {Object.<oc.Category>} categories
@@ -69,7 +70,21 @@ oc.Category.View.prototype.go = function(url) {
         var dynamic = goog.dom.getElement('dynamic');
         dynamic.innerHTML = '<div class="posts"></div>';
         var postsDiv = goog.dom.query('.posts',dynamic)[0];
-        goog.dom.append(postsDiv,self.createConversations(false,posts));
+
+        goog.array.forEach(posts,function(p) {
+            var html = oc.Templates.Category.conversation({
+                hide:false,
+                id:p['id'],
+                title:p['title'],
+                cover_image:p['user']['cover_image'],
+                avatar_image:p['user']['avatar_image'],
+                user_id:p['user']['user_id'],
+                date: oc.Util.humanDate(goog.date.fromIsoString(p['date'])),
+                user_name:p['user']['name']});
+            var d = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
+            goog.dom.appendChild(postsDiv,d);
+            
+        });
         self.convoHandle(postsDiv);
         
         oc.Nav.hideAll();
@@ -82,21 +97,20 @@ oc.Category.View.prototype.go = function(url) {
         self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/category/'+categoryData['id']]});
     });
     this.socket.addCallback('conversation',function(data) {
-        var d = self.createConversations(true,[{'id':data['d_id'],'title':data['title'],'user':data['user'],'date':data['date']}]);
+        var html = oc.Templates.Category.conversation({
+            hide:true,
+            id:data['id'],
+            title:data['title'],
+            cover_image:data['user']['cover_image'],
+            avatar_image:data['user']['avatar_image'],
+            user_id:data['user']['user_id'],
+            date: oc.Util.humanDate(goog.date.fromIsoString(data['date'])),
+            user_name:data['user']['name']});
+        var d = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
         goog.dom.insertChildAt(goog.dom.query('.posts')[0],d,0);
         self.convoHandle(goog.dom.query('.posts:first')[0]);
         (new goog.fx.dom.FadeInAndShow(d,500)).play();
     });
-};
-
-/**
- * @param {boolean} hide
- * @param {Array.<Object>} d_list
- * @return {Node}
- */
-oc.Category.View.prototype.createConversations = function(hide,d_list) {
-    var html = oc.Templates.Category.conversationList({hide:hide,conversationList:d_list});
-    return goog.dom.htmlToDocumentFragment(html);
 };
 
 /**
@@ -173,6 +187,11 @@ oc.Conversation.View = function(category_view,socket,userView) {
      * @type {oc.Conversation}
      */
     this.conversation = null;
+
+    /**
+     * @type {Array.<oc.Conversation.Response>}
+     */
+    this.responses = [];
 };
 
 /**
@@ -278,39 +297,22 @@ oc.Conversation.View.prototype.go = function(id) {
  */
 oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categoryId) {
     var previousD = goog.dom.query('.conversation');
-    // get last full date
-    var lastDateSplit = null;
-    for (var x=previousD.length-1; x >= 0; x--)
+    var date;
+    if (this.responses.length > 0)
     {
-        var dates = goog.dom.query('.date span',previousD[x]);
-        for (var y=dates.length-1; y >= 0; y--)
-        {
-            lastDateSplit = dates[y].innerHTML.replace('  ',' ').split(' ');
-            if (lastDateSplit.length == 4)
+        var lastResponse = this.responses[this.responses.length-1];
+        if (goog.date.isSameDay(response.date,lastResponse.date))
+            date = response.date.toUsTimeString();
+        else {
+            date = oc.Util.humanDate(response.date);
+            // today? 
+            if (date.length <= 7)
             {
-                break;
+                date = "Today, "+date;
             }
         }
-        if (lastDateSplit.length == 4)
-        {
-            break;
-        }
-    }
-
-    // display shortened date?
-    var date = response.date;
-    if (lastDateSplit != null)
-    {
-        var currentDateSplit = date.replace('  ',' ').split(' ');
-
-        // same date as before?
-        if (currentDateSplit[0] == lastDateSplit[0] && currentDateSplit[1] == lastDateSplit[1] &&
-            currentDateSplit[2] == lastDateSplit[2])
-        {
-            // show just the time
-            date = currentDateSplit[3];
-        }
-    }
+    } else
+        date = oc.Util.humanDate(response.date);
 
     // create right float
     var self = this;
@@ -409,6 +411,7 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categor
         }
     }
 
+    self.responses.push(response);
     if (fadeIn)
     {
         var responses = goog.dom.query('.responses')[0];

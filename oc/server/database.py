@@ -1,5 +1,6 @@
 import util
 import datetime
+import pickle
 def fetchResponses(cursor,d_id,user_id):
     cursor.execute('select r_id,user_id,replyDate,content from response where d_id=%s order by replyDate asc', (d_id,))
     
@@ -11,7 +12,7 @@ def fetchResponses(cursor,d_id,user_id):
             users[resp[1]] = fetchUser(cursor,resp[1])
 
         responses.append({'r_id':resp[0],'user':users[resp[1]], \
-                          'date': util.dateFormat(resp[2]), 'content': util.replaceMentions(cursor,util.escape(resp[3]))})
+                          'date': resp[2].isoformat(), 'content': util.replaceMentions(cursor,util.escape(resp[3]))})
     return responses
 
 def fetchTrendingConversations(cursor):
@@ -21,7 +22,7 @@ def fetchTrendingConversations(cursor):
     conversations = []
     i=1
     for d in cursor.fetchall():
-        conversations.append({'rank':i,'id': d[0],'cat_id':d[1],'title':d[3],'date':util.dateFormat(d[4]),'content':util.escape(d[5])})
+        conversations.append({'rank':i,'id': d[0],'cat_id':d[1],'title':d[3],'date': d[4].isoformat(),'content':util.escape(d[5])})
         i += 1
     return conversations
 
@@ -40,7 +41,7 @@ def fetchAnnouncements(cursor):
     
     announcements = []
     for a in cursor.fetchall():
-        announcements.append({'a_id':a[0],'title':a[1],'content':a[2],'postDate':util.dateFormat(a[3]),'user_id':a[4]})
+        announcements.append({'a_id':a[0],'title':a[1],'content':a[2],'postDate': a[3].strftime('%d %B %Y'),'user_id':a[4]})
     return announcements
 
 def fetchTasks(cursor,user_id):
@@ -78,3 +79,29 @@ def fetchQuestion(cursor):
         return {'id':row[0],'title':row[1]}
     else:
         return None
+
+def fetchNews(cursor,user_id):
+    res = cursor.execute('select value from object where id=%s',('news_%s' % user_id,))
+    row = cursor.fetchone()
+    data = []
+    if (row):
+        data = pickle.loads(row[0])
+    else:
+        data.append({'date':datetime.datetime.now(),'content':'Feed initialized.'});
+    return data
+
+def insertNews(cursor,user_id,item):
+    item['date'] = datetime.datetime.now()
+    news = fetchNews(cursor,user_id)
+    isNew = len(news) == 1
+
+    news.insert(0,item)
+    
+    # max news items
+    news = news[:14]
+    key = 'news_%s' %user_id
+    data = pickle.dumps(news)
+    if (isNew):
+        cursor.execute('insert into object (id,value) values (%s,%s)',(key,data))
+    else:
+        cursor.execute('update object set value=%s where id=%s',(data,key))

@@ -101,7 +101,7 @@
     float:right;
     font-size: 12px;
     font-weight: bold;
-    color: #999;
+    color: #bbb;
 }
 .conversation .date a {
     float:right;
@@ -117,7 +117,7 @@
 .action .content {
     background-color: transparent;
     padding: 0px 15px 0px 15px;
-    margin-left: 210px;
+    margin-left: 205px;
     min-height: 0px;
 }
 .action .section img {
