@@ -341,6 +341,7 @@ def reply():
 
     # ensure that any mentions are valid
     mentions = util.findMentions(cur,data)
+    print mentions
     for name in mentions:
         if mentions[name] == None:
             error = "@%s didn't match to a user." % name

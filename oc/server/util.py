@@ -33,7 +33,7 @@ def replaceMentions(cur,data):
     
     accum = ''
     for segment in re.split('(@\w+)',data):
-        if (segment.startswith('@')):
+        if (re.match('@\w+',segment)):
             name = segment[1:]
             u = users[name.lower()] 
             
