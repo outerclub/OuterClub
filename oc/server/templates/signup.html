@@ -269,7 +269,7 @@ $(document).ready(function() {
         var login = function() {
             $.ajax({
                 type:'POST',
-                url:'/login',
+                url:'login',
                 data: { l_email: $("input[name='l_email']").val(), l_password: $("input[name='l_password']").val()},
                 success:function(data) {
                     if ('error' in data) {
@@ -305,7 +305,7 @@ $(document).ready(function() {
         $("button[name='signup']").click(function() {
             $.ajax({
                 type:'POST',
-                url:'/signup',
+                url:'signup',
                 data: { username: $("input[name='username']").val(), email: $("input[name='email']").val(),
                     password: $("input[name='password']").val(),confirm:$("input[name='confirm']").val(),
                     k: '{{ k }}' },
