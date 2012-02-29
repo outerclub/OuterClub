@@ -283,14 +283,14 @@ $(document).ready(function() {
             });
         };
         var defaultE = getURLParameter('e');
-        if (defaultE != null)
+        if (defaultE != 'null')
             $("input[name='l_email']").val(defaultE);
     
         var defaultP = getURLParameter('p');
-        if (defaultP != null)
+        if (defaultP != 'null')
             $("input[name='l_password']").val(defaultP);
 
-        if (defaultE != null && defaultP != null)
+        if (defaultE != 'null' && defaultP != 'null')
             login();
         
         $("button[name='login']").click(login);
