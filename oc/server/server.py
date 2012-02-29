@@ -198,7 +198,7 @@ def config(config):
     if not app.debug:
         import logging
         from logging.handlers import SMTPHandler
-        mail_handler = SMTPHandler(app.config['MAIL_SERVER'],app.config['EMAIL_ADDRESS'],[app.config['ERROR_EMAIL']],'OuterClub Exception',credentials=(app.config['EMAIL_USER'],app.config['EMAIL_PASSWORD']),secure=())
+        mail_handler = SMTPHandler((app.config['EMAIL_SERVER'],app.config['EMAIL_PORT']),app.config['EMAIL_ADDRESS'],[app.config['ERROR_EMAIL']],'OuterClub Exception',credentials=(app.config['EMAIL_USER'],app.config['EMAIL_PASSWORD']),secure=())
         mail_handler.setLevel(logging.ERROR)
         app.logger.addHandler(mail_handler)
         from logging.handlers import RotatingFileHandler

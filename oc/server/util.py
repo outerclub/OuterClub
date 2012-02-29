@@ -72,7 +72,7 @@ def send(config,to,subject,msg):
     m['From'] = fro
     m['To'] = to
     m['Subject'] = subject
-    server = smtplib.SMTP(config['MAIL_SERVER'])
+    server = smtplib.SMTP(config['EMAIL_SERVER'],config['EMAIL_PORT'])
     server.starttls()
     server.login(config['EMAIL_USER'],config['EMAIL_PASSWORD'])
     server.sendmail(fro,to,m.as_string())

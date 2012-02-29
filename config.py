@@ -12,7 +12,8 @@ class WebserverConfig:
     PORT = 5000
     DEBUG = True
 
-    MAIL_SERVER = 'email-smtp.us-east-1.amazonaws.com'
+    EMAIL_SERVER = 'email-smtp.us-east-1.amazonaws.com'
+    EMAIL_PORT = 465
     EMAIL_ADDRESS = 'no-reply@outerclub.com'
     EMAIL_USER = None
     EMAIL_PASSWORD = None
