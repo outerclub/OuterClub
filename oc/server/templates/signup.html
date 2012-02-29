@@ -203,6 +203,11 @@ function showError(msg) {
         $("#center .error").fadeIn();
     }
 }
+function getURLParameter(name) {
+    return decodeURI(
+        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+    );
+};
 var wait = 7000;
 function slideshow() {
     var active = $(".dots .dotActive").index();
@@ -231,6 +236,7 @@ $(document).ready(function() {
             $(this).next('span').hide();
         });
         
+        // preload the signup images
         var preload = new Image();
         preload.src = '/static/images/signup/0.png';
         preload.src = '/static/images/signup/1.png';
@@ -276,6 +282,17 @@ $(document).ready(function() {
                 dataType:'json'
             });
         };
+        var defaultE = getURLParameter('e');
+        if (defaultE != null)
+            $("input[name='l_email']").val(defaultE);
+    
+        var defaultP = getURLParameter('p');
+        if (defaultP != null)
+            $("input[name='l_password']").val(defaultP);
+
+        if (defaultE != null && defaultP != null)
+            login();
+        
         $("button[name='login']").click(login);
         $("input[name='l_password'],input[name='l_email']").keypress(function(e) {
             if ($("input[name='l_password']").val() != '' && $("input[name='l_email']").val() != '')
