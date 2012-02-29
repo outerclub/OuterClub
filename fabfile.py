@@ -21,5 +21,6 @@ def compile():
     f.write('[js]\nfile=%s\n' % (js_file))
     f.close()
     
+def deploy():
     local('mkdir -p /var/www')
     local('cp -r %s /var/www' % (BASE_DIR))
