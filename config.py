@@ -12,10 +12,10 @@ class WebserverConfig:
     PORT = 5000
     DEBUG = True
 
-    MAIL_SERVER = 'smtp.gmail.com'
-    EMAIL_ADDRESS = 'outerclub@gmail.com'
-    EMAIL_USER = 'outerclub'
-    EMAIL_PASSWORD = 'stayfr3sh'
+    MAIL_SERVER = 'email-smtp.us-east-1.amazonaws.com'
+    EMAIL_ADDRESS = 'no-reply@outerclub.com'
+    EMAIL_USER = None
+    EMAIL_PASSWORD = None
     ERROR_EMAIL = 'ice.arch@gmail.com'
 
 class RtgConfig:

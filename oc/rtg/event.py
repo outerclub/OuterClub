@@ -18,9 +18,8 @@ class NewAuthKey:
         self.uid = uid
         self.key = key
 class Auth:
-    def __init__(self,conn,uid,key):
+    def __init__(self,conn,key):
         self.conn = conn
-        self.uid = uid
         self.key = key
 class QueueKill:
     pass

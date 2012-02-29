@@ -10,8 +10,8 @@ class EventConnection(SockJSConnection):
         message = json.loads(message)
         if 'register' in message:
             rtg.StaticQueue.instance.put(event.Register(message['register'],self))
-        if 'user_id' in message:
-            rtg.StaticQueue.instance.put(event.Auth(self,int(message['user_id']),message['key']))
+        if 'key' in message:
+            rtg.StaticQueue.instance.put(event.Auth(self,message['key']))
 
     def on_close(self):
         rtg.StaticQueue.instance.put(event.Close(self))

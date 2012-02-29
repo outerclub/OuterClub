@@ -17,6 +17,7 @@ goog.require('goog.dom.query');
 goog.require('goog.dom.classes');
 goog.require('goog.fx.dom');
 goog.require('goog.fx.Transition');
+goog.require('goog.fx.easing');
 goog.require('goog.style');
 goog.require('goog.net.XhrIo');
 goog.require('goog.uri.utils');
@@ -78,6 +79,7 @@ oc.Main.prototype.happening = function() {
     goog.style.showElement(slideShow,false);
 
     var self = this;
+    var itemHeight = 81;
     /**
      * @param {Object} data
      * @param {boolean} animate
@@ -103,7 +105,47 @@ oc.Main.prototype.happening = function() {
         goog.style.showElement(element,false);
         
         var scroller = goog.dom.query('.scroll',slideShow)[0];
+
         goog.dom.insertChildAt(scroller,element,0);
+        var currentItems = goog.dom.query('.item',scroller);
+
+        // setup the hidden element
+        if (animate)
+        {
+            (new goog.fx.dom.FadeInAndShow(element,1000,goog.fx.easing.easeOut)).play();
+            goog.style.setPosition(element,0,-itemHeight);
+        }
+
+        // slide all the elements
+        for (var i=0; i < currentItems.length; i++) {
+            var newY = (i)*itemHeight;
+            var remove = (i >= self.happeningItems);
+                
+            if (animate)
+            {
+                var anim = (new goog.fx.dom.SlideFrom(currentItems[i],[0,newY],1000,goog.fx.easing.easeOut));
+                if (remove)
+                {
+                    goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+                        goog.dom.removeNode(currentItems[currentItems.length-1]);
+                    });
+                }
+                anim.play();
+            } else {
+                goog.style.showElement(currentItems[i],true);
+                goog.style.setPosition(currentItems[i],0,newY);
+                if (remove)
+                    goog.dom.removeNode(currentItems[i]);
+            }
+                
+        };
+
+        // resize the actual scroller box
+        var newHeight = itemHeight*Math.min(self.happeningItems,goog.dom.query('.item',scroller).length);
+        if (animate)
+            (new goog.fx.dom.ResizeHeight(scroller,goog.style.getSize(scroller).height,newHeight,1000,goog.fx.easing.easeOut)).play();
+        else
+            goog.style.setHeight(scroller,newHeight);
 
         // clickhandler for conversation
         goog.events.listen(element,goog.events.EventType.CLICK,function(e) {
@@ -120,32 +162,18 @@ oc.Main.prototype.happening = function() {
             });
         });
         
-        (new goog.fx.dom.FadeInAndShow(element,500)).play();
     };
 
     this.socket.addCallback('users',function(num) {
         goog.dom.query('.online span')[0].innerHTML = num;
     });
     this.socket.addCallback('happening',function(data) {
-        var items = goog.dom.query('.slide_show .item');
-        
-        if (items.length >= self.happeningItems)
-        {
-            var last = items[items.length-1];
-            var anim = new goog.fx.dom.FadeOutAndHide(last,500);
-            goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
-                goog.dom.removeNode(last);
-                createHappening(data,true);
-            });
-            anim.play();
-        } else 
-            createHappening(data,true);
+        createHappening(data,true);
     });
     this.socket.addCallback('happening_init',function(data) {
         // create the initial happening now items
         goog.array.forEach(data,function(h,i) {
-            if (i < self.happeningItems)
-                    createHappening(h,false);
+            createHappening(h,false);
         });
 
         // reveal everything

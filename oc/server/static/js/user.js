@@ -113,21 +113,19 @@ oc.User.View.prototype.init =  function() {
      // extract the user_id and key from the cookies
      goog.array.forEach(document.cookie.split("; "),function(cookie) {
         var spl = cookie.split('=');
-        if (spl[0] == 'user_id')
-            self.user = new oc.User(spl[1]);
-        else if (spl[0] == 'key')
+        if (spl[0] == 'key')
             self.key = spl[1];
     });
 
     // initialize the socket
     self.socket.init('http://'+window.location.hostname+':'+window['RTG_WEBPORT']+'/sock');
-    self.socket.send({'user_id':self.user.id,'key':self.key});
-    self.socket.send({'register':['/happening','/user/'+self.user.id]});
+    self.socket.send({'key':self.key});
 
     // load the user details
-    goog.net.XhrIo.send('/user/'+self.user.id,function(e) {
+    goog.net.XhrIo.send('/user',function(e) {
         var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
         self.user = oc.User.extractFromJson(u);
+        self.socket.send({'register':['/happening','/user/'+self.user.id]});
     });
     self.socket.addCallback('user',function(data) {
         // increase prestige

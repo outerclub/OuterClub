@@ -147,14 +147,9 @@ button.dot {
     <div class="footer" style="border:0;border-bottom: 1px solid #333">
      <div class="footer_menu">
         <div class="footer_menu_left">
-            <form action="/login" method="post">
             E-mail <input type="text" name="l_email" size="16" /> &nbsp;Password <input type="password" name="l_password" size="16" />
             <button type="submit" name="login" class="default">Log In</button><div class="error">
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            {{ messages[0] }}
-            {% endif %}
-            {% endwith %}</div>
+            </div>
             </form>
         </div>
      </div>
@@ -186,7 +181,7 @@ button.dot {
         <div class="error">
         </div>
         <div class="clear"></div>
-        <button type="submit" />
+        <button type="submit" name="signup" />
     </div>
     <div class="footer">
         <div class="footer_menu">
@@ -257,7 +252,40 @@ $(document).ready(function() {
 
         });
         setTimeout('slideshow()',wait);
-        $("button[type='submit']").click(function() {
+        var setKey = function(key) {
+            var today = new Date();
+            today.setDate(today.getDate() + 4*7);
+            today.setTime(today.getTime()+(30*60*60*24));
+            document.cookie = 'key='+key+';expires='+today.toUTCString();
+            window.location = '/';
+        };
+
+        var login = function() {
+            $.ajax({
+                type:'POST',
+                url:'/login',
+                data: { l_email: $("input[name='l_email']").val(), l_password: $("input[name='l_password']").val()},
+                success:function(data) {
+                    if ('error' in data) {
+                        $('.footer_menu_left .error').html(data['error']);
+                    }
+                    if ('key' in data) {
+                        setKey(data.key);
+                    }
+                },
+                dataType:'json'
+            });
+        };
+        $("button[name='login']").click(login);
+        $("input[name='l_password'],input[name='l_email']").keypress(function(e) {
+            if ($("input[name='l_password']").val() != '' && $("input[name='l_email']").val() != '')
+            {
+                var keycode = e.keyCode ? e.keyCode : e.which;
+                if (keycode == 13)
+                    login();
+            }
+        });
+        $("button[name='signup']").click(function() {
             $.ajax({
                 type:'POST',
                 url:'/signup',
@@ -268,10 +296,8 @@ $(document).ready(function() {
                     if ('error' in data) {
                         showError(data['error']);
                     }
-                    if ('user_id' in data && 'key' in data) {
-                        document.cookie = 'user_id='+data['user_id']+';';
-                        document.cookie = 'key='+data['key']+';';
-                        window.location = '/';
+                    if ('key' in data) {
+                        setKey(data.key);
                     }
                 },
                 dataType: 'json'

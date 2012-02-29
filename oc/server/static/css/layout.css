@@ -177,6 +177,8 @@ body{
     border-top: 1px solid #222;
     border-left: 1px solid #222;
     border-right: 1px solid #222;
+    overflow:hidden;
+    position:relative;
 }
 .slide_show h2{
     color: #FFFFFF;
@@ -185,6 +187,7 @@ body{
     font-family: BebasRegular;
 }
 .slide_show .item {
+    position:absolute;
     overflow: hidden;
     border-bottom: 1px solid #222;
 }

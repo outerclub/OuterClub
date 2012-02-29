@@ -73,7 +73,7 @@ class QueueProc(threading.Thread):
             msg = self.queue.get(True)
             try:
                 if isinstance(msg,event.NewAuthKey):
-                    self.auth[msg.uid] = msg.key
+                    self.auth[msg.key] = msg.uid
                 # internal messages
                 elif isinstance(msg,event.Message):
                     # distribute to path
@@ -127,14 +127,15 @@ class QueueProc(threading.Thread):
                         del self.conns[conn_id]
                     elif isinstance(msg,event.Auth):
                         # success?
-                        if msg.uid in self.auth and self.auth[msg.uid] == msg.key:
-                            print 'authenticated %s %s' %(msg.uid,msg.key)
-                            self.conns[conn_id]['uid'] = msg.uid 
+                        if msg.key in self.auth:
+                            uid = self.auth[msg.key]
+                            print 'authenticated %s %s' %(uid,msg.key)
+                            self.conns[conn_id]['uid'] = uid 
                             self.conns[conn_id]['paths'] = set() 
-                            if not msg.uid in self.uid_sessions:
-                                self.uid_sessions[msg.uid] = []
+                            if not uid in self.uid_sessions:
+                                self.uid_sessions[uid] = []
                             
-                            self.uid_sessions[msg.uid].append(conn_id)
+                            self.uid_sessions[uid].append(conn_id)
                             self.send(conn_id,['happening_init',self.happening])
                             users = len(self.uid_sessions.keys())
                             self.send(conn_id,['users',users])
