@@ -1,5 +1,12 @@
-Install required dependencies. Configure config.py as appropriate.
+Install required dependencies.
+Copy config.default.py to config.py and configure as appropriate, replacing relevant unset parameters.
 
-Run the server using 'python server.py'.
-Run the real-time component in rtg/ using 'python rtg.py'
+The DEBUG flag controls whether the server relies on compiled javascript+css, amongst other things. Typically it will be set to True for most developmental purposes. Plovr (tracker.sh) must be run if in DEBUG mode.
+The email parameters do not need to be set if in DEBUG mode.
+
+If in DEBUG mode, run tracker.sh (or see inside for the command it runs). This can stay alive indefinitely, even if you restart the other components.
+Run the server using 'python main.py'.
+Run the real-time gateway using 'python rtg.py'
+Or, you can use the startDebug.sh script.
+
 Access web server with browser using the address and port configured in config.py.
