@@ -144,11 +144,6 @@
 .help span {
     color: lightblue;
 }
-.reply .error {
-    color: #c33;
-    font-weight: bold;
-}
-
 .reply {
     float: right;
     margin-right: 75px;

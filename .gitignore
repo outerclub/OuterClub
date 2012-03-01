@@ -6,3 +6,4 @@ logs
 *.c.*
 .settings
 *.cache
+config.py

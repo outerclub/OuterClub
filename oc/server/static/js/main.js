@@ -247,20 +247,28 @@ oc.Main.prototype.start = function() {
             var title = titleInput.value;
             var content = contentArea.value;
                 
-	    titleInput.value = ''; 
-	    contentArea.value = '';
+            var err = /** @type {Element} */ goog.dom.query("#newConversation .error")[0];
+            goog.net.XhrIo.send('/post', function(e) {
+                var resp = e.target.getResponseJson();
+                if ('error' in resp) {
+                    goog.style.showElement(err,true);
+                    err.innerHTML = resp['error'];
+                } else {
+                    // show the defaults again
+                    goog.array.forEach(goog.dom.query('#newConversation span'),function(span) {
+                        goog.style.showElement(span,true);
+                    });
+                    titleInput.value = ''; 
+                    contentArea.value = '';
+                    goog.style.showElement(err,false);
+                    ov.close();
+                }
 
-        // show the defaults again
-        goog.array.forEach(goog.dom.query('#newConversation span'),function(span) {
-            goog.style.showElement(span,true);
-        });
-            goog.net.XhrIo.send('/post', function() {
                 
                  },'POST',goog.uri.utils.buildQueryDataFromMap({'area':self.categoryView.category.id,
                     'title':title,
                     'content':content})
             );
-            ov.close();
     });
     
     var inputs = goog.dom.query("#newConversation .titleField input,#newConversation textarea");

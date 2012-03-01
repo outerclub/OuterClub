@@ -27,37 +27,54 @@ def formatCategoryName(c):
 def escape(s):
     return cgi.escape(s)
 
+MENTION_REGEX = re.compile(r'(^|\W)(@\w+)',flags=re.MULTILINE)
 def replaceMentions(cur,data):
     users = findMentions(cur,data)
     isAction = data.startswith('/me')
     
     accum = ''
-    for segment in re.split('(@\w+)',data):
-        if (re.match('@\w+',segment)):
-            name = segment[1:]
-            u = users[name.lower()] 
-            
-            if isAction:
-                accum += '<a class="mention" href="#!/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (u['user_id'],u['avatar_image'])
+    matches = MENTION_REGEX.finditer(data)
+    end = None
+    for m in matches:
+        accum += data[:m.start()]
+        name = m.group(2)
+        if (len(name) > 1):
+            accum += m.group(1)
+            name = name[1:]
+            lname = name.lower()
+            if lname in users and users[lname] != None:
+                u = users[lname] 
+                
+                if isAction:
+                    accum += '<a class="mention" href="#!/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (u['user_id'],u['avatar_image'])
+                else:
+                    accum += '<a class="mention" href="#!/user/%s">@%s</a>' % (u['user_id'],name)
             else:
-                accum += '<a class="mention" href="#!/user/%s">@%s</a>' % (u['user_id'],name)
+                accum += m.group()
         else:
-            accum += segment
+            accum += m.group()
+        end = m.end()
+    if (end):
+        accum += data[end:]
+    else:
+        accum = data
     return accum
 
 def findMentions(cur,data):
-    mentions = re.findall('@(\w+)',data)
-
-    # convert to lowercase.
-    mentions = map(lambda x: x.lower(),mentions)
+    mentions = MENTION_REGEX.finditer(data)
 
     users = dict()
-    if (len(mentions) > 0):
-        replacements = map(lambda x:'%s',mentions)
-        cur.execute('select name,user_id,avatar_image from user where LCASE(name) in (%s)' % ','.join(replacements),tuple(mentions))
+    mentionsSet = set()
+    for m in mentions:
+        name = m.group(2).lower().strip()
+        if (len(name) > 1):
+            mentionsSet.add(name[1:])
+    if (len(mentionsSet) > 0):
+        replacements = map(lambda x:'%s',mentionsSet)
+        cur.execute('select name,user_id,avatar_image from user where LCASE(name) in (%s)' % ','.join(replacements),tuple(mentionsSet))
         for u in cur.fetchall():
             users[u[0].lower()] = {'user_id':u[1],'avatar_image':u[2]}
-        for n in mentions:
+        for n in mentionsSet:
             if not (n in users):
                 users[n] = None
     

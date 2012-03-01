@@ -158,6 +158,16 @@ def post():
     if not viewFunctions.isLoggedIn():
         return ''
 
+    error = None
+    if len(request.form['title']) == 0:
+        error = 'Please enter a title for your conversation.'
+    elif len(request.form['content']) == 0:
+        error = 'Please enter some content for your conversation.'
+    
+    if (error):
+        return flask.jsonify(error=error)
+        
+
     # fetch the category information
     conn = app.config['pool'].connection()
     cur = conn.cursor()
@@ -175,7 +185,7 @@ def post():
     app.config['client'].conversation(d_id)
     app.config['transport'].close()
     
-    return ''
+    return '{}'
 
 
 def config(config):

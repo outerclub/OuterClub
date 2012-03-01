@@ -202,6 +202,7 @@ oc.Conversation.View.prototype.go = function(id) {
     var conversationDiv = goog.dom.getElement('conversation');
     var usersView = goog.dom.query('#conversation .users')[0];
     usersView.innerHTML = '';
+    goog.dom.query('#conversation .error')[0].innerHTML = '';
     goog.net.XhrIo.send('/conversation/'+id,function(e) {
         var data = goog.json.unsafeParse(e.target.getResponseText());
         self.conversation = oc.Conversation.extractFromJson(data);
@@ -259,10 +260,22 @@ oc.Conversation.View.prototype.go = function(id) {
         /**
          * Reply
          */
+        // textarea focus on tab
+        var textarea = goog.dom.query('.reply textarea')[0];
         var replyButton = goog.dom.query('.reply button')[0];
+        goog.events.removeAll(textarea);
+        goog.events.listen(textarea,goog.events.EventType.KEYDOWN,function(e) {
+            if (e.keyCode == goog.events.KeyCodes.TAB)
+            {
+                replyButton.focus();
+                e.preventDefault();
+            }
+                
+        });
+
         goog.events.removeAll(replyButton);
         goog.events.listen(replyButton,goog.events.EventType.CLICK,function(e) {
-            var content = goog.dom.query('.reply textarea')[0].value;
+            var content = textarea.value;
             goog.net.XhrIo.send('/reply',function(e) {
                 var data = goog.json.unsafeParse(e.target.getResponseText());
                 var errorView = goog.dom.query('.reply .error')[0];
@@ -271,7 +284,6 @@ oc.Conversation.View.prototype.go = function(id) {
                     (new goog.fx.dom.FadeInAndShow(errorView,500)).play();
                 } else {
                     (new goog.fx.dom.FadeOut(errorView,500)).play();
-                    var textarea = goog.dom.query('.reply textarea')[0];
                     textarea.value = '';
                     textarea.focus();
                 }

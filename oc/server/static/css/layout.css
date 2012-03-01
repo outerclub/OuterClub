@@ -280,6 +280,11 @@ button.decorated{
     height: 31px;
     width: 161px;
 }
+.error {
+    color: #c33;
+    font-weight: bold;
+}
+
 
 
 

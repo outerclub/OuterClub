@@ -70,6 +70,7 @@ oc.News.View.prototype.refresh = function() {
         goog.array.forEach(data,function(tweet) {
             var text = tweet['text'];
             text = text.replace(/(#\w+)/g,'<span class="hi">$1</span>');
+            text = text.replace(/(@\w+)/g,'<span class="hi">$1</span>');
             var date = new goog.date.DateTime(new Date(Date.parse(tweet['created_at'])));
             var frag = goog.dom.htmlToDocumentFragment('<div class="tweet">'+text+' &mdash; <span class="date">'+oc.Util.prettyDate(date)+'</span></div>');
             goog.dom.appendChild(twitter,frag);
