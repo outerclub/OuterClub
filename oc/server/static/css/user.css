@@ -56,11 +56,18 @@
 }
 .blurb input {
     border: 0;
-    font-size: 140%;
+    font-size: 120%;
     background-color: rgba(0,0,0,0.5);
     color: white;
     margin:0;
     padding: 3px 6px 3px 6px;
+}
+.blurb span {
+    width:170px;
+    display:inline-block;
+    text-align:right;
+    margin-right:7px;
+    font-weight:bold;
 }
 
 /**

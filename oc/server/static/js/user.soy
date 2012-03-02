@@ -23,7 +23,8 @@
 <h3>{if $isMe}Your {/if}Blurbs</h3>
 {foreach $cat_id in $categoryIds}
 <div class="blurb">
-<label style="display:none" for="{$cat_id}">{$categories[$cat_id].name}</label> <input {if not $isMe}disabled="disabled"{/if} size="55" maxlength="60" type="text" name="{$cat_id}" 
+<span>{$categories[$cat_id].name}</span>
+<input {if not $isMe}disabled="disabled"{/if} size="55" maxlength="60" type="text" name="{$cat_id}" 
 {if $blurbs[$cat_id]}value="{$blurbs[$cat_id]}"{/if}/>
 </div>
 {/foreach}

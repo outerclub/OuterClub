@@ -198,36 +198,15 @@ oc.User.View.prototype.go = function(user_id) {
 
         // display default text if necessary
         var blurbInputs = goog.dom.query('.blurb input',dynamic);
-        goog.array.forEach(blurbInputs,function(input) {
-            if (input.value == '')
-            {
-               goog.style.showElement(goog.dom.getPreviousElementSibling(input),true);
-            }
-        });
 
         // allow profile customization if isMe
         if (isMe) {
             // click handlers for blurbs
             goog.array.forEach(blurbInputs,function(input) {
-                var label = goog.dom.getPreviousElementSibling(input);
-                goog.events.listen(input,goog.events.EventType.FOCUSIN,function() {
-                   goog.dom.classes.add(label,'light');
-                });
                 goog.events.listen(input,goog.events.EventType.FOCUSOUT,function() {
-                    if (this.value == '')
-                        goog.style.showElement(label,true);
-                    goog.dom.classes.remove(label,'light'); 
-
                     var cat_id = input.getAttribute('name');
                     self.user.blurbs[cat_id] = input.value;
                     goog.net.XhrIo.send('/blurb',function() {},'POST',goog.uri.utils.buildQueryDataFromMap({'blurb':input.value,'cat_id': cat_id}));
-                });
-                goog.events.listen(input,goog.events.EventType.KEYPRESS,function() {
-                    goog.style.showElement(label,false);
-                });
-                goog.events.listen(label,goog.events.EventType.MOUSEDOWN,function(e) {
-                    input.focus();
-                    e.preventDefault();
                 });
             });
 
