@@ -22,7 +22,7 @@ a:hover {
     text-decoration: none
 }
 body{
-	font-family:Helvetica,Arial,Sans-Serif;
+    font-family: 'Helvetica Neue',Arial, sans-serif;
     font-size: 80%;
     background: black url(/static/images/background.png) repeat-x fixed top center;
 }
@@ -266,7 +266,7 @@ h1 a,h2 a {
     display: none;
 }
 textarea, input {
-    font-family: Arial;
+    font-family: 'Helvetica Neue',Arial, sans-serif;
 }
 button.decorated{
     cursor: pointer;
