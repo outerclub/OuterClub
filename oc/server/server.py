@@ -53,10 +53,12 @@ def index():
 
 @app.route('/twitter')
 def twitter():
-    if not 'twitter' in app.config or (datetime.now()-app.config['twitter']['time']).seconds >= 60*30:
-        data = urllib2.urlopen('http://api.twitter.com/1/statuses/user_timeline.json?screen_name=outerclub&include_rts=true&include_entities=true&count=5').read()
-        app.config['twitter'] = {'data':data,'time':datetime.now()}
-    return app.config['twitter']['data']
+    if not app.config['DEBUG']:
+        if not 'twitter' in app.config or (datetime.now()-app.config['twitter']['time']).seconds >= 60*30:
+            data = urllib2.urlopen('http://api.twitter.com/1/statuses/user_timeline.json?screen_name=outerclub&include_rts=true&include_entities=true&count=5').read()
+            app.config['twitter'] = {'data':data,'time':datetime.now()}
+        return app.config['twitter']['data']
+    return '[]'
 
 
 @app.route('/news')
@@ -114,14 +116,40 @@ def category(category):
     # verify that this user has access to this category
     if not isPrivate or (isPrivate and cat_id in self['guilds']):
         # fetch the conversations for this category
-        res = cur.execute('select d_id,title,postDate,user_id from conversation where cat_id=%s order by postDate desc',(cat_id,))
+        res = cur.execute('select d_id,title,postDate,user_id,content from conversation where cat_id=%s order by postDate desc',(cat_id,))
         posts = []
-        cur2 = conn.cursor()
+        maxResponses = 4
         for conversation in cur.fetchall():
+            # collect the last responses
+            cur.execute('select user_id,replyDate,content from response where d_id=%s order by replyDate desc limit %s',(conversation[0],maxResponses))
+            responses = []
+            for response in cur.fetchall():
+                responses.insert(0,{'user':db.fetchUser(cur,response[0]),'date':response[1].isoformat(),'content':util.replaceMentions(cur,util.escape(response[2]))})
+
+            # fetch the poster
+            user = db.fetchUser(cur,conversation[3])
+
+            # add in the original post, if applicable
+            if (len(responses) < maxResponses):
+                responses.insert(0,{'user':user,'date':(conversation[2]).isoformat(),'content':util.replaceMentions(cur,util.escape(conversation[4]))})
+
+            # count replies
+            cur.execute('select COUNT(*) from response where d_id=%s',(conversation[0],))
+            numReplies = cur.fetchone()[0]
+
+            # count participants
+            cur.execute('select DISTINCT user_id from response where d_id=%s',(conversation[0],))
+            uids = set()
+            for u in cur.fetchall():
+                uids.add(u[0])
+            uids.add(user['user_id'])
+                
+            numUsers = len(uids)
+
+
             posts.append({'id':conversation[0], 'title':conversation[1],  \
-                          'user':db.fetchUser(cur,conversation[3]), \
-                          'date': (conversation[2]).isoformat()})
-        cur2.close()
+                          'user':user, \
+                          'date': (conversation[2]).isoformat(),'responses':responses,'numReplies':numReplies,'numUsers':numUsers})
         cur.close()
         conn.close()
         

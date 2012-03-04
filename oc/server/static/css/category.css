@@ -43,39 +43,102 @@
  * Posts
  */
 .posts {
-    margin-bottom: 15px;
-    overflow:hidden;
+    position:relative;
 }
 .post a h1 {
     color: #6597ca;
 }
-.post a:hover h1 {
-    color: #a5c7ea;
-}
 .post a:hover img {
-    opacity: 0.7;
+    opacity: 0.8;
 }
 .post{
-    float:left;
-    width:295px;
-    background-color: rgba(0,0,0,0.5);
-    margin: 0 3px 6px 3px;
+    width:285px;
+    position:absolute;
 }
-.post h1{
-    font-family: BebasRegular;
-    font-size: 140%;
-    float:left;
+.post a h1{
+    font-size: 200%;
+    color: white;
+    left:4px;
+    top:5px;
+    font-weight:bold;
+    text-shadow: 1px 1px 1px #000000;
+    filter: dropshadow(color=#000000,offx=1,offy=1);
 }
-.post .inner {
-    padding:5px;
+.post .innerTop,.post .innerBottom {
+    -moz-box-shadow: 0 0 5px #888;
+    -webkit-box-shadow: 0 0 5px #000;
+    box-shadow: 0 0 5px #000;
+}
+.post .innerTop {
     overflow:hidden;
+    background-color: rgba(0,0,0,0.7);
+    
 }
-.post .right {
-    float:right;
+.post .convo {
+    position:relative;
+    height:105px;
+    display:block
+}
+.post .convo > * {
+    position:absolute;
 }
 .post .block {
+    margin:5px;
+    font-weight:bold;
+}
+.post .block a {
+    float:right;
+}
+
+/**
+ * Post bottom section.
+ */
+.post .innerBottom {
+    background-color: rgba(0,0,0,0.5);
+    overflow:hidden;
+    padding-top: 5px;
+}
+.post .responses {
+    position:relative;
+    overflow:hidden;
+}
+.post .response {
+    position:absolute;
+    overflow:hidden;
+    padding:10px 15px;
+}
+.post .responses .border {
+    border-bottom: 1px solid #444;
+}
+.post .responses .text {
     float:left;
-    clear:left;
+    width:218px;
+}
+.post .responses .name {
+    color:white;
+    font-weight:bold;
+}
+.post .responses .name:hover {
+    text-decoration:underline;
+}
+.post .responses img {
+    vertical-align: middle;
+}
+.post .responses img.avatar {
+    float:left;
+    margin-right:6px;
+}
+.post .text .date {
+    color: #777;
+   }
+.post textarea {
+    width:284px;
+    margin: 0 -5px;
+    background-color: rgba(0,0,0,0.5);
+    border: 0;
+    color: white;
+    padding: 5px;
+    font-size:100%;
 }
 
 /** Conversation box **/

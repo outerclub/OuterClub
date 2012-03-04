@@ -20,12 +20,6 @@ def initAuth(id):
 
     app.config['globalAuths'][auth.key] = id
 
-    conn = app.config['pool'].connection()
-    cur = conn.cursor()
-    cur.execute('update user set last_login=NOW() where user_id=%s',(id,))
-    conn.commit()
-    cur.close()
-    conn.close()
     return auth.key
 
 @app.route('/login',methods=['POST'])

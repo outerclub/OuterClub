@@ -136,20 +136,12 @@ oc.User.View.prototype.init =  function() {
         }
     });
 
-    var profile = goog.dom.query('#miniProfile > a');
-    goog.array.forEach(profile,function(p) {
-        var h2 = goog.dom.query('h2',goog.dom.getNextElementSibling(p))[0];
-        goog.events.listen(p,goog.events.EventType.MOUSEOVER, function(){
-            goog.style.setStyle(h2,'color','#ff8211');
-        });
-        goog.events.listen(p,goog.events.EventType.MOUSEOUT,function() {
-            goog.style.setStyle(h2,'color','white');
-        });
-        goog.events.listen(p,goog.events.EventType.CLICK,function(e) {
-            oc.Nav.go('/user/'+self.user.id);
-            e.preventDefault();
-        }); 
+    var userLink = goog.dom.query('#miniProfile > a')[0];
+    goog.events.listen(userLink,goog.events.EventType.CLICK,function(e) {
+        oc.Nav.go(this.getAttribute('href'));
+        e.preventDefault();
     });
+
 
 };
 /**

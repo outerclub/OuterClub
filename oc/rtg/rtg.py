@@ -43,7 +43,7 @@ class TRtgHandler:
         cur.close()
         conn.close()
         
-        payload = {'date':res[2].isoformat(),'content':newContent,'user':user,'r_id':r_id}
+        payload = {'date':res[2].isoformat(),'content':newContent,'user':user,'r_id':r_id,'d_id':res[0]}
         self.queue.put(event.Message('/conversation/%d' % (res[0]), 'response',payload))
 
         happening_data = {'user':user,'date':res[2].isoformat(),'category_image':res[5],'category_id':res[4],'d_id':res[0],'title': res[6],'r_id':r_id,'content':newContent}

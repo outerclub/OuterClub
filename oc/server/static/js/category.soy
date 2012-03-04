@@ -28,31 +28,55 @@
  * @param user_id
  * @param date
  * @param user_name
+ * @param numReplies
+ * @param numUsers
  */
 {template .conversation}
 <div title="{$title}" class="post" style="{if $hide}display: none{/if}">
-    <div class="inner">
+    <div class="innerTop">
         <a class="convo" href="#!/conversation/{$id}">
             <img width="285" src="/static/images/covers/{$cover_image}" />
             <h1>{$title}</h1>
         </a>
-        <img height="40" src="/static/images/avatars/{$avatar_image}" class="right" />
+        <!--<img height="20" src="/static/images/avatars/{$avatar_image}" class="right" />-->
         <div class="block">
-            {$date} by{sp}
+            {$numReplies} replies {if $numUsers > 1 or $numReplies > 0}{$numUsers} {if $numUsers > 1}people{else}person{/if}{/if}<!--{$date} by{sp} -->
             <a href="#!/user/{$user_id}">
                 {$user_name}
             </a>
         </div>
     </div>
+    <div class="innerBottom">
+        <div class="responses">
+        </div>
+        <textarea name="reply" rows="1"></textarea>
+    </div>
 </div>
 {/template}
 
 /**
- * @param response
+ * @param date
+ * @param content
+ * @param user
+ * @param border
+ */
+{template .miniResponse}
+    <div class="response {if $border}border{/if}">
+        <a href="#!/user/{$user.id}"><img class="avatar" height="30" src="/static/images/avatars/{$user.avatar_image}" /></a>
+        <div class="text">
+            <a href="#!/user/{$user.id}"><span class="name">{$user.name}</span></a>{sp}
+            <span class="content">{$content|noAutoescape}</span>{sp}
+            <span class="date">{$date}</span>
+        </div>
+    </div>
+{/template}
+
+/**
+ * @param user
  */
 {template .actionMe}
-<a href="#!/user/{$response.user.id}">
-<img width="30" height="30" src="/static/images/avatars/{$response.user.avatar_image}" />
+<a href="#!/user/{$user.id}">
+<img width="30" height="30" src="/static/images/avatars/{$user.avatar_image}" />
 </a>
 {/template}
 

@@ -24,14 +24,15 @@
 .room h2 {
     color: white;
     padding: 10px;
-    font-size: 36px;
-    background-color: rgba(50,50,50,0.7);
+    font-size: 500%;
     position: absolute;
     top:0;
     left:0;
     width: 100%;
     z-index: 99;
     font-weight: bold;
+    text-shadow: 1px 1px 1px #000000;
+    filter: dropshadow(color=#000000,offx=1,offy=1);
 }
 .room .users {
     position: absolute;
@@ -47,7 +48,7 @@
     background-color:rgba(0,0,0,0.5);
     padding-bottom:10px;
 }
-.responses {
+#conversation .responses {
     overflow: auto;
     padding: 5px 0 5px 0;
     position:relative;

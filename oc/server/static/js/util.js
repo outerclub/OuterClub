@@ -114,7 +114,8 @@ oc.Util.prettyDate = function(date) {
     } else if (day_diff < 7) {
         ret = day_diff +" days ago";
     } else if (day_diff < 31) {
-        ret = Math.ceil(day_diff/7)+" weeks ago";
+        var week = Math.ceil(day_diff/7);
+        ret = week+" week"+(week > 1 ? "s" : "")+" ago";
     } else 
         ret = date.getDate()+" "+oc.Util.humanMonth(date) +", "+date.toUsTimeString();
     return ret;
@@ -136,4 +137,114 @@ oc.Util.humanDate = function(date) {
     
     return ret;
     
+};
+
+/**
+ * @param {Element} element
+ * @param {Element} scroller
+ * @param {number} maxItems
+ * @param {boolean} animate
+ * @param {boolean=} down
+ */
+oc.Util.slide = function(element,scroller,maxItems,animate,down) {
+        if (!goog.isDef(down))
+            down = true;
+
+        if (down)
+            goog.dom.insertChildAt(scroller,element,0);
+        else
+            goog.dom.appendChild(scroller,element);
+        var currentItems = goog.dom.getChildren(scroller);
+        var currentItemHeight = goog.style.getSize(element).height;
+        var currentScrollerHeight = goog.style.getSize(scroller).height;
+        // setup the hidden element
+        if (animate)
+        {
+            (new goog.fx.dom.FadeInAndShow(element,1000,goog.fx.easing.easeOut)).play();
+        } else {
+             goog.style.showElement(element,true);
+        }
+
+        // slide all the elements
+        var finalHeight = 0;
+        var appendDown = currentItems.length <= maxItems;
+        
+        // if sliding down or sliding up
+        if (down || (!down && !appendDown)) {
+            // set the position of the hidden element.
+            if (animate) {
+                var currentY;
+                if (down)
+                    currentY = -currentItemHeight;
+                else
+                    currentY = currentScrollerHeight;
+                goog.style.setPosition(element,0,currentY);
+            }
+            var newY = (down ? 0 : currentScrollerHeight-currentItemHeight);
+            var func = function(i) {
+                // is this item scheduled to be removed?
+                var remove = (down ? i >= maxItems : i <= 0);
+                    
+                if (animate)
+                {
+                    var anim = (new goog.fx.dom.SlideFrom(currentItems[i],[0,newY],1000,goog.fx.easing.easeOut));
+                    if (remove)
+                    {
+                        goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+                            goog.dom.removeNode(currentItems[i]);
+                        });
+                    }
+                    anim.play();
+                } else {
+                    goog.style.setPosition(currentItems[i],0,newY);
+                    if (remove)
+                        goog.dom.removeNode(currentItems[i]);
+                }
+                var height = goog.style.getSize(currentItems[i]).height;
+                
+                if (down)
+                    newY += height;
+                else
+                    newY -= height;
+
+                // calculate the final height of the scroller
+                if (!remove)
+                    finalHeight += height;
+            };
+            // iterate down or up?
+            if (down) {
+                for (var i=0; i < currentItems.length; i++) {
+                    func(i);
+                };
+            } else {
+                for (var i=currentItems.length-1; i >= 0; i--) {
+                    func(i);
+                };
+            }
+        } else {
+            // append down
+            if (animate) {
+                // set the position to be before the last element
+                goog.style.setPosition(element,0,currentScrollerHeight-currentItemHeight);
+
+                // set the element underneath
+                goog.style.setStyle(element,'z-index',-1);
+                var anim = (new goog.fx.dom.SlideFrom(element,[0,currentScrollerHeight],1000,goog.fx.easing.easeOut));
+                goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+                    goog.style.setStyle(element,'z-index',0);
+                });
+
+                anim.play();
+            } else {
+                goog.style.setPosition(element,0,currentScrollerHeight);
+            }
+            finalHeight = currentScrollerHeight+currentItemHeight;
+        }
+            
+
+        // resize the actual scroller box
+        if (animate)
+            (new goog.fx.dom.ResizeHeight(scroller,currentScrollerHeight,finalHeight,1000,goog.fx.easing.easeOut)).play();
+        else
+            goog.style.setHeight(scroller,finalHeight);
 };

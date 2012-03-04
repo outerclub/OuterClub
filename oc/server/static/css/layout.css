@@ -48,6 +48,7 @@ body{
     
 #menu {
     width: 100%;
+    height:43px;
     background: rgba(0,0,0,0.65);
     color: white;
     overflow: hidden;
@@ -131,36 +132,24 @@ body{
 /**
  * Profile card.
  */
-#miniProfile, .slide_show {
-    right: 0px;
-    width: 302px;
-    position: fixed;
-    z-index: 999
-}
 #miniProfile {
-    top: 45px;
     overflow: hidden;
 }
-#miniProfile h2 {
+#miniProfile img,#miniProfile .name {
+    float:left
+}
+#miniProfile .name {
     font-family: 'BebasRegular';
     font-size: 140%;
-    display: inline-block;
-
+    margin: 11px 10px;
+    color:white;
 }
-#miniProfile img {
-    float: left;
-    border: 1px solid #222;
+#miniProfile a:hover .name {
+	color:#ff8211;
 }
-#miniProfile div {
-    padding: 7px;
-    float: left;
-}
-#miniProfile p {
-    margin-top: 5px;
-}
-#miniProfile, .slide_show .text {
-    background-color: rgba(0,0,0,0.65);
-    color: white;
+#miniProfile .text {
+    float:left;
+    margin: 11px 10px 11px 0;
 }
 #miniProfile .prestige {
     font-weight: bold;
@@ -170,13 +159,20 @@ body{
 /**
  * slide show.
  */
+.slide_show {
+    right: 0px;
+    width: 300px;
+    position: fixed;
+    z-index: 999
+}
 .slide_show{
     top: 125px;
 }
+.slide_show .text {
+    background-color: rgba(0,0,0,0.65);
+    color: white;
+}
 .slide_show .scroll {
-    border-top: 1px solid #222;
-    border-left: 1px solid #222;
-    border-right: 1px solid #222;
     overflow:hidden;
     position:relative;
 }
@@ -189,7 +185,6 @@ body{
 .slide_show .item {
     position:absolute;
     overflow: hidden;
-    border-bottom: 1px solid #222;
 }
 .slide_show .item:hover .text {
     background-color: rgba(0,0,0,0.8);

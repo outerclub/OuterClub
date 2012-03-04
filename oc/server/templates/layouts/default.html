@@ -35,29 +35,32 @@
 </head>
 <body>
 <div id="menu" style="display: none">
-<ul>
-<li id="miniLogo"><a class="active" href="#!/welcome"></a></li>
-<li class="link"><a href="#!/categories">CATEGORIES</a></li>
-<li class="link"><a href="#!/trending">TRENDING NOW</a></li>
-<li class="link"><a href="#!/leaderboard">LEADERBOARD</a></li>
-</ul>
-<div class="right">
-<div class="online">
-Users Online: <span>1</span>
-</div>
-<div class="search">
-<input type="text" name="search" />
-<span>Search</span>
-<button />
-</div>
-</div>
-</div>
-<div id="miniProfile" style="display:none">
-<a href="/user/{{ user_id }}"><img width="70" height="70" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" /></a>
-<div>
-<h2>{{ username }}</h2> <a href="{{ url_for('logout') }}">Log out</a><br />
-<p>Prestige: <span class="prestige">{{ prestige }}</span></p>
-</div>
+    <ul>
+    <li id="miniLogo"><a class="active" href="#!/welcome"></a></li>
+    <li class="link"><a href="#!/categories">CATEGORIES</a></li>
+    <li class="link"><a href="#!/trending">TRENDING NOW</a></li>
+    <li class="link"><a href="#!/leaderboard">LEADERBOARD</a></li>
+    </ul>
+    <div class="right">
+        <div class="online">
+        Users Online: <span>1</span>
+        </div>
+        <div id="miniProfile">
+            <a href="#!/user/{{ user_id }}">
+                <img height="43" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" />
+                <span class="name">{{ username }}</a>
+            </a>
+            <div class="text">
+                Prestige: <span class="prestige">{{ prestige }}</span> <a href="{{ url_for('logout') }}">Log Out</a>
+            </div>
+        </div>
+    <!--<div class="search">
+    <input type="text" name="search" />
+    <span>Search</span>
+    <button />
+    </div>
+    -->
+    </div>
 </div>
 
 <div class="slide_show" style="display: none">
