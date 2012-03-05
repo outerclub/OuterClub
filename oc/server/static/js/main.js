@@ -63,89 +63,22 @@ oc.Main = function(categories) {
     this.leaderboard = new oc.Leaderboard(this.userView);
 
     /**
-     * @type {number}
-     */
-    this.happeningItems = 5;
-
-    /**
      * @type {oc.News.View}
      */
     this.newsView = new oc.News.View(this.socket);
 
 };
-
-oc.Main.prototype.happening = function() {
-    var slideShow = goog.dom.query('.slide_show')[0];
-    goog.style.showElement(slideShow,false);
-
-    var self = this;
-    /**
-     * @param {Object} data
-     * @param {boolean} animate
-     */
-    var createHappening = function(data,animate) {
-        var p = data.data;
-
-        // is the happening now bar shown?
-        if (!goog.style.isElementShown(slideShow))
-        {
-            (new goog.fx.dom.FadeInAndShow(slideShow,500)).play();
-        }
-
-        // parse the happening type
-        var html = oc.Templates.Main.happening({
-                user:oc.User.extractFromJson(p['user']),
-                category_image:p['category_image'],
-                date:(goog.date.fromIsoString(p['date']).toUsTimeString()),
-                title:p['title'],
-                type:data['type'],
-                content:p['content']});
-        var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
-        goog.style.showElement(element,false);
-        
-        var scroller = goog.dom.query('.scroll',slideShow)[0];
-        oc.Util.slide(element,scroller,self.happeningItems,animate);
-
-        // clickhandler for conversation
-        goog.events.listen(element,goog.events.EventType.CLICK,function(e) {
-            oc.Nav.go('/conversation/'+p['d_id']); 
-            e.preventDefault();
-        });
-
-        // clickhandler for @mentions
-        goog.array.forEach(goog.dom.query('a',element),function(a) {
-            goog.events.listen(a,goog.events.EventType.CLICK,function(e) {
-                // Doesn't work right
-                //oc.Nav.go(a.getAttribute('href'));
-                e.preventDefault();
-            });
-        });
-        
-    };
-
+oc.Main.prototype.start = function() {
     this.socket.addCallback('users',function(num) {
         goog.dom.query('.online span')[0].innerHTML = num;
-    });
-    this.socket.addCallback('happening',function(data) {
-        createHappening(data,true);
-    });
-    this.socket.addCallback('happening_init',function(data) {
-        // create the initial happening now items
-        goog.array.forEach(data,function(h,i) {
-            createHappening(h,false);
-        });
-
         // reveal everything
         goog.array.forEach(goog.dom.query('.content_wrapper,#miniProfile,#menu,.footer'),function(item) {
             (new goog.fx.dom.FadeInAndShow(item,500)).play();
         });
     });
-};
-
-oc.Main.prototype.start = function() {
-    this.happening();
-    this.userView.init();
     
+    this.userView.init();
+
     var self = this;
     this.socket.addCallback('authRejected',function() {
         window.location = '/logout';
@@ -338,18 +271,6 @@ oc.Main.prototype.start = function() {
  * Resizes the frames to fit the viewport properly.
  */
 oc.Main.Resize = function() {
-    var size = goog.dom.getViewportSize();
-    var frame = 965;
-    var happeningSize = goog.style.getSize(goog.dom.query('.slide_show')[0]).width;
-    var padding = 15;
-    var overlap = happeningSize + padding - (size.width-frame)/2;
-    var isShadowing =  overlap > 0;
-    if (isShadowing)
-    {
-        goog.style.setStyle(goog.dom.getElement('outer'),'margin-right',(happeningSize+padding)+'px');
-    } else {
-        goog.style.setStyle(goog.dom.getElement('outer'),'margin-right','auto');
-    }
 };
 
 // ensure that main starts with categories

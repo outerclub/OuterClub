@@ -130,10 +130,10 @@
 }
 .post .text .date {
     color: #777;
+    font-size:80%;
    }
 .post textarea {
     width:284px;
-    margin: 0 -5px;
     background-color: rgba(0,0,0,0.5);
     border: 0;
     color: white;

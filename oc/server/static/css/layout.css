@@ -27,8 +27,7 @@ body{
     background: black url(/static/images/background.png) repeat-x fixed top center;
 }
 #outer {
-    width: 965px;
-    margin: 423px auto 20px auto;
+    margin: 43px auto 20px auto;
 }
 
 /**
@@ -49,7 +48,7 @@ body{
 #menu {
     width: 100%;
     height:43px;
-    background: rgba(0,0,0,0.65);
+    background: rgba(0,0,0,0.8);
     color: white;
     overflow: hidden;
     position: fixed;
@@ -156,75 +155,17 @@ body{
     font-size: 140%;
 }
 
-/**
- * slide show.
- */
-.slide_show {
-    right: 0px;
-    width: 300px;
-    position: fixed;
-    z-index: 999
-}
-.slide_show{
-    top: 125px;
-}
-.slide_show .text {
-    background-color: rgba(0,0,0,0.65);
-    color: white;
-}
-.slide_show .scroll {
-    overflow:hidden;
-    position:relative;
-}
-.slide_show h2{
-    color: #FFFFFF;
-    font-size: 140%;
-    margin: 0 0 10px 0;
-    font-family: BebasRegular;
-}
-.slide_show .item {
-    position:absolute;
-    overflow: hidden;
-}
-.slide_show .item:hover .text {
-    background-color: rgba(0,0,0,0.8);
-    cursor: pointer;
-}
-.slide_show img.bg {
-    display: block;
-    height: 80px
-}
-.slide_show  .text {
-    height: 60px;
-    width: 145px;
-    padding: 10px;
-    float: left;
-}
-.slide_show .text .content {
-    display: block
-}
-.slide_show .text .date {
-    color: #fdd610;
-    float:right;
-}
-.slide_show .images {
-    position: relative;
-    float: left;
-}
-.slide_show .images .avatar {
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 45px;
-    width: 45px;
-}
-.slide_show a.user {
-    color:#bbb;
-}
 
 /**
  * FAQ
  */
+#faq {
+    display:block;
+    width:600px;
+    background-color: rgba(0,0,0,0.8);
+    padding: 15px;
+    margin: 0 auto;
+}
 #faq .question {
     color: #6092c6;
     font-size: 180%;
@@ -241,12 +182,10 @@ body{
  */
 .content_wrapper{
     padding: 15px;
-    background-color: rgba(20,20,20,0.9);
     clear: both;
 }
 
  .content_wrapper .frame {
-    background: url(/static/images/tiled_bg.jpg) repeat-y;
     color: white;
     padding: 15px;
 }

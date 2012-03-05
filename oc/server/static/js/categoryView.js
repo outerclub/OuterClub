@@ -21,6 +21,7 @@ goog.require('goog.fx.Transition');
 goog.require('goog.style');
 goog.require('goog.events');
 goog.require('goog.events.EventType');
+goog.require('goog.events.KeyCodes');
 goog.require('goog.uri.utils');
 goog.require('goog.date');
 
@@ -57,23 +58,30 @@ oc.Category.View = function(categories,socket,userView) {
     this.categories = categories;
 
     /**
-     * @type {Array.<Element>}
+     * @type {Array.<oc.Category.View.Conversation>}
      */
     this.conversations = [];
 
     /**
-     * @type {Object.<Element>}
+     * @type {Object.<number>}
      */
-    this.idConversations = {};
+    this.idConversationsIndex = {};
 };
+/**
+ * @type {number}
+ * @const
+ */
+oc.Category.View.MAX_RESPONSES = 4;
 
+/** @typedef {{id: number,element:Element}} */
+oc.Category.View.Conversation;
 /**
  * @param {string} url
  */
 oc.Category.View.prototype.go = function(url) {
     var self = this;
     this.conversations = [];
-    this.idConversations = {};
+    this.idConversationsIndex = {};
     goog.net.XhrIo.send('/category/'+url,function(e) {
         var categoryData = goog.json.unsafeParse(e.target.getResponseText());
         
@@ -85,6 +93,7 @@ oc.Category.View.prototype.go = function(url) {
         oc.Nav.hideAll();
         goog.style.showElement(dynamic,true);
         var registrations=['/happening','/user/'+self.userView.user.id,'/category/'+categoryData['id']];
+        // iterate over all the posts backwards
         for (var i=posts.length-1; i >= 0; i--) {
             var p = posts[i];
             registrations.push('/conversation/'+p['id']);
@@ -103,10 +112,14 @@ oc.Category.View.prototype.go = function(url) {
             self.insertPost(parseInt(p['id'],10),d,false);
 
             var responsesElement = goog.dom.query('.responses',d)[0];
-            goog.array.forEach(p['responses'],function(r) {
-                oc.Util.slide(self.responseToElement(r),responsesElement,4,false,false);
-            });
-            
+            var lastElement;
+            for (var j=0; j < p['responses'].length; j++) {
+                lastElement = self.responseToElement(p['responses'][j]);
+                oc.Util.slide(lastElement,responsesElement,oc.Category.View.MAX_RESPONSES,false,false);
+            }
+            // remove the border from the bottom
+            goog.dom.classes.remove(lastElement,'border');
+            self.refresh();
         };
 
         var canCreate = !categoryData['private'] || self.userView.user.admin;
@@ -115,11 +128,32 @@ oc.Category.View.prototype.go = function(url) {
         oc.Nav.setTitle(self.category.name);
         self.socket.send({'register':registrations});
     });
+
+    // a new response arrives?
     this.socket.addCallback('response',function(data) {
-        var conversationElement = self.idConversations[parseInt(data['d_id'],10)];
+        var id = parseInt(data['d_id'],10);
+        var conversationElement = self.conversations[self.idConversationsIndex[id]].element;
         var responsesElement = goog.dom.query('.responses',conversationElement)[0];
-        oc.Util.slide(self.responseToElement(data),responsesElement,4,true,false);
+        var responses = goog.dom.query('.response',responsesElement);
+        var oldHeight = goog.style.getSize(responsesElement).height;
+        
+        // add border to previous bottom
+        goog.dom.classes.add(responses[responses.length-1],'border');
+        var newResponse = self.responseToElement(data);
+        var newHeight = oc.Util.slide(newResponse,responsesElement,oc.Category.View.MAX_RESPONSES,true,false);
+        goog.dom.classes.remove(newResponse,'border');
+
+        self.push(id,newHeight-oldHeight);
+        /*
+        // if smaller than max, pushdown rest.
+        if (responses.length < oc.Category.View.MAX_RESPONSES)
+            self.push(id,goog.style.getSize(newResponse).height);
+        else // else push up by removed element
+            self.push(id,-goog.style.getSize(responses[0]).height);
+        */
     });
+
+    // a new conversation arrives?
     this.socket.addCallback('conversation',function(data) {
         var html = oc.Templates.Category.conversation({
             hide:true,
@@ -131,10 +165,25 @@ oc.Category.View.prototype.go = function(url) {
             date: oc.Util.humanDate(goog.date.fromIsoString(data['date'])),
             user_name:data['user']['name']});
         var d = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
-        self.insertPost(parseInt(data['id'],10),d,true);
         (new goog.fx.dom.FadeInAndShow(d,500)).play();
+        self.insertPost(parseInt(data['id'],10),d,true);
     });
 };
+
+/**
+ * @param {number} id
+ * @param {number} pixels
+ */
+oc.Category.View.prototype.push = function(id,pixels) {
+    for (var i=this.idConversationsIndex[id]+3; i < this.conversations.length; i+= 3)
+    {
+        var elementToMove = this.conversations[i].element;
+        var pos = goog.style.getPosition(elementToMove);
+        var anim = (new goog.fx.dom.SlideFrom(elementToMove,[pos.x,pos.y+pixels],oc.Util.SLIDE_TIME,goog.fx.easing.easeOut));
+        anim.play();
+    }
+}
+
 
 /**
  * @param {Object} r
@@ -144,7 +193,7 @@ oc.Category.View.prototype.responseToElement = function(r) {
     var newR = oc.Conversation.Response.extractFromJson(r);
     var content = newR.content.replace(/^\/me/,'');
     var html = oc.Templates.Category.miniResponse({
-        border:false,
+        border:true,
         content:content,
         date:oc.Util.prettyDate(newR.date),
         user:newR.user
@@ -153,21 +202,13 @@ oc.Category.View.prototype.responseToElement = function(r) {
     return rElement;
 };
 
-
 /**
- * @param {number} id
- * @param {Element} postElement
- * @param {boolean} animate
+ *
  */
-oc.Category.View.prototype.insertPost = function(id,postElement,animate) {
+oc.Category.View.prototype.refresh = function() {
     var width = 285;
     var padding = 10;
     
-    var rootElement = goog.dom.query('.posts')[0];
-    goog.dom.insertChildAt(rootElement,postElement,0);
-    goog.style.showElement(postElement,true);
-    this.conversations.splice(0,0,postElement);
-    this.idConversations[id] = postElement;
     for (var i= 1; i < this.conversations.length; i++)
     {
         var newLeft = 0; 
@@ -176,16 +217,60 @@ oc.Category.View.prototype.insertPost = function(id,postElement,animate) {
         // move to same row?
         if (i % 3 != 0)
         {
-            var currentPosition = goog.style.getPosition(this.conversations[i]).x;
+            var currentPosition = goog.style.getPosition(this.conversations[i].element).x;
             newLeft = currentPosition+width+padding;
         }
         // is there an element above the new position?
         if (upperIndex >= 0)
         {
-            newTop =goog.style.getPosition(this.conversations[upperIndex]).y+goog.style.getSize(this.conversations[upperIndex]).height + padding;
+            newTop =goog.style.getPosition(this.conversations[upperIndex].element).y+goog.style.getSize(this.conversations[upperIndex].element).height + padding;
         }
-        goog.style.setPosition(this.conversations[i],newLeft,newTop);
+        goog.style.setPosition(this.conversations[i].element,newLeft,newTop);
     }
+
+};
+/**
+ * @param {number} id
+ * @param {Element} postElement
+ */
+oc.Category.View.prototype.insertPost = function(id,postElement) {
+    var rootElement = goog.dom.query('.posts')[0];
+    goog.dom.insertChildAt(rootElement,postElement,0);
+    goog.style.showElement(postElement,true);
+    this.conversations.splice(0,0,{'id':id,'element':postElement});
+
+    for (var i= 0; i < this.conversations.length; i++)
+    {
+        // update the ID index
+        this.idConversationsIndex[this.conversations[i].id] = i;
+    }
+
+    goog.events.listen(goog.dom.query('textarea',postElement)[0],goog.events.EventType.KEYPRESS,function(e) {
+        if (e.keyCode == goog.events.KeyCodes.ENTER)
+        {
+            var content = this.value;
+            var textarea = this;
+            goog.net.XhrIo.send('/reply',function(e) {
+                var data = goog.json.unsafeParse(e.target.getResponseText());
+                /*
+                var errorView = goog.dom.query('.reply .error',self.rootElement)[0];
+                if ('error' in data) {
+                    errorView.innerHTML = data['error'];
+                    (new goog.fx.dom.FadeInAndShow(errorView,500)).play();
+                } else {
+                    (new goog.fx.dom.FadeOut(errorView,500)).play();
+                    textarea.value = '';
+                    textarea.focus();
+                }
+                */
+                textarea.value = '';
+             },
+            'POST',goog.uri.utils.buildQueryDataFromMap({
+                    'd_id':id,
+                    'data':content}));
+        }
+    });
+    // clickhandler
     goog.events.listen(goog.dom.query('a.convo',postElement)[0],goog.events.EventType.CLICK,function(e) {
         oc.Nav.go(this.getAttribute('href'));
         e.preventDefault();

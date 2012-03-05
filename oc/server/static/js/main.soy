@@ -1,43 +1,6 @@
 {namespace oc.Templates.Main}
 
 /**
- * @param category_image
- * @param user
- * @param date
- * @param title
- * @param type
- * @param content
- */
-{template .happening}
-<div class="item">
-    <div class="images">
-        <img class="bg" src="/static/images/categories/{$category_image}" />
-    </div>
-    <div class="text">
-        <span class="date">{$date}</span>
-        {call .happening_text data="all"/}
-    </div>
-</div>
-{/template}
-
-/**
- * @param title
- * @param user
- * @param type
- * @param content
- */
-{template .happening_text}
-<h2>{$title}</h2>
-<a class="user" href="#!/user/{$user.id}">{$user.name}</a>{sp}
-    {if $type == 'post'}
-        posted
-    {elseif $type == 'response'}
-        replied
-    {/if}
-    <span class="content">&quot;{$content|noAutoescape}&quot;</span>
-{/template}
-
-/**
  * @param conversations
  * @param categories
  */

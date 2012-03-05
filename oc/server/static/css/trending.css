@@ -1,3 +1,6 @@
+#leaderboard .entry {
+    float:left;
+}
 .entry strong {
     font-weight:bold;
     font-size: 160%;
@@ -13,13 +16,16 @@
 .entry .date {
     color: #6092c6;
 }
-.entry {
+#trending .entry {
     clear: both;
     margin-bottom: 1px;
     overflow: hidden;
     color: #efefef;
     display: block;
 
+}
+#trending .entry .text {
+    width: 645px; 
 }
 .entry a:hover {
     color: white;
@@ -41,12 +47,10 @@
     float: left;
     padding: 10px 10px 10px 10px;
     position: relative;
-    width: 645px; 
     height: 70px;
     background-color: rgba(0,0,0,0.5)
 }
 #leaderboard .entry .text {
-    width: 705px;
 }
 .entry .number {
     font: 50px BebasRegular;

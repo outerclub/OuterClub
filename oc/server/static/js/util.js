@@ -98,7 +98,10 @@ oc.Util.prettyDate = function(date) {
     var diff = (((new Date()).getTime() - date.getTime()) / 1000),
 		day_diff = Math.floor(diff / 86400);
     var ret = "";
-    if (day_diff == 0 ) {
+    if (day_diff < 0) {
+        // deal with time sync issue
+        ret = "just now";
+    } else if (day_diff == 0 ) {
         if (diff < 60)
             ret = "just now";
         else if (diff < 120)
@@ -140,27 +143,34 @@ oc.Util.humanDate = function(date) {
 };
 
 /**
+ * @type {number}
+ * @const
+ */
+oc.Util.SLIDE_TIME = 1000;
+
+/**
  * @param {Element} element
  * @param {Element} scroller
  * @param {number} maxItems
  * @param {boolean} animate
  * @param {boolean=} down
+ * @return {number}
  */
 oc.Util.slide = function(element,scroller,maxItems,animate,down) {
         if (!goog.isDef(down))
             down = true;
 
+        var currentScrollerHeight = goog.style.getSize(scroller).height;
         if (down)
             goog.dom.insertChildAt(scroller,element,0);
         else
             goog.dom.appendChild(scroller,element);
         var currentItems = goog.dom.getChildren(scroller);
-        var currentItemHeight = goog.style.getSize(element).height;
-        var currentScrollerHeight = goog.style.getSize(scroller).height;
+        var insertItemHeight = goog.style.getSize(element).height;
         // setup the hidden element
         if (animate)
         {
-            (new goog.fx.dom.FadeInAndShow(element,1000,goog.fx.easing.easeOut)).play();
+            (new goog.fx.dom.FadeInAndShow(element,oc.Util.SLIDE_TIME,goog.fx.easing.easeOut)).play();
         } else {
              goog.style.showElement(element,true);
         }
@@ -175,61 +185,49 @@ oc.Util.slide = function(element,scroller,maxItems,animate,down) {
             if (animate) {
                 var currentY;
                 if (down)
-                    currentY = -currentItemHeight;
+                    currentY = -insertItemHeight;
                 else
                     currentY = currentScrollerHeight;
                 goog.style.setPosition(element,0,currentY);
             }
-            var newY = (down ? 0 : currentScrollerHeight-currentItemHeight);
-            var func = function(i) {
+            var newY = (down ? 0 : -goog.style.getSize(currentItems[0]).height);
+            for (var i=0; i < currentItems.length; i++) {
+                var currentItem = currentItems[i];
                 // is this item scheduled to be removed?
-                var remove = (down ? i >= maxItems : i <= 0);
+                var remove = (down ? (i >= maxItems) : (i <= 0));
                     
                 if (animate)
                 {
-                    var anim = (new goog.fx.dom.SlideFrom(currentItems[i],[0,newY],1000,goog.fx.easing.easeOut));
+                    var anim = (new goog.fx.dom.SlideFrom(currentItem,[0,newY],oc.Util.SLIDE_TIME,goog.fx.easing.easeOut));
                     if (remove)
                     {
-                        goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
-                            goog.dom.removeNode(currentItems[i]);
+                        goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function(e) {
+                           goog.dom.removeNode(this.element);
                         });
                     }
                     anim.play();
                 } else {
-                    goog.style.setPosition(currentItems[i],0,newY);
+                    goog.style.setPosition(currentItem,0,newY);
                     if (remove)
-                        goog.dom.removeNode(currentItems[i]);
+                        goog.dom.removeNode(currentItem);
                 }
-                var height = goog.style.getSize(currentItems[i]).height;
-                
-                if (down)
-                    newY += height;
-                else
-                    newY -= height;
-
-                // calculate the final height of the scroller
+                var currentHeight = goog.style.getSize(currentItem).height;
+                // add to the final height of the scroller
                 if (!remove)
-                    finalHeight += height;
+                    finalHeight += currentHeight;
+                
+                newY += currentHeight;
+
             };
-            // iterate down or up?
-            if (down) {
-                for (var i=0; i < currentItems.length; i++) {
-                    func(i);
-                };
-            } else {
-                for (var i=currentItems.length-1; i >= 0; i--) {
-                    func(i);
-                };
-            }
         } else {
             // append down
             if (animate) {
                 // set the position to be before the last element
-                goog.style.setPosition(element,0,currentScrollerHeight-currentItemHeight);
+                goog.style.setPosition(element,0,currentScrollerHeight-insertItemHeight);
 
                 // set the element underneath
                 goog.style.setStyle(element,'z-index',-1);
-                var anim = (new goog.fx.dom.SlideFrom(element,[0,currentScrollerHeight],1000,goog.fx.easing.easeOut));
+                var anim = (new goog.fx.dom.SlideFrom(element,[0,currentScrollerHeight],oc.Util.SLIDE_TIME,goog.fx.easing.easeOut));
                 goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
                     goog.style.setStyle(element,'z-index',0);
                 });
@@ -238,13 +236,14 @@ oc.Util.slide = function(element,scroller,maxItems,animate,down) {
             } else {
                 goog.style.setPosition(element,0,currentScrollerHeight);
             }
-            finalHeight = currentScrollerHeight+currentItemHeight;
+            finalHeight = currentScrollerHeight+insertItemHeight;
         }
             
 
         // resize the actual scroller box
         if (animate)
-            (new goog.fx.dom.ResizeHeight(scroller,currentScrollerHeight,finalHeight,1000,goog.fx.easing.easeOut)).play();
+            (new goog.fx.dom.ResizeHeight(scroller,currentScrollerHeight,finalHeight,oc.Util.SLIDE_TIME,goog.fx.easing.easeOut)).play();
         else
             goog.style.setHeight(scroller,finalHeight);
+        return finalHeight;
 };
