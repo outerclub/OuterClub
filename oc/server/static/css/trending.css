@@ -1,5 +1,9 @@
 #leaderboard .entry {
     float:left;
+    margin: 10px;
+    -webkit-box-shadow: 0 0 3px #000; 
+    -moz-box-shadow: 0 0 3px #000; 
+    box-shadow: 0 0 3px #000; 
 }
 .entry strong {
     font-weight:bold;

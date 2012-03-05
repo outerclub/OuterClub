@@ -95,6 +95,7 @@ oc.Main.prototype.start = function() {
         });
     });
 
+    /*
     // search box
     /*
     var searchInput = goog.dom.query('#menu input')[0];
@@ -116,9 +117,35 @@ oc.Main.prototype.start = function() {
     });
     */
 
-    var newConvoCallback = function(close) {
-    };
-    var ov = oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],newConvoCallback);
+    var referOv = oc.overlay(goog.dom.query('#menu button')[0],function() {});
+    goog.events.listen(goog.dom.query("#refer button")[0],
+        goog.events.EventType.CLICK,function() {
+            var nameInput = goog.dom.query("input[name='name']")[0];
+            var emailInput = goog.dom.query("input[name='email']")[0];
+            var name = nameInput.value;
+            var email = emailInput.value;
+                
+            var err = /** @type {Element} */ goog.dom.query("#refer .error")[0];
+            var invitesLeft = /** @type {Element} */ goog.dom.query("#refer span")[0];
+            goog.net.XhrIo.send('/invite', function(e) {
+                var resp = e.target.getResponseJson();
+                if ('error' in resp) {
+                    goog.style.showElement(err,true);
+                    err.innerHTML = resp['error'];
+                } else {
+                    invitesLeft.innerHTML = Math.max(0,parseInt(invitesLeft.innerHTML,10)-1);
+                    // show the defaults again
+                    nameInput.value = ''; 
+                    emailInput.value = '';
+                    goog.style.showElement(err,false);
+                    referOv.close();
+                }
+                
+                 },'POST',goog.uri.utils.buildQueryDataFromMap({
+                    'name':name,
+                    'email':email})
+            );
+    });
 
     /**
      * Bottom links
@@ -134,6 +161,7 @@ oc.Main.prototype.start = function() {
     /**
       * new conversation box.
       */
+    var ov = oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],function() {});
     goog.events.listen(goog.dom.query("#newConversation button[name='post']")[0],
         goog.events.EventType.CLICK,function() {
             var titleInput = goog.dom.query(".titleField input")[0];
@@ -165,6 +193,9 @@ oc.Main.prototype.start = function() {
             );
     });
     
+    /**
+     * New conversation box hints.
+     */
     var inputs = goog.dom.query("#newConversation .titleField input,#newConversation textarea");
     goog.array.forEach(inputs,function(i) {
         goog.events.listen(i,goog.events.EventType.FOCUSIN,function () {
@@ -204,6 +235,9 @@ oc.Main.prototype.start = function() {
         }
     });
    
+    /**
+     * The main navigation handler.
+     */
     var navigate = function(e) {
         var t = e.token;
         oc.Tracking.page(t);

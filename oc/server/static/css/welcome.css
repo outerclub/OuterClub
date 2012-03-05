@@ -65,6 +65,11 @@
     float: left;
     margin: 0 5px 10px 0;
 }
+.announcement {
+    margin-bottom: 10px;
+    padding-bottom:10px;
+    border-bottom:1px solid #555;
+}
 .announcement h2{
     font-weight: bold;
     font-size: 160%;

@@ -48,7 +48,7 @@ def login():
     else:
         return flask.jsonify(error='E-mail or password was not valid.');
 
-@app.route('/invite',methods=['GET','POST'])
+@app.route('/invite',methods=['POST'])
 def invite():
     #return render_template('invite.html',name='test')
     if not viewFunctions.isLoggedIn():
@@ -61,16 +61,19 @@ def invite():
     if not isAdmin and numInvites == 0:
         cur.close()
         conn.close()
-        return flask.jsonify(error='No more invites available!')
-    
-    if request.method == 'GET': 
-        return render_template('sender.html')
+        return flask.jsonify(error='No more invitations available!')
 
-    ret = '{}'
-    if 'name' in request.form and 'email' in request.form:
-        name = request.form['name'] 
-        email = request.form['email']
+    error = None
+    name = request.form['name'] 
+    email = request.form['email'].strip()
+    if len(name) == 0:
+        error = 'Friend name must be provided.'
+    elif len(email) == 0:
+        error = 'Friend e-mail address must be provided.'
+    elif not util.emailValid(email):
+        error = "E-mail address was not valid."
 
+    if not error:
         key = str(uuid.uuid4())[:7]
         cur.execute('insert into invite_key (email,code,myDate,user_id) values (%s,%s,NOW(),%s)',(email,key,uid))
         if not isAdmin:
@@ -84,12 +87,14 @@ def invite():
             data = render_template('invite.html',name=name,key=key)
         else:
             data = render_template('referral.html',name=name,key=key,alias=username)
-        ret = data
         
         # only actually send if it's in prod mode
         if not app.config['DEBUG']:
             util.send(app.config,email,'%s, welcome to OuterClub!' % (name),data)
-    return ret
+    if error:
+        return flask.jsonify(error=error)
+    else:
+        return '{}'
          
     
 @app.route('/signup',methods=['GET','POST'])

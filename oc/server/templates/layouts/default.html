@@ -54,12 +54,23 @@
                 Prestige: <span class="prestige">{{ prestige }}</span> <a href="{{ url_for('logout') }}">Log Out</a>
             </div>
         </div>
+        <button rel="#refer" class="default">Invite a Friend</a>
     <!--<div class="search">
     <input type="text" name="search" />
     <span>Search</span>
     <button />
     </div>
     -->
+    </div>
+</div>
+<div id="refer" class="overlay">
+    <div class="border">
+       <h2>Invite a Friend</h2>
+        <label for="name">Name:</label> <input type="text" name="name" /><br />
+        <label for="email">E-mail:</label> <input type="text" name="email" />
+        <div class="error"></div>
+
+        <p><button name="submit">Send Invitation</button> <span>{{ invites }}</span> remaining</p>
     </div>
 </div>
 <div id="outer">
