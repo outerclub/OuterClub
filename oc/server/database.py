@@ -53,9 +53,9 @@ def fetchTasks(cursor,user_id):
     return tasks
 
 def fetchUser(cursor,user_id):
-    res = cursor.execute('select name,avatar_image,prestige,cover_image,admin from user where user_id=%s',(user_id,))
+    res = cursor.execute('select name,avatar_image,prestige,cover_image,admin,invites from user where user_id=%s',(user_id,))
     user = cursor.fetchone()
-    userData =  {'name':user[0],'avatar_image':user[1],'user_id':user_id,'prestige':user[2],'cover_image':user[3],'admin':user[4]}
+    userData =  {'name':user[0],'avatar_image':user[1],'user_id':user_id,'prestige':user[2],'cover_image':user[3],'admin':user[4],'invites':user[5]}
     res = cursor.execute('select cat_id,name from user_guild inner join category using (cat_id) where user_id=%s',(user_id,))
     guilds = dict()
     for guild in cursor.fetchall():

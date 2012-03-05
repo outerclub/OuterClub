@@ -85,28 +85,31 @@ body{
     margin: 15px 11px;
     font-weight:bold;
 }
-.search {
+#menu .input{
     float: left;
-    margin: 9px 10px 0 0;
+    margin: 9px 0 0 0;
     overflow: hidden;
     position: relative;
    }
-.search input {
+#menu input {
     border: 0;
     background-color: #000;
     font-size: 14px;
     color: #efefef;
-    padding: 2px;
+    padding: 3px;
     float: left;
 }
-.search span {
+#menu .input label,.search span {
     position: absolute;
     top: 7px;
     left: 7px;
     z-index: 1;
 }
-.search span.light {
+#menu .input span.light,.search span.light {
     color: #aaa;
+}
+#menu button {
+    margin: 11px 10px 0 0;
 }
 .search button{
     background: url(/static/images/search.png) no-repeat center center;
@@ -115,16 +118,7 @@ body{
     border: 0;
     float: left
 }
-#search{
-    background: none repeat scroll 0 0 transparent;
-    border: medium none;
-    display: block;
-    height: 27px;
-    position: absolute;
-    width: 180px;
-	left:40px;
-	color:#ffffff;
-	line-height: 27px;
+#refer {
 }
 
 

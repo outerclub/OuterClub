@@ -35,22 +35,35 @@
 </head>
 <body>
 <div id="menu" style="display: none">
-<ul>
-<li id="miniLogo"><a class="active" href="#!/welcome"></a></li>
-<li class="link"><a href="#!/categories">CATEGORIES</a></li>
-<li class="link"><a href="#!/trending">TRENDING NOW</a></li>
-<li class="link"><a href="#!/leaderboard">LEADERBOARD</a></li>
-</ul>
-<div class="right">
-<div class="online">
-Users Online: <span>1</span>
+    <ul>
+    <li id="miniLogo"><a class="active" href="#!/welcome"></a></li>
+    <li class="link"><a href="#!/categories">CATEGORIES</a></li>
+    <li class="link"><a href="#!/trending">TRENDING NOW</a></li>
+    <li class="link"><a href="#!/leaderboard">LEADERBOARD</a></li>
+    </ul>
+    <div class="right">
+        <div class="online">
+        Users Online: <span>1</span>
+        </div>
+        <button rel="#refer" class="default">Invite a Friend</a>
+        <!--
+        <div class="search">
+        <input type="text" name="search" />
+        <span>Search</span>
+        <button />
+        </div>
+        -->
+    </div>
 </div>
-<div class="search">
-<input type="text" name="search" />
-<span>Search</span>
-<button />
-</div>
-</div>
+<div id="refer" class="overlay">
+    <div class="border">
+       <h2>Invite a Friend</h2>
+        <label for="name">Name:</label> <input type="text" name="name" /><br />
+        <label for="email">E-mail:</label> <input type="text" name="email" />
+        <div class="error"></div>
+
+        <p><button name="submit">Send Invitation</button> <span>{{ invites }}</span> remaining</p>
+    </div>
 </div>
 <div id="miniProfile" style="display:none">
 <a href="/user/{{ user_id }}"><img width="70" height="70" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" /></a>

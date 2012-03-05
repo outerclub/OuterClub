@@ -39,7 +39,7 @@ def index():
     g = {}
     uid = viewFunctions.getUid()
     user = db.fetchUser(cur,uid)
-    g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige']})
+    g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige'],'invites':user['invites']})
     g.update({'categories':[]})
 
     g.update({'announcements':db.fetchAnnouncements(cur)})
