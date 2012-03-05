@@ -22,6 +22,7 @@ def initAuth(id):
 
     conn = app.config['pool'].connection()
     cur = conn.cursor()
+    # update the last activity time
     cur.execute('update user set last_login=NOW() where user_id=%s',(id,))
     conn.commit()
     cur.close()
@@ -52,31 +53,37 @@ def invite():
     #return render_template('invite.html',name='test')
     if not viewFunctions.isLoggedIn():
         return ''
+    uid = viewFunctions.getUid()
     conn = app.config['pool'].connection()
     cur = conn.cursor()
-    cur.execute('select admin from user where user_id=%s',(viewFunctions.getUid(),))    
-    isAdmin = cur.fetchone()[0]
-    if not isAdmin:
+    cur.execute('select invites,admin from user where user_id=%s',(uid,))    
+    numInvites,isAdmin = cur.fetchone()
+    if not isAdmin and numInvites == 0:
         cur.close()
         conn.close()
-        return ''
+        return flask.jsonify(error='No more invites available!')
     
     if request.method == 'GET': 
         return render_template('sender.html')
 
-    ret = ''
+    ret = '{}'
     if 'name' in request.form and 'email' in request.form:
         name = request.form['name'] 
         email = request.form['email']
 
         key = str(uuid.uuid4())[:7]
-        cur.execute('insert into invite_key (email,code,myDate) values (%s,%s,NOW())',(email,key))
+        cur.execute('insert into invite_key (email,code,myDate,user_id) values (%s,%s,NOW(),%s)',(email,key,uid))
+        if not isAdmin:
+            cur.execute('update user set invites=%s where user_id=%s',(numInvites-1,uid))
+        conn.commit()
         cur.close()
         conn.close()
         
         data = render_template('invite.html',name=name,key=key)
-        util.send(app.config,email,'%s, welcome to OuterClub!' % (name),data)
-        return 'sent to %s<br /><br /><br /><br />%s' % (email,data)
+        
+        # only actually send if it's in prod mode
+        if not app.config['DEBUG']:
+            util.send(app.config,email,'%s, welcome to OuterClub!' % (name),data)
     return ret
          
     
@@ -94,19 +101,21 @@ def signup():
     conn = app.config['pool'].connection()
     cur = conn.cursor()
 
+    invite_uid = None
     # do we require an invite key?
     if not app.debug:
         # did the user provide an invite key?
         if not ('k' in request.form):
             error = "Sorry, OuterClub is not accepting signups at this time."
         else:
-            cur.execute('select email,code from invite_key where code=%s',(request.form['k'],))
+            cur.execute('select email,code,user_id from invite_key where code=%s',(request.form['k'],))
             row = cur.fetchone()
             if (not row):
                 error = "Sorry, OuterClub is not accepting signups at this time."
+            else:
+                invite_uid = row[2]
 
     if not error:
-
         if len(request.form['email']) == 0:
             error = "E-mail cannot be empty."
         elif not util.emailValid(request.form['email']):
@@ -157,6 +166,10 @@ def signup():
         res = cur.execute('insert into user (name,email,password,avatar_image,prestige,cover_image) values (%s,%s,%s,%s,0,%s)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar,cover))
 
         uid = cur.lastrowid
+        
+        if invite_uid:
+            # increment the user prestige only if not admin
+            cur.execute('update user set prestige=prestige+3 where user_id=%s and admin=0',(invite_uid,))
 
         # delete the invite key
         res = cur.execute('delete from invite_key where code=%s',(request.form['k'],))
@@ -164,6 +177,12 @@ def signup():
         conn.commit()
         cur.close()
         conn.close()
+
+        # push the prestige change
+        if invite_uid:
+            app.config['transport'].open()
+            app.config['client'].userModified(invite_uid);
+            app.config['transport'].close()
 
         # initialize the user
         return flask.jsonify(key=initAuth(uid))

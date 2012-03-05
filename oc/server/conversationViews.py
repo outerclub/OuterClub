@@ -130,8 +130,7 @@ def upvote():
     # does this current upvote exist?
     if (cur.fetchone()[0] == 0):
         cur.execute('insert into upvote (user_id, context_id,object_id, type) values (%s,%s,%s,%s)',(uid,d_id,object_id,util.Upvote.UserType))
-        cur.execute('select prestige from user where user_id=%s',(object_id,))
-        cur.execute('update user set prestige=%s where user_id=%s',(cur.fetchone()[0]+1,object_id))
+        cur.execute('update user set prestige=prestige+1 where user_id=%s',(object_id,))
         
         self = db.fetchUser(cur,uid)
         db.insertNews(cur,object_id,{'content':'<a href="#!/user/%s"><img height="30" src="/static/images/avatars/%s" /> %s</a> gave you a coffee!' % (uid,self['avatar_image'],self['name'])})

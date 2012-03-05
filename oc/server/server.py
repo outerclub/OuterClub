@@ -103,11 +103,10 @@ def category(category):
     category = category.replace('+',' ')
     conn = app.config['pool'].connection()
     cur = conn.cursor()
-    cur.execute('select cat_id,private,icon from category where name=%s', (category,))
+    cur.execute('select cat_id,private from category where name=%s', (category,))
     row = cur.fetchone()
     cat_id = row[0]
     isPrivate = bool(row[1])
-    icon = row[2]
 
     self = db.fetchUser(cur,viewFunctions.getUid())
     
@@ -127,7 +126,7 @@ def category(category):
         
         category = ' '.join(c.capitalize() for c in category.split())
 
-        return flask.jsonify(posts=posts,id=cat_id,private=isPrivate,icon=icon)
+        return flask.jsonify(posts=posts,id=cat_id,private=isPrivate)
     return ''
 @app.route('/trending')
 def trending():
