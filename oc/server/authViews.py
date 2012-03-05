@@ -56,8 +56,8 @@ def invite():
     uid = viewFunctions.getUid()
     conn = app.config['pool'].connection()
     cur = conn.cursor()
-    cur.execute('select invites,admin from user where user_id=%s',(uid,))    
-    numInvites,isAdmin = cur.fetchone()
+    cur.execute('select name,invites,admin from user where user_id=%s',(uid,))    
+    username,numInvites,isAdmin = cur.fetchone()
     if not isAdmin and numInvites == 0:
         cur.close()
         conn.close()
@@ -79,7 +79,12 @@ def invite():
         cur.close()
         conn.close()
         
-        data = render_template('invite.html',name=name,key=key)
+        # use formal invitation if admin, otherwise normal referer
+        if isAdmin: 
+            data = render_template('invite.html',name=name,key=key)
+        else:
+            data = render_template('referral.html',name=name,key=key,alias=username)
+        ret = data
         
         # only actually send if it's in prod mode
         if not app.config['DEBUG']:
