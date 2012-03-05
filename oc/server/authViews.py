@@ -65,7 +65,7 @@ def invite():
 
     error = None
     name = request.form['name'] 
-    email = request.form['email']
+    email = request.form['email'].strip()
     if len(name) == 0:
         error = 'Friend name must be provided.'
     elif len(email) == 0:
