@@ -17,8 +17,8 @@ def fetchResponses(cursor,d_id,user_id):
 
 def fetchTrendingConversations(cursor):
     # a simple order by most recent date
-    cursor.execute('select d_id,cat_id,user_id,title,postDate,content from conversation order by postDate desc limit 10')
-    
+    cursor.execute('select c.d_id,cat_id,c.user_id,title,postDate,c.content from conversation c join response r on c.d_id = r.d_id where replyDate > (select subtime(now(), \'2 00:00:00\')) group by d_id,cat_id,c.user_id,title,postDate,c.content order by count(*) desc limit 10')
+	
     conversations = []
     i=1
     for d in cursor.fetchall():
