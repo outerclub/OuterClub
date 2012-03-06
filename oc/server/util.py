@@ -34,9 +34,9 @@ def replaceMentions(cur,data):
     
     accum = ''
     matches = MENTION_REGEX.finditer(data)
-    end = None
+    end = 0
     for m in matches:
-        accum += data[:m.start()]
+        accum += data[end:m.start()]
         name = m.group(2)
         if (len(name) > 1):
             accum += m.group(1)
@@ -54,7 +54,8 @@ def replaceMentions(cur,data):
         else:
             accum += m.group()
         end = m.end()
-    if (end):
+    # found matches
+    if (end > 0):
         accum += data[end:]
     else:
         accum = data
