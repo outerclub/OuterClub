@@ -10,6 +10,7 @@
  * @param categoryIds
  */
 {template .show}
+<div class="profile frame">
     <a rel="#cover">
         <img width="905" name="{$cover_image}" {if $isMe}class="me" style="cursor: pointer"{/if}
     src="/static/images/covers/{$cover_image}" />
@@ -28,4 +29,5 @@
 {if $blurbs[$cat_id]}value="{$blurbs[$cat_id]}"{/if}/>
 </div>
 {/foreach}
+</div>
 {/template}

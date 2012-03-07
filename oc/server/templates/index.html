@@ -14,68 +14,88 @@ Welcome
     <p><button name="post" class="default">Post</button></p>
     </div>
 </div>
-<div class="content_wrapper" style="display: none">
-    <div class="heading" style="display: none">
-        <div class="left">
-            <a href="#">
-            <img width="72" height="65" /><h2></h2></a>
-        </div>
-        <div class="right">
-            <button rel="#newConversation" class="decorated">Start a Conversation</button>
-        </div>
-    </div>	
-    <div class="frame">
-        <div id="welcome" title="Welcome">
-            <div class="announcements">
-                <h1>Announcements</h1>
-                {% for a in announcements %}
-                    <div class="announcement">
-                        <img src="/static/images/icons/oc.png" />
-                        <h2>{{ a.title }}</h2>
-                        <p>{{ a.content.replace('\n','<br />')|safe }}</p>
-                        <span class="date">{{ a.postDate }}</span>
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="news">
-                <h1>Recent activity</h1>
-                <div class="feed">
+<div id="frame">
+    <div id="welcome" title="Welcome">
+        <div class="announcements">
+            <h1>Announcements</h1>
+            {% for a in announcements %}
+                <div class="announcement">
+                    <img src="/static/images/icons/oc.png" />
+                    <h2>{{ a.title }}</h2>
+                    <p>{{ a.content.replace('\n','<br />')|safe }}</p>
+                    <span class="date">{{ a.postDate }}</span>
                 </div>
+            {% endfor %}
+        </div>
+        <div class="news">
+            <h1>Recent activity</h1>
+            <div class="feed">
             </div>
-            <div class="twitter">
-            {% if not config['DEBUG'] %}
-                <a href="https://twitter.com/outerclub" class="twitter-follow-button" data-show-count="false">Follow @outerclub</a>
+        </div>
+        <div class="twitter">
+        {% if not config['DEBUG'] %}
+            <a href="https://twitter.com/outerclub" class="twitter-follow-button" data-show-count="false">Follow @outerclub</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-            {% endif %}
-                <div class="tweets">
+        {% endif %}
+            <div class="tweets">
+            </div>
+        </div>
+        {% if question %}
+        <div class="question">
+            <h1><span>Question</span> of the Week</h1>
+            <a href="/category/question+of+the+week/"><blockquote>&quot;Lorem Ipsum&quot; <span class="author">Author</span></blockquote></a>
+            <textarea cols="100" rows="5" name="question_answer"></textarea><button name="post">Post</button>
+        </div>
+        <div class="tasks">
+            <h1><span>Suggested</span> Tasks</h1>
+            {% for t in tasks %}
+                <div class="task">
+                    <h2>{{ t.type }}</h2>
+                    <p> {{ t.done }}</p>
+                 </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <div id="trending" title="Trending" style="display: none">
+    </div>
+    <div id="leaderboard" title="Leaderboard" style="display: none">
+    </div>
+    <div id="dynamic" style="display: none">
+    </div>
+    <div id="viewer" style="display:none" class="frame">
+        <div class="menu">
+            <ul>
+            </ul>
+            <ul class="categories">
+                
+             </ul>
+        </div>
+        <div class="panel">
+            <div class="heading">
+                <div class="left">
+                    <a href="#">
+                    <img width="72" height="65" /><h2></h2></a>
                 </div>
-            </div>
-            {% if question %}
-            <div class="question">
-                <h1><span>Question</span> of the Week</h1>
-                <a href="/category/question+of+the+week/"><blockquote>&quot;Lorem Ipsum&quot; <span class="author">Author</span></blockquote></a>
-                <textarea cols="100" rows="5" name="question_answer"></textarea><button name="post">Post</button>
-            </div>
-            <div class="tasks">
-                <h1><span>Suggested</span> Tasks</h1>
-                {% for t in tasks %}
-                    <div class="task">
-                        <h2>{{ t.type }}</h2>
-                        <p> {{ t.done }}</p>
-                     </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-        <div id="categories" title="Categories" style="display: none">
-            <div align="center">
+                <div class="right">
+                    <button rel="#newConversation" class="decorated">Start a Conversation</button>
+                </div>
+            </div>	
+            <div class="content">
             </div>
         </div>
-        <div id="trending" title="Trending" style="display: none">
-        </div>
-        <div id="leaderboard" title="Leaderboard" style="display: none">
-        </div>
-        <div id="dynamic" style="display: none">
+        <div class="scrollPanel" style="display:none">
+            <div class="heading">
+                <div class="left">
+                    <a href="#">
+                    <img width="72" height="65" /><h2></h2></a>
+                </div>
+                <div class="right">
+                    <button rel="#newConversation" class="decorated">Start a Conversation</button>
+                </div>
+            </div>	
+            <div class="content">
+            </div>
         </div>
         <div id="conversation" style="display: none">
             <div class="room">
@@ -102,6 +122,5 @@ Welcome
                 </div>
             </div>
         </div>
-    </div>
 </div>
 {% endblock %}

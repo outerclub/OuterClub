@@ -28,14 +28,16 @@ goog.require('goog.date');
 
 /**
  *
+ * @param {oc.User.View} userView
  * @param {Object.<oc.Category>} categories
+ * @param {oc.Socket} socket
  * @constructor
  */
-oc.Main = function(categories) {
+oc.Main = function(userView,categories,socket) {
     /**
      * @type {oc.Socket}
      */
-    this.socket = new oc.Socket();
+    this.socket = socket;
 
     /**
      * @type {Object.<oc.Category>}
@@ -45,7 +47,7 @@ oc.Main = function(categories) {
     /**
      * @type {oc.User.View}
      */
-    this.userView = new oc.User.View(this.categories,this.socket);
+    this.userView = userView;
 
     /**
      * @type {oc.Category.View}
@@ -72,17 +74,12 @@ oc.Main.prototype.start = function() {
     this.socket.addCallback('users',function(num) {
         goog.dom.query('.online span')[0].innerHTML = num;
         // reveal everything
-        goog.array.forEach(goog.dom.query('.content_wrapper,#miniProfile,#menu,.footer'),function(item) {
+        goog.array.forEach(goog.dom.query('#miniProfile,#menu,.footer'),function(item) {
             (new goog.fx.dom.FadeInAndShow(item,500)).play();
         });
     });
-    
-    this.userView.init();
 
     var self = this;
-    this.socket.addCallback('authRejected',function() {
-        window.location = '/logout';
-    });
 
     // gate to another section
     var menuItems = goog.dom.query('#menu ul a'); 
@@ -161,7 +158,7 @@ oc.Main.prototype.start = function() {
     /**
       * new conversation box.
       */
-    var ov = oc.overlay(goog.dom.query('.content_wrapper .heading .right button')[0],function() {});
+    var ov = oc.overlay(goog.dom.query('.heading .right button')[0],function() {});
     goog.events.listen(goog.dom.query("#newConversation button[name='post']")[0],
         goog.events.EventType.CLICK,function() {
             var titleInput = goog.dom.query(".titleField input")[0];
@@ -220,8 +217,10 @@ oc.Main.prototype.start = function() {
         });
     }
 
-    goog.events.listen(window,goog.events.EventType.RESIZE,oc.Main.Resize);
-    oc.Main.Resize();
+    goog.events.listen(window,goog.events.EventType.RESIZE,function() {
+        self.resize();
+    });
+    this.resize();
 
     // prevent escape
     goog.events.listen(window,goog.events.EventType.KEYDOWN,function(e) {
@@ -255,7 +254,7 @@ oc.Main.prototype.start = function() {
                 goog.style.showElement(page,true);
                 window.scrollTo(0,0);
             });
-        } else if (t == '!/welcome' || t == '!/trending' || t== '!/categories' || t== '!/leaderboard') {
+        } else if (t == '!/welcome' || t == '!/trending' || t== '!/leaderboard') {
             var menuItems = goog.dom.query('#menu ul a'); 
             var menuItem = goog.dom.query('#menu a[href="#'+t+'"]')[0];
              goog.array.forEach(menuItems,function(i) {
@@ -304,26 +303,49 @@ oc.Main.prototype.start = function() {
 /**
  * Resizes the frames to fit the viewport properly.
  */
-oc.Main.Resize = function() {
+oc.Main.prototype.resize = function() {
+    this.categoryView.refresh();
 };
 
 // ensure that main starts with categories
 goog.net.XhrIo.send('/categories',function(e) {
     var data = goog.json.unsafeParse(e.target.getResponseText())['categories'];
-    var ordered = [];
     var categories = {};
+    var menu = goog.dom.query('#viewer .menu .categories')[0];
     goog.array.forEach(data,function(cat) {
         var obj = oc.Category.extractFromJson(cat);
-        ordered.push(obj);
         categories[obj.id] = obj; 
+        var html = oc.Templates.Category.menuItem({name:obj.name,url:obj.url});
+        var element = goog.dom.htmlToDocumentFragment(html)
+
+        goog.dom.appendChild(menu,element);
+        
     });
-    goog.dom.query('#categories div')[0].innerHTML = oc.Templates.Category.categoryList({categories:ordered});
-    goog.array.forEach(goog.dom.query('#categories a'),function(category) {
-        goog.events.listen(category,goog.events.EventType.CLICK,function(e) {
-            oc.Nav.go(category.getAttribute('href'));
-            e.preventDefault();
-        });
+
+    var id = undefined;
+    var key;
+     // extract the user_id and key from the cookies
+     goog.array.forEach(document.cookie.split("; "),function(cookie) {
+        var spl = cookie.split('=');
+        if (spl[0] == 'key')
+            key = spl[1];
     });
-    var main = new oc.Main(categories);
-    main.start();
+
+    // initialize the socket
+    var socket = new oc.Socket();
+    socket.init('http://'+window.location.hostname+':'+window['RTG_WEBPORT']+'/sock');
+    socket.addCallback('authRejected',function() {
+        window.location = '/logout';
+    });
+
+    // load the user details
+    goog.net.XhrIo.send('/user',function(e) {
+        var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
+        var user = oc.User.extractFromJson(u);
+        var userView = new oc.User.View(user,categories,socket);
+        var main = new oc.Main(userView,categories,socket);
+        socket.send({'key':key});
+        main.start();
+        userView.init();
+    });
 });

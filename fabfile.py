@@ -4,7 +4,7 @@ from datetime import datetime
 BASE_DIR = 'oc/server/static'
 def compile():
     CSS_DIR = BASE_DIR+'/css'
-    local('java -jar tools/closure-stylesheets-20111230.jar --allow-unrecognized-functions %s/reset.css %s/misc.css %s/footer.css %s/layout.css %s/welcome.css %s/about.css %s/trending.css %s/user.css %s/categories.css %s/category.css %s/conversation.css > .c.css'.replace('%s',CSS_DIR))
+    local('java -jar tools/closure-stylesheets-20111230.jar --allow-unrecognized-functions %s/reset.css %s/misc.css %s/footer.css %s/layout.css %s/welcome.css %s/about.css %s/trending.css %s/user.css %s/category.css %s/conversation.css > .c.css'.replace('%s',CSS_DIR))
     
     checksum=local("md5sum .c.css | awk '{print $1}'",capture=True)
     css_file = '%s.c.css' % checksum

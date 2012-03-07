@@ -82,11 +82,12 @@ oc.User.extractFromJson = function(json) {
 }
 
 /**
+ * @param {oc.User} user
  * @param {Object.<oc.Category>} categories
  * @param {oc.Socket} socket
  * @constructor
  */
-oc.User.View = function(categories,socket) {
+oc.User.View = function(user,categories,socket) {
     /**
      * @type {Object.<oc.Category>}
      */
@@ -95,12 +96,7 @@ oc.User.View = function(categories,socket) {
     /**
      * @type {oc.User}
      */
-    this.user = null;
-
-    /**
-     * @type {string}
-     */
-    this.key = '';
+    this.user = user;
 
     /**
      * @type {oc.Socket}
@@ -108,25 +104,8 @@ oc.User.View = function(categories,socket) {
     this.socket = socket;
 };
 oc.User.View.prototype.init =  function() {
-     var self = this;
-     var id = undefined;
-     // extract the user_id and key from the cookies
-     goog.array.forEach(document.cookie.split("; "),function(cookie) {
-        var spl = cookie.split('=');
-        if (spl[0] == 'key')
-            self.key = spl[1];
-    });
-
-    // initialize the socket
-    self.socket.init('http://'+window.location.hostname+':'+window['RTG_WEBPORT']+'/sock');
-    self.socket.send({'key':self.key});
-
-    // load the user details
-    goog.net.XhrIo.send('/user',function(e) {
-        var u = goog.json.unsafeParse(e.target.getResponseText())['user'];
-        self.user = oc.User.extractFromJson(u);
-        self.socket.send({'register':['/happening','/user/'+self.user.id]});
-    });
+    var self = this;
+    self.socket.send({'register':['/happening','/user/'+self.user.id]});
     self.socket.addCallback('user',function(data) {
         // increase prestige
         if (data['prestige'] != self.user.prestige)
@@ -180,16 +159,16 @@ oc.User.View.prototype.go = function(user_id) {
 
         var dynamic = goog.dom.getElement('dynamic');
         goog.style.showElement(dynamic,true); 
-        goog.dom.classes.add(dynamic,'profile');
 
         var categoryIds = goog.object.getKeys(self.categories);
 
         // write the profile HTML
         var html = oc.Templates.User.show({cover_image:u.cover_image,avatar_image:u.avatar_image,name:u.name,isMe:isMe,blurbs:u.blurbs,categories:self.categories,categoryIds:categoryIds});
         dynamic.innerHTML = html;
+        var profileElement = goog.dom.query('.profile',dynamic)[0];
 
         // display default text if necessary
-        var blurbInputs = goog.dom.query('.blurb input',dynamic);
+        var blurbInputs = goog.dom.query('.blurb input',profileElement);
 
         // allow profile customization if isMe
         if (isMe) {
@@ -206,7 +185,7 @@ oc.User.View.prototype.go = function(user_id) {
             var coverOverlay = goog.dom.htmlToDocumentFragment('<div id="cover" class="overlay">'+
                     '<div class="border"><h2>Select Cover</h2><div class="center"></div></div></div>');
             
-            goog.dom.append(dynamic,coverOverlay);
+            goog.dom.append(profileElement,coverOverlay);
 
             /**
              * @param {function()} close
@@ -257,12 +236,12 @@ oc.User.View.prototype.go = function(user_id) {
                         paginate(0);
                     });
             };
-            oc.overlay(goog.dom.query("#dynamic a[rel='#cover']")[0],coversCallback);
+            oc.overlay(goog.dom.query("a[rel='#cover']",profileElement)[0],coversCallback);
     
             var avatarOverlay = /** @type {Element} */ goog.dom.htmlToDocumentFragment('<div id="avatar" class="overlay">'+
                     '<div class="border"><h2>Select Avatar</h2><div align="center"></div></div>');
             
-            goog.dom.append(dynamic,avatarOverlay);
+            goog.dom.append(profileElement,avatarOverlay);
 
             /**
              * @param {function()} close
@@ -303,7 +282,7 @@ oc.User.View.prototype.go = function(user_id) {
                    
                 });
             }
-            oc.overlay(goog.dom.query("#dynamic a[rel='#avatar']")[0],avatarsCallback);
+            oc.overlay(goog.dom.query("a[rel='#avatar']",profileElement)[0],avatarsCallback);
       }
     }); // getJson
 };

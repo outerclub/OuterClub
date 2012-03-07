@@ -1,3 +1,8 @@
+#trending {
+    margin: 60px auto 20px auto;
+    width:905px;
+
+}
 #leaderboard .entry {
     float:left;
     margin: 10px;
@@ -22,10 +27,10 @@
 }
 #trending .entry {
     clear: both;
-    margin-bottom: 1px;
     overflow: hidden;
     color: #efefef;
     display: block;
+    border-bottom:1px solid #444;
 
 }
 #trending .entry .text {
@@ -47,12 +52,15 @@
     top: 10px;
     font-weight:bold;
 }
+.alt .text {
+    background-color: rgba(70,70,70,0.9) !important;
+}
 .entry .text {
     float: left;
     padding: 10px 10px 10px 10px;
     position: relative;
     height: 70px;
-    background-color: rgba(0,0,0,0.5)
+    background-color: rgba(55,55,55,0.9)
 }
 #leaderboard .entry .text {
 }

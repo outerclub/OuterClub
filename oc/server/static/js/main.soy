@@ -6,7 +6,7 @@
  */
 {template .trending}
 {foreach $c in $conversations}
-<div class="entry">
+<div class="entry {if index($c) % 2 == 1}alt{/if}">
     <div class="number"><span>{$c['rank']}</span></div>
     <img src="/static/images/categories/{$categories[$c['cat_id']].thumb}" height="90" />
     <div class="text">

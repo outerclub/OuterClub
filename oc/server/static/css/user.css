@@ -1,5 +1,7 @@
 .profile {
     position: relative;
+    width:905px;
+    margin: 60px auto 20px auto;
 }
 .profile a[rel='#avatar'] img {
     position:absolute;

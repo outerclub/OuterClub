@@ -66,15 +66,39 @@ oc.Category.View = function(categories,socket,userView) {
      * @type {Object.<number>}
      */
     this.idConversationsIndex = {};
+   
+    /**
+     * @type {number}
+     */
+    this.columnPadding = 10; 
+
+    /**
+     * @type {number}
+     */
+    this.columns = 0;
 };
+
+/**
+ * @type {number}
+ * @const
+ */
+oc.Category.View.COLUMN_WIDTH = 285;
+
 /**
  * @type {number}
  * @const
  */
 oc.Category.View.MAX_RESPONSES = 4;
 
+/**
+ * @type {number}
+ * @const
+ */
+oc.Category.View.MARGIN_LEFT = 185;
+
 /** @typedef {{id: number,element:Element}} */
 oc.Category.View.Conversation;
+
 /**
  * @param {string} url
  */
@@ -82,16 +106,46 @@ oc.Category.View.prototype.go = function(url) {
     var self = this;
     this.conversations = [];
     this.idConversationsIndex = {};
+
     goog.net.XhrIo.send('/category/'+url,function(e) {
         var categoryData = goog.json.unsafeParse(e.target.getResponseText());
         
         var posts = categoryData['posts'];
-        var dynamic = goog.dom.getElement('dynamic');
-        dynamic.innerHTML = '<div class="posts"></div>';
+        var viewerElement = goog.dom.getElement('viewer');
+        var conversationElement = goog.dom.getElement('conversation');
 
+        // only scroll if paging through categories
+        var scroll = goog.style.isElementShown(viewerElement) && !goog.style.isElementShown(conversationElement);
+        var scrollDirection = 0;
+        var beforeViewerHeight = goog.style.getSize(viewerElement).height;
+        if (scroll)
+        {
+            var currentElement = goog.dom.query('.panel',viewerElement)[0];
+            var scrollElement = goog.dom.query('.scrollPanel',viewerElement)[0];
+            // swap the two
+            goog.dom.classes.remove(currentElement,'panel');
+            goog.dom.classes.add(currentElement,'scrollPanel');
+            goog.dom.classes.remove(scrollElement,'scrollPanel');
+            goog.dom.classes.add(scrollElement,'panel');
+
+            goog.style.setPosition(scrollElement,0,-1000);
+            goog.style.showElement(scrollElement,true);
+            
+            var activeLi = goog.dom.query('.menu .categories .active',viewerElement)[0];
+            var targetLi = goog.dom.query('.menu .categories a[name="'+url+'"]',viewerElement)[0];
+            scrollDirection = goog.dom.compareNodeOrder(activeLi,targetLi);
+        }
+        var panelElement = goog.dom.query('.panel',viewerElement)[0];
         
         oc.Nav.hideAll();
-        goog.style.showElement(dynamic,true);
+        goog.style.showElement(conversationElement,false);
+        goog.style.showElement(panelElement,true);
+        goog.style.showElement(viewerElement,true);
+
+        var contentElement = goog.dom.query('.content',panelElement)[0];
+        contentElement.innerHTML = '<div class="posts"></div>';
+    
+
         var registrations=['/happening','/user/'+self.userView.user.id,'/category/'+categoryData['id']];
         // iterate over all the posts backwards
         for (var i=posts.length-1; i >= 0; i--) {
@@ -123,10 +177,25 @@ oc.Category.View.prototype.go = function(url) {
         };
 
         var canCreate = !categoryData['private'] || self.userView.user.admin;
-        self.setCategory(categoryData['id'],!categoryData['private']);
         
+        self.setCategory(categoryData['id'],true,!categoryData['private']);
         oc.Nav.setTitle(self.category.name);
         self.socket.send({'register':registrations});
+        if (scroll)
+        {
+            var afterViewerHeight = goog.style.getSize(viewerElement).height;
+            var viewerHeight = Math.max(beforeViewerHeight,afterViewerHeight);
+            var scrollElement= goog.dom.query('.scrollPanel',viewerElement)[0];
+            var newElement = goog.dom.query('.panel',viewerElement)[0];
+
+            goog.style.setPosition(newElement,oc.Category.View.MARGIN_LEFT,-scrollDirection*viewerHeight);
+            
+            var anim = (new goog.fx.dom.SlideFrom(scrollElement,[oc.Category.View.MARGIN_LEFT,scrollDirection*viewerHeight],oc.Util.SLIDE_TIME,goog.fx.easing.easeOut));
+            var anim2 = (new goog.fx.dom.SlideFrom(newElement,[oc.Category.View.MARGIN_LEFT,0],oc.Util.SLIDE_TIME,goog.fx.easing.easeOut));
+            anim.play();
+            anim2.play();
+            goog.dom.query('body')[0].scrollTop = 0;
+        }
     });
 
     // a new response arrives?
@@ -144,13 +213,6 @@ oc.Category.View.prototype.go = function(url) {
         goog.dom.classes.remove(newResponse,'border');
 
         self.push(id,newHeight-oldHeight);
-        /*
-        // if smaller than max, pushdown rest.
-        if (responses.length < oc.Category.View.MAX_RESPONSES)
-            self.push(id,goog.style.getSize(newResponse).height);
-        else // else push up by removed element
-            self.push(id,-goog.style.getSize(responses[0]).height);
-        */
     });
 
     // a new conversation arrives?
@@ -175,13 +237,21 @@ oc.Category.View.prototype.go = function(url) {
  * @param {number} pixels
  */
 oc.Category.View.prototype.push = function(id,pixels) {
-    for (var i=this.idConversationsIndex[id]+3; i < this.conversations.length; i+= 3)
+    var currentId = this.idConversationsIndex[id];
+    // compute the maximum y position after the push
+    var maxY = goog.style.getSize(this.conversations[currentId].element).height+goog.style.getPosition(this.conversations[currentId].element).y+pixels;
+    for (var i=+this.columns; i < this.conversations.length; i+= this.columns)
     {
         var elementToMove = this.conversations[i].element;
         var pos = goog.style.getPosition(elementToMove);
         var anim = (new goog.fx.dom.SlideFrom(elementToMove,[pos.x,pos.y+pixels],oc.Util.SLIDE_TIME,goog.fx.easing.easeOut));
         anim.play();
+        maxY = Math.max(goog.style.getSize(elementToMove).height+pos.y+pixels,maxY);
     }
+
+    // increase the viewport size, as necessary
+    var contentElement = goog.dom.query('#viewer .panel .content')[0];
+    (new goog.fx.dom.ResizeHeight(contentElement,goog.style.getSize(contentElement).height,maxY,oc.Util.SLIDE_TIME,goog.fx.easing.easeOut)).play();
 }
 
 
@@ -206,35 +276,53 @@ oc.Category.View.prototype.responseToElement = function(r) {
  *
  */
 oc.Category.View.prototype.refresh = function() {
-    var width = 285;
-    var padding = 10;
-    
+    var viewportSize = goog.dom.getViewportSize();
+    // calculate the number of columns
+    this.columns = Math.floor((viewportSize.width
+                       -goog.style.getSize(goog.dom.query('#viewer .menu')[0]).width
+                       )/(oc.Category.View.COLUMN_WIDTH+this.columnPadding));
+
+    var heights = [];
+
+    // push initial zero heights
+    for (var i=0; i < this.columns; i++)
+        heights.push(0);
+
+    // set the first height according to the 0,0 conversation
+    if (this.conversations.length > 0)
+        heights[0] = goog.style.getSize(this.conversations[0].element).height;
+
+    // process all the convos
     for (var i= 1; i < this.conversations.length; i++)
     {
         var newLeft = 0; 
         var newTop = 0;
-        var upperIndex = i-3;
+        var upperIndex = i-this.columns;
         // move to same row?
-        if (i % 3 != 0)
+        if (i % this.columns != 0)
         {
-            var currentPosition = goog.style.getPosition(this.conversations[i].element).x;
-            newLeft = currentPosition+width+padding;
+            newLeft = (i % this.columns)*(oc.Category.View.COLUMN_WIDTH+this.columnPadding);
         }
         // is there an element above the new position?
         if (upperIndex >= 0)
         {
-            newTop =goog.style.getPosition(this.conversations[upperIndex].element).y+goog.style.getSize(this.conversations[upperIndex].element).height + padding;
+            newTop =goog.style.getPosition(this.conversations[upperIndex].element).y+goog.style.getSize(this.conversations[upperIndex].element).height + this.columnPadding;
         }
+        var currentHeight = goog.style.getSize(this.conversations[i].element).height;
+        heights[i%this.columns] = newTop+currentHeight;
         goog.style.setPosition(this.conversations[i].element,newLeft,newTop);
     }
 
+    // set the viewer height
+    var maxHeight = Math.ceil(goog.array.reduce(heights,function(r,v) { return Math.max(r,v); },0))+100;
+    goog.style.setHeight(goog.dom.query('#viewer')[0],Math.max(maxHeight,this.computeMenuHeight()));
 };
 /**
  * @param {number} id
  * @param {Element} postElement
  */
 oc.Category.View.prototype.insertPost = function(id,postElement) {
-    var rootElement = goog.dom.query('.posts')[0];
+    var rootElement = goog.dom.query('#viewer .panel .posts')[0];
     goog.dom.insertChildAt(rootElement,postElement,0);
     goog.style.showElement(postElement,true);
     this.conversations.splice(0,0,{'id':id,'element':postElement});
@@ -279,37 +367,63 @@ oc.Category.View.prototype.insertPost = function(id,postElement) {
 
 /**
  * @param {number} id
+ * @param {boolean=} showHeading
  * @param {boolean=} canCreate
  */
-oc.Category.View.prototype.setCategory = function(id,canCreate) {
+oc.Category.View.prototype.setCategory = function(id,showHeading,canCreate) {
     canCreate = goog.isBoolean(canCreate) ? canCreate : true;
     // change to the new category
     this.category = this.categories[id];
 
-    // show category head
-    goog.dom.query('.heading h2')[0].innerHTML = this.category.name;
-    var link = goog.dom.query('.heading a')[0];
-    link.setAttribute('href','#!/category/'+this.category.url);
-
-    goog.style.showElement(goog.dom.query('.heading')[0],true);
-    var img = goog.dom.query('.heading img')[0];
-    if (!goog.isDefAndNotNull(this.category.icon) || this.category.icon == '')
+    if (showHeading)
     {
-        goog.style.showElement(img,false);
-    } else {
-        img.setAttribute('src','/static/images/categories/'+this.category.icon);
-        goog.style.showElement(img,true);
-    }
-    
-    var newConvoButton = goog.dom.query('.heading .right button')[0];
-    goog.style.showElement(newConvoButton,canCreate);
+        // show category head
+        var headerElement = goog.dom.query('#viewer .panel .heading')[0];
+        goog.dom.query('h2',headerElement)[0].innerHTML = this.category.name;
+        var link = goog.dom.query('a',headerElement)[0];
+        link.setAttribute('href','#!/category/'+this.category.url);
 
-    goog.events.removeAll(link);
+        // change the category image
+        goog.style.showElement(headerElement,true);
+        var img = goog.dom.query('img',headerElement)[0];
+        if (!goog.isDefAndNotNull(this.category.icon) || this.category.icon == '')
+        {
+            goog.style.showElement(img,false);
+        } else {
+            img.setAttribute('src','/static/images/categories/'+this.category.icon);
+            goog.style.showElement(img,true);
+        }
+        // show the new conversation button
+        var newConvoButton = goog.dom.query('.right button',headerElement)[0];
+        goog.style.showElement(newConvoButton,canCreate);
+
+        goog.events.removeAll(link);
+        goog.events.listen(link,goog.events.EventType.CLICK,function(e) {
+            oc.Nav.go(this.getAttribute('href'));
+            e.preventDefault();
+        });
+    }
+
     var self = this;
-    goog.events.listen(link,goog.events.EventType.CLICK,function(e) {
-        oc.Nav.go(this.getAttribute('href'));
-        e.preventDefault();
+    // set the active menu item
+    goog.array.forEach(goog.dom.query('#viewer .menu .categories a'),function(a) {
+        if (self.category.url == a.getAttribute('name'))
+            goog.dom.classes.add(a,'active');
+        else
+            goog.dom.classes.remove(a,'active');
     });
+    
+};
+
+/**
+ * @return {number}
+ */
+oc.Category.View.prototype.computeMenuHeight = function() {
+    var viewportSize = goog.dom.getViewportSize();
+    var topH = goog.style.getSize(goog.dom.getElement('menu')).height;
+    var bottomH = goog.style.getSize(goog.dom.query('.footer')[0]).height;
+    return viewportSize.height-topH-bottomH; 
+    
 };
 
 /**
@@ -351,6 +465,18 @@ oc.Conversation.View = function(category_view,socket,userView) {
 };
 
 /**
+ *
+ */
+oc.Conversation.View.prototype.resize = function() {
+    var viewerElement = goog.dom.getElement('viewer');
+    var underlayElement = goog.dom.query('.underlay',this.rootElement)[0];
+    // set to auto and then find the height
+    goog.style.setStyle(underlayElement,'height','auto');
+    goog.style.setHeight(underlayElement,Math.max(this.categoryView.computeMenuHeight()-334,goog.style.getSize(underlayElement).height));
+    var convoHeight = goog.style.getSize(this.rootElement).height;
+    goog.style.setHeight(viewerElement,convoHeight);
+}
+/**
  * @param {number} id
  */
 oc.Conversation.View.prototype.go = function(id) {
@@ -364,12 +490,23 @@ oc.Conversation.View.prototype.go = function(id) {
         oc.Nav.hideAll();
         oc.Nav.setTitle(self.conversation.title); 
 
+        var viewerElement = goog.dom.getElement('viewer');
+        goog.style.showElement(viewerElement,true);
+        // hide the category panel if necessary
+        goog.array.forEach(goog.dom.query('.panel,.scrollPanel',viewerElement),function(panel) {
+            goog.style.showElement(panel,false);
+        });
+
+        // scroll to top
+        goog.dom.query('body')[0].scrollTop = 0;
+
         // show category head
-        self.categoryView.setCategory(self.conversation.categoryId);
+        self.categoryView.setCategory(self.conversation.categoryId,false);
 
         self.socket.send({'register':['/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
         self.socket.addCallback('response',function(data) {
             self.createResponse(true,oc.Conversation.Response.extractFromJson(data),self.conversation.categoryId);
+            self.resize();
         });
         self.socket.addCallback('viewers',function(viewers) {
             // scan for removals
@@ -428,6 +565,7 @@ oc.Conversation.View.prototype.go = function(id) {
                 
         });
 
+        // reply button
         goog.events.removeAll(replyButton);
         goog.events.listen(replyButton,goog.events.EventType.CLICK,function(e) {
             var content = textarea.value;
@@ -453,7 +591,9 @@ oc.Conversation.View.prototype.go = function(id) {
             self.createResponse(false,r,self.conversation.categoryId);
         });
         
+        // resize the viewer
         goog.style.showElement(self.rootElement,true);
+        self.resize();
 
     }); 
 };

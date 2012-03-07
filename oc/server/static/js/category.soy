@@ -1,22 +1,11 @@
 {namespace oc.Templates.Category}
 
 /**
- * @param categories
+ * @param name
+ * @param url
  */
-{template .categoryList}
-<table id="nav">
-{foreach $cat in $categories}
-    {if index($cat) % 4 == 0 }
-    <tr>
-    {/if}
-    <td>
-        <a title="{$cat.name}" href="#!/category/{$cat.url}"><img src="/static/images/categories/{$cat.image}" /></a>
-    </td>
-    {if index($cat) % 4 == 3 }
-    </tr>
-    {/if}
-{/foreach}
-</table>
+{template .menuItem}
+<li><a name="{$url}" href="#!/category/{$url}">{$name}</a></li>
 {/template}
 
 /**

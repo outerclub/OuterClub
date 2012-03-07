@@ -146,7 +146,7 @@ oc.Util.humanDate = function(date) {
  * @type {number}
  * @const
  */
-oc.Util.SLIDE_TIME = 1000;
+oc.Util.SLIDE_TIME = 800;
 
 /**
  * @param {Element} element

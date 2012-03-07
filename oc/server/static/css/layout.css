@@ -25,9 +25,12 @@ body{
     font-family: 'Helvetica Neue',Arial, sans-serif;
     font-size: 80%;
     background: black url(/static/images/background.png) repeat-x fixed top center;
+    color:white;
 }
 #outer {
-    margin: 43px auto 20px auto;
+    margin: 43px auto 0px auto;
+}
+#frame {
 }
 
 /**
@@ -154,6 +157,19 @@ body{
     font-size: 140%;
 }
 
+.frame {
+    background-color: rgba(55,55,55,0.9);
+    padding: 25px;
+    -moz-box-shadow: 0 0 5px #000;
+    -webkit-box-shadow: 0 0 5px #000;
+    box-shadow: 0 0 5px #000;
+}
+.frame h1 {
+    font-family:BebasRegular;
+    font-size:500%;
+    margin-bottom:20px;
+}
+
 
 /**
  * FAQ
@@ -161,9 +177,7 @@ body{
 #faq {
     display:block;
     width:600px;
-    background-color: rgba(0,0,0,0.8);
-    padding: 15px;
-    margin: 0 auto;
+    margin: 60px auto 20px auto;
 }
 #faq .question {
     color: #6092c6;
@@ -175,26 +189,9 @@ body{
     line-height: 20px;
     margin-bottom: 15px;
 }
-
-/**
- * Frames
- */
-.content_wrapper{
-    padding: 15px;
-    clear: both;
-}
-
- .content_wrapper .frame {
-    color: white;
-    padding: 15px;
-}
-
 /**
  * Miscellaneous
  */
-h1 a,h2 a {
-    color: #6092c6;
-}
 .hide {
     display: none;
 }

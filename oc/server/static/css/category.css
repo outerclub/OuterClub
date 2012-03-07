@@ -1,25 +1,61 @@
-/* --------------------Technology Board--------------------- */
-
-.content_wrapper .heading .left {
+#viewer {
+    padding: 0;
+    position:relative;
+    overflow:hidden;
+}
+#viewer .menu {
+    position:fixed;
+    background-color: rgba(180,180,180,0.6);
+    width:160px;
+    
+    -moz-box-shadow: 0 0 3px #000;
+    -webkit-box-shadow: 0 0 3px #000;
+    box-shadow: 0 0 3px #000;
+    padding: 5px 0 5px 0;
+    z-index:1;
+}
+#viewer .menu li {
+}
+#viewer .menu li a:hover,#viewer .menu a.active {
+    background-color:#333;
+}
+#viewer .menu li a{
+    color:white;
+    font-weight:bold;
+    padding: 5px 10px;
+    display:block;
+}
+#viewer .content {
+}
+#viewer .panel,#viewer .scrollPanel {
+    left:185px;
+}
+#viewer .panel,#viewer .scrollPanel {
+    position:absolute;
+}
+/**
+ * Heading.
+ */
+.heading .left {
     float: left;
     padding-left: 20px;
 }
-.content_wrapper .heading .left img {
+.heading .left img {
     vertical-align: middle;
     margin-top: -24px;
 }
-.content_wrapper .heading .right {
+.heading .right {
     float: right;
 }
-.content_wrapper .heading .right button {
+.heading .right button {
     margin-top:5px;
 }
 
-.content_wrapper .heading{
+.heading{
     overflow: hidden;
-    margin: 5px 0 15px 0;
+    margin: 20px 0 20px 0;
 }
-.content_wrapper .heading h2{
+.heading h2{
     color: #FFFFFF;
     text-transform: uppercase;
     font-family: BebasRegular;
@@ -180,6 +216,6 @@
 }
 #newConversation .contentField span {
     left: 50%;
-    top: 142px;
+    top: 115px;
     margin-left: -40px;
 }
