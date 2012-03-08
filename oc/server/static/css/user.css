@@ -5,8 +5,8 @@
 }
 .profile a[rel='#avatar'] img {
     position:absolute;
-    left: 20px;
-    top: 205px;
+    left: 45px;
+    top: 230px;
     border:5px solid white
 }
 .profile a[rel='#avatar']:hover img.me {
@@ -27,8 +27,8 @@
     font-family: BebasRegular;
     font-size: 500%;
     position:absolute;
-    top:225px;
-    left:150px;
+    top:245px;
+    left:175px;
     text-shadow: 1px 1px 1px #000000;
     filter: dropshadow(color=#000000,offx=1,offy=1);
 }

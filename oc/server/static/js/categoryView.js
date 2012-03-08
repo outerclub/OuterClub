@@ -240,7 +240,7 @@ oc.Category.View.prototype.push = function(id,pixels) {
     var currentId = this.idConversationsIndex[id];
     // compute the maximum y position after the push
     var maxY = goog.style.getSize(this.conversations[currentId].element).height+goog.style.getPosition(this.conversations[currentId].element).y+pixels;
-    for (var i=+this.columns; i < this.conversations.length; i+= this.columns)
+    for (var i=currentId+this.columns; i < this.conversations.length; i+= this.columns)
     {
         var elementToMove = this.conversations[i].element;
         var pos = goog.style.getPosition(elementToMove);
@@ -250,8 +250,8 @@ oc.Category.View.prototype.push = function(id,pixels) {
     }
 
     // increase the viewport size, as necessary
-    var contentElement = goog.dom.query('#viewer .panel .content')[0];
-    (new goog.fx.dom.ResizeHeight(contentElement,goog.style.getSize(contentElement).height,maxY,oc.Util.SLIDE_TIME,goog.fx.easing.easeOut)).play();
+    var viewerElement = goog.dom.query('#viewer')[0];
+    (new goog.fx.dom.ResizeHeight(viewerElement,goog.style.getSize(viewerElement).height,maxY+100,oc.Util.SLIDE_TIME,goog.fx.easing.easeOut)).play();
 }
 
 
@@ -264,7 +264,7 @@ oc.Category.View.prototype.responseToElement = function(r) {
     var content = newR.content.replace(/^\/me/,'');
     var html = oc.Templates.Category.miniResponse({
         border:true,
-        content:content,
+        content:oc.Util.replaceLinks(goog.string.newLineToBr(content)),
         date:oc.Util.prettyDate(newR.date),
         user:newR.user
        });
@@ -273,7 +273,7 @@ oc.Category.View.prototype.responseToElement = function(r) {
 };
 
 /**
- *
+ * Refreshes the category layout.
  */
 oc.Category.View.prototype.refresh = function() {
     var viewportSize = goog.dom.getViewportSize();
@@ -332,15 +332,36 @@ oc.Category.View.prototype.insertPost = function(id,postElement) {
         // update the ID index
         this.idConversationsIndex[this.conversations[i].id] = i;
     }
-
-    goog.events.listen(goog.dom.query('textarea',postElement)[0],goog.events.EventType.KEYPRESS,function(e) {
+    
+    var self = this;
+    goog.events.listen(goog.dom.query('textarea',postElement)[0],goog.events.EventType.KEYDOWN,function(e) {
+        /*
         if (e.keyCode == goog.events.KeyCodes.ENTER)
         {
-            var content = this.value;
             var textarea = this;
+            var before = goog.style.getSize(textarea).height;
+            textarea.rows = goog.string.countOf(textarea.value,'\n')+2;
+            self.push(id,goog.style.getSize(textarea).height-before);
+        } else if (e.keyCode == goog.events.KeyCodes.BACKSPACE)
+        {
+            var textarea = this;
+            var spl = textarea.value.split('\n');
+            var before = goog.style.getSize(textarea).height;
+            textarea.rows = goog.string.countOf(textarea.value,'\n')+1;
+            // last line is length 0
+            if (spl.length > 1 && spl[spl.length-1].length == 0)
+            {
+                alert('sub');
+                textarea.rows -= 1;
+            }
+            self.push(id,goog.style.getSize(textarea).height-before);
+        }
+        */
+        /*
+        {
+            var content = this.value;
             goog.net.XhrIo.send('/reply',function(e) {
                 var data = goog.json.unsafeParse(e.target.getResponseText());
-                /*
                 var errorView = goog.dom.query('.reply .error',self.rootElement)[0];
                 if ('error' in data) {
                     errorView.innerHTML = data['error'];
@@ -350,13 +371,13 @@ oc.Category.View.prototype.insertPost = function(id,postElement) {
                     textarea.value = '';
                     textarea.focus();
                 }
-                */
                 textarea.value = '';
              },
             'POST',goog.uri.utils.buildQueryDataFromMap({
                     'd_id':id,
                     'data':content}));
         }
+        */
     });
     // clickhandler
     goog.events.listen(goog.dom.query('a.convo',postElement)[0],goog.events.EventType.CLICK,function(e) {
