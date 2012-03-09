@@ -75,7 +75,8 @@ oc.Main.prototype.start = function() {
         goog.dom.query('.online span')[0].innerHTML = num;
         // reveal everything
         goog.array.forEach(goog.dom.query('#miniProfile,#menu,.footer'),function(item) {
-            (new goog.fx.dom.FadeInAndShow(item,500)).play();
+            if (!goog.style.isElementShown(item))
+                (new goog.fx.dom.FadeInAndShow(item,500)).play();
         });
     });
 

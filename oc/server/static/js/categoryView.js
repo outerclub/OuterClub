@@ -358,13 +358,24 @@ oc.Category.View.prototype.insertPost = function(id,postElement) {
     
     var self = this;
     goog.events.listen(goog.dom.query('textarea',postElement)[0],goog.events.EventType.KEYDOWN,function(e) {
-        /*
         if (e.keyCode == goog.events.KeyCodes.ENTER)
         {
+            var content = this.value;
             var textarea = this;
+            goog.net.XhrIo.send('/reply',function(e2) {
+                var data = goog.json.unsafeParse(e2.target.getResponseText());
+                textarea.value = '';
+                textarea.focus();
+             },
+            'POST',goog.uri.utils.buildQueryDataFromMap({
+                    'd_id':id,
+                    'data':content}));
+            e.preventDefault();
+            /*
             var before = goog.style.getSize(textarea).height;
             textarea.rows = goog.string.countOf(textarea.value,'\n')+2;
             self.push(id,goog.style.getSize(textarea).height-before);
+            */
         } else if (e.keyCode == goog.events.KeyCodes.BACKSPACE)
         {
             var textarea = this;
@@ -379,26 +390,8 @@ oc.Category.View.prototype.insertPost = function(id,postElement) {
             }
             self.push(id,goog.style.getSize(textarea).height-before);
         }
-        */
         /*
         {
-            var content = this.value;
-            goog.net.XhrIo.send('/reply',function(e) {
-                var data = goog.json.unsafeParse(e.target.getResponseText());
-                var errorView = goog.dom.query('.reply .error',self.rootElement)[0];
-                if ('error' in data) {
-                    errorView.innerHTML = data['error'];
-                    (new goog.fx.dom.FadeInAndShow(errorView,500)).play();
-                } else {
-                    (new goog.fx.dom.FadeOut(errorView,500)).play();
-                    textarea.value = '';
-                    textarea.focus();
-                }
-                textarea.value = '';
-             },
-            'POST',goog.uri.utils.buildQueryDataFromMap({
-                    'd_id':id,
-                    'data':content}));
         }
         */
     });
