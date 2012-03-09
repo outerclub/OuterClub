@@ -19,7 +19,7 @@ Welcome
         <div class="announcements">
             <h1>Announcements</h1>
             {% for a in announcements %}
-                <div class="announcement">
+                <div class="announcement {% if not loop.last %}border{% endif %}">
                     <img src="/static/images/icons/oc.png" />
                     <h2>{{ a.title }}</h2>
                     <p>{{ a.content.replace('\n','<br />')|safe }}</p>

@@ -57,7 +57,7 @@ body {
 	position:relative;
 	top:140px;
 	height: 469px;
-	background: url(/static/images/signup/0.png) no-repeat top center;
+	/*background: url(/static/images/signup/0.png) no-repeat top center;*/
 }
 
 /**
@@ -109,6 +109,7 @@ body {
     position:relative;
 	margin-top: 70px;
 	z-index: 99;
+    visibility:hidden;
 }
 button {
 	cursor: pointer;
@@ -238,9 +239,11 @@ $(document).ready(function() {
         
         // preload the signup images
         var preload = new Image();
+        /*
         preload.src = '/static/images/signup/0.png';
         preload.src = '/static/images/signup/1.png';
         preload.src = '/static/images/signup/2.png';
+        */
         $('.dots button').click(function() {
             $('.dots button').each(function() {
                 if ($(this).hasClass('dotActive')) {
@@ -257,7 +260,7 @@ $(document).ready(function() {
             });
 
         });
-        setTimeout('slideshow()',wait);
+        //setTimeout('slideshow()',wait);
         var setKey = function(key) {
             var today = new Date();
             today.setDate(today.getDate() + 4*7);

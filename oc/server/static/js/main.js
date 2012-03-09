@@ -158,7 +158,11 @@ oc.Main.prototype.start = function() {
     /**
       * new conversation box.
       */
-    var ov = oc.overlay(goog.dom.query('.heading .right button')[0],function() {});
+    var ov;
+    goog.array.forEach(goog.dom.query('.heading .right button'),function(button) {
+        ov = oc.overlay(button,function() {});
+
+    });
     goog.events.listen(goog.dom.query("#newConversation button[name='post']")[0],
         goog.events.EventType.CLICK,function() {
             var titleInput = goog.dom.query(".titleField input")[0];
@@ -183,7 +187,6 @@ oc.Main.prototype.start = function() {
                     ov.close();
                 }
 
-                
                  },'POST',goog.uri.utils.buildQueryDataFromMap({'area':self.categoryView.category.id,
                     'title':title,
                     'content':content})
@@ -240,6 +243,13 @@ oc.Main.prototype.start = function() {
     var navigate = function(e) {
         var t = e.token;
         oc.Tracking.page(t);
+
+        // unselect the active item
+        var menuItems = goog.dom.query('#menu ul a'); 
+         goog.array.forEach(menuItems,function(i) {
+            goog.dom.classes.remove(i,'active');
+        });
+
         if (t == '!/about' || t ==  '!/faq')
         {
             var title = 'About Us';
@@ -255,11 +265,7 @@ oc.Main.prototype.start = function() {
                 window.scrollTo(0,0);
             });
         } else if (t == '!/welcome' || t == '!/trending' || t== '!/leaderboard') {
-            var menuItems = goog.dom.query('#menu ul a'); 
             var menuItem = goog.dom.query('#menu a[href="#'+t+'"]')[0];
-             goog.array.forEach(menuItems,function(i) {
-                goog.dom.classes.remove(i,'active');
-            });
             goog.dom.classes.add(menuItem,'active');
 
             // register for events
@@ -287,6 +293,8 @@ oc.Main.prototype.start = function() {
             id = id[id.length-1];
             self.userView.go(id);
         } else if (t.indexOf('!/category/') == 0) {
+            var menuItem = goog.dom.query('#menu a[name="category"]')[0];
+            goog.dom.classes.add(menuItem,'active');
             var name = t.split('/');
             name = name[name.length-1];
             self.categoryView.go(name);

@@ -38,14 +38,13 @@
  */
 .heading .left {
     float: left;
-    padding-left: 20px;
 }
 .heading .left img {
     vertical-align: middle;
-    margin-top: -24px;
 }
 .heading .right {
     float: right;
+    margin: -3px 0 0 10px;
 }
 .heading .right button {
     margin-top:5px;
@@ -61,7 +60,6 @@
     font-family: BebasRegular;
 	text-shadow: 1px 1px 2px #000000;
     display: inline;
-    margin-left: -5px;
     font-size: 250%;
 }
 .heading h3{

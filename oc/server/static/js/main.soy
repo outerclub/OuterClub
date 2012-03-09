@@ -19,26 +19,6 @@
 {/template}
 
 /**
- * @param users
- */
-{template .leaderboard}
-{foreach $u in $users}
-<div class="entry">
-    <div class="number"><span>{$u['rank']}</span></div>
-    <img src="/static/images/avatars/{$u['avatar_image']}" height="90" width="90"/>
-    <div class="text">
-        <h2>
-            <a href="#!/user/{$u['user_id']}">
-            {$u['name']}</a>
-        </h2>
-        <p class="strong">Prestige: <strong>{$u['prestige']}</strong></p>
-    </div>
-</div>
-{/foreach}
-{/template}
-
-
-/**
  * @param date
  * @param content
  */

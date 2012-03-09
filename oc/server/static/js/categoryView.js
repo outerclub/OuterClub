@@ -146,11 +146,9 @@ oc.Category.View.prototype.go = function(url) {
         contentElement.innerHTML = '<div class="posts"></div>';
     
 
-        var registrations=['/happening','/user/'+self.userView.user.id,'/category/'+categoryData['id']];
         // iterate over all the posts backwards
         for (var i=posts.length-1; i >= 0; i--) {
             var p = posts[i];
-            registrations.push('/conversation/'+p['id']);
             var html = oc.Templates.Category.conversation({
                 hide:true,
                 id:p['id'],
@@ -173,14 +171,14 @@ oc.Category.View.prototype.go = function(url) {
             }
             // remove the border from the bottom
             goog.dom.classes.remove(lastElement,'border');
-            self.refresh();
         };
 
         var canCreate = !categoryData['private'] || self.userView.user.admin;
         
         self.setCategory(categoryData['id'],true,!categoryData['private']);
         oc.Nav.setTitle(self.category.name);
-        self.socket.send({'register':registrations});
+        self.updateRegistrations();
+        self.refresh();
         if (scroll)
         {
             var afterViewerHeight = goog.style.getSize(viewerElement).height;
@@ -225,12 +223,32 @@ oc.Category.View.prototype.go = function(url) {
             avatar_image:data['user']['avatar_image'],
             user_id:data['user']['user_id'],
             date: oc.Util.humanDate(goog.date.fromIsoString(data['date'])),
+            numReplies:0,
+            numUsers:1,
             user_name:data['user']['name']});
         var d = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
         (new goog.fx.dom.FadeInAndShow(d,500)).play();
         self.insertPost(parseInt(data['id'],10),d,true);
+
+        var responsesElement = goog.dom.query('.responses',d)[0];
+        var lastElement = self.responseToElement(data);
+        oc.Util.slide(lastElement,responsesElement,oc.Category.View.MAX_RESPONSES,false,false);
+
+        // remove the border from the bottom
+        goog.dom.classes.remove(lastElement,'border');
+        self.updateRegistrations();
+        self.refresh();
     });
 };
+
+
+oc.Category.View.prototype.updateRegistrations = function() {
+    var registrations=['/happening','/user/'+this.userView.user.id,'/category/'+this.category.id];
+
+    for (var id in this.idConversationsIndex)
+        registrations.push('/conversation/'+id);
+    this.socket.send({'register':registrations});
+}
 
 /**
  * @param {number} id
@@ -251,7 +269,12 @@ oc.Category.View.prototype.push = function(id,pixels) {
 
     // increase the viewport size, as necessary
     var viewerElement = goog.dom.query('#viewer')[0];
-    (new goog.fx.dom.ResizeHeight(viewerElement,goog.style.getSize(viewerElement).height,maxY+100,oc.Util.SLIDE_TIME,goog.fx.easing.easeOut)).play();
+    var currentHeight = goog.style.getSize(viewerElement).height;
+    var newHeight = maxY+100;
+    if (newHeight > currentHeight)
+    {
+        (new goog.fx.dom.ResizeHeight(viewerElement,currentHeight,newHeight,oc.Util.SLIDE_TIME,goog.fx.easing.easeOut)).play();
+    }
 }
 
 
@@ -597,7 +620,15 @@ oc.Conversation.View.prototype.go = function(id) {
                     errorView.innerHTML = data['error'];
                     (new goog.fx.dom.FadeInAndShow(errorView,500)).play();
                 } else {
-                    (new goog.fx.dom.FadeOut(errorView,500)).play();
+                    var anim = new goog.fx.dom.FadeOut(errorView,200);
+                    /*
+                    no auto-scroll for now.
+                    goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function(e) {
+                        var body = goog.dom.query('body')[0];
+                        body.scrollTop += 50;
+                    });
+                    */
+                    anim.play();
                     textarea.value = '';
                     textarea.focus();
                 }
@@ -739,11 +770,6 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categor
     }
 
     self.responses.push(response);
-    if (fadeIn)
-    {
-        var responses = goog.dom.query('.responses',self.rootElement)[0];
-        responses.scrollTop = responses.scrollHeight;
-    }
 
 };
 

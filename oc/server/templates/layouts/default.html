@@ -36,7 +36,7 @@
 <div id="menu" style="display: none">
     <ul>
     <li id="miniLogo"><a class="active" href="#!/welcome"></a></li>
-    <li class="link"><a href="#!/category/general">CATEGORIES</a></li>
+    <li class="link"><a name="category" href="#!/category/general">CATEGORIES</a></li>
     <li class="link"><a href="#!/trending">TRENDING NOW</a></li>
     <li class="link"><a href="#!/leaderboard">LEADERBOARD</a></li>
     </ul>
@@ -81,6 +81,7 @@ window['RTG_WEBPORT'] = {{ config['RTG_WEBPORT'] }};
 window['DEBUG'] = {% if config['DEBUG'] %}true{% else %}false{% endif%};
 </script>
     <script type="text/javascript" src="/static/sockjs-0.2.1.min.js"></script>
+    <script type="text/javascript" src="/static/d3.v2.min.js"></script>
 {% if config['DEBUG'] %}
    <script type="text/javascript" src="http://localhost:9810/compile?id=outerclub"></script>
 {% else %}

@@ -27,17 +27,15 @@ oc.Leaderboard.prototype.go = function() {
         var leaderboard = goog.dom.query('#leaderboard')[0];
         oc.Nav.setTitle(leaderboard.getAttribute('title'));
 
-        var html = oc.Templates.Main.leaderboard({users:users});
-        goog.array.forEach(goog.dom.query('.entry',leaderboard),function(l) {
-            goog.dom.removeNode(l);
-        });
-        goog.dom.append(leaderboard,goog.dom.htmlToDocumentFragment(html));
+        leaderboard.innerHTML = '';
+        window['leaderboard']({name:'leaderboard',children:users});
         oc.Nav.hideAll();
+        goog.style.showElement(goog.dom.query('#leaderboard .cell')[0],false);
 
         goog.style.showElement(leaderboard,true);
-        goog.array.forEach(goog.dom.query('#leaderboard h2 a'),function(clickable) {
+        goog.array.forEach(goog.dom.query('#leaderboard .cell'),function(clickable) {
             goog.events.listen(clickable,goog.events.EventType.CLICK,function(e) {
-                oc.Nav.go(this.getAttribute('href'));
+                oc.Nav.go(this.getAttribute('data-url'));
                 e.preventDefault();
             });
         });

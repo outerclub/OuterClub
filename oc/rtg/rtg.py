@@ -59,10 +59,13 @@ class TRtgHandler:
         cur.close()
         conn.close()
 
-        payload = {'id':d_id,'date':convo[1].isoformat(),'title':convo[5],'user':user}
+        # just escape, shouldn't be any mentions
+        newContent = util.escape(convo[2])
+
+        payload = {'id':d_id,'date':convo[1].isoformat(),'title':convo[5],'user':user,'content':newContent}
         self.queue.put(event.Message('/category/%d' % (convo[4]),'conversation',payload))
 
-        happening_data = {'user':user,'date':convo[1].isoformat(),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':util.escape(convo[2])}
+        happening_data = {'user':user,'date':convo[1].isoformat(),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':newContent}
         self.queue.put(event.Message('/happening','happening',{'type':'post','data':happening_data}))
 
     def auth(self,auth):
