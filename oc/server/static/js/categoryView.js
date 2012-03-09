@@ -516,9 +516,9 @@ oc.Conversation.View.prototype.resize = function() {
     var underlayElement = goog.dom.query('.underlay',this.rootElement)[0];
     // set to auto and then find the height
     goog.style.setStyle(underlayElement,'height','auto');
-    goog.style.setHeight(underlayElement,Math.max(this.categoryView.computeMenuHeight()-334,goog.style.getSize(underlayElement).height));
-    var convoHeight = goog.style.getSize(this.rootElement).height;
-    goog.style.setHeight(viewerElement,convoHeight);
+    var underlayHeight = Math.max(this.categoryView.computeMenuHeight()-334,goog.style.getSize(underlayElement).height);
+    goog.style.setHeight(underlayElement,underlayHeight);
+    goog.style.setHeight(viewerElement,underlayHeight+334);
 }
 /**
  * @param {number} id
