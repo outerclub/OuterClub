@@ -118,15 +118,21 @@ def category(category):
         res = cur.execute('select d_id,title,postDate,user_id,content from conversation where cat_id=%s order by postDate desc',(cat_id,))
         posts = []
         maxResponses = 4
+        userCache = dict()
         for conversation in cur.fetchall():
             # collect the last responses
             cur.execute('select user_id,replyDate,content from response where d_id=%s order by replyDate desc limit %s',(conversation[0],maxResponses))
             responses = []
             for response in cur.fetchall():
-                responses.insert(0,{'user':db.fetchUser(cur,response[0]),'date':response[1].isoformat(),'content':util.replaceMentions(cur,util.escape(response[2]))})
+                r_uid = response[0]
+                if not r_uid in userCache:
+                    userCache[r_uid] = db.fetchUser(cur,r_uid)
+                responses.insert(0,{'user':userCache[r_uid],'date':response[1].isoformat(),'content':util.replaceMentions(cur,util.escape(response[2]))})
 
+            if not conversation[3] in userCache:
+                userCache[conversation[3]] = db.fetchUser(cur,conversation[3])
             # fetch the poster
-            user = db.fetchUser(cur,conversation[3])
+            user = userCache[conversation[3]]
 
             # add in the original post, if applicable
             if (len(responses) < maxResponses):

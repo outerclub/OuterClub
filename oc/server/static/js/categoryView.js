@@ -540,6 +540,8 @@ oc.Conversation.View.prototype.go = function(id) {
         // show category head
         self.categoryView.setCategory(self.conversation.categoryId,false);
 
+        // hack to reset regs
+        self.socket.send({'register':['/chat','/happening','/user/'+self.userView.user.id]});
         self.socket.send({'register':['/chat','/happening','/user/'+self.userView.user.id,'/conversation/'+id]});
         self.socket.addCallback('response',function(data) {
             self.createResponse(true,oc.Conversation.Response.extractFromJson(data),self.conversation.categoryId);
