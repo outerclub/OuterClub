@@ -91,11 +91,11 @@ oc.Main.prototype.start = function() {
     	var msg = data['message'];
     	var user = oc.User.extractFromJson(data['user']);
     	var date = goog.date.fromIsoString(data['date']);
-    	goog.dom.query('ul',chat)[0].appendChild(goog.dom.htmlToDocumentFragment('<li><span class="date">'+date.toUsTimeString(true,false)+'</span> '+user.name+": "+msg+'</li>'));
+    	goog.dom.query('ul',chat)[0].appendChild(goog.dom.htmlToDocumentFragment('<li><span class="date">'+date.toUsTimeString(true,false)+'</span> '+user.name+": "+goog.string.htmlEscape(msg)+'</li>'));
     	
     	if (!goog.style.isElementShown(chat))
     	{
-    		goog.dom.query('#menu .online .notify')[0].innerHTML = '*';
+    		goog.style.setStyle(goog.dom.query('#menu .online span')[0],'color','red');
     	}
     	var chatItems = goog.dom.query('li',chat);
     	if (chatItems.length > oc.Main.MAX_CHAT_ITEMS)
@@ -108,7 +108,7 @@ oc.Main.prototype.start = function() {
     	// opening
     	if (isClosed)
 		{
-    		goog.dom.query('#menu .online .notify')[0].innerHTML = '';
+    		goog.style.setStyle(goog.dom.query('#menu .online span')[0],'color','inherit');
 		}
     });
     goog.events.listen(goog.dom.query('input',chat)[0],goog.events.EventType.KEYPRESS,function(e) {

@@ -125,7 +125,7 @@ body{
 }
 #chat {
 	position:absolute;
-	background-color: rgba(0,0,0,0.5);
+	background-color: rgba(0,0,0,0.7);
 	top:43px;
 	right:0;
 	width:275px;
