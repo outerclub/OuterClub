@@ -1,11 +1,13 @@
 import MySQLdb
 from DBUtils.PooledDB import PooledDB
 
+from ..server import database
 import event
 import threading
 import Queue
 import json
 import pickle
+from datetime import datetime
 
 class QueueProc(threading.Thread):
     MAX_HAPPENING = 5
@@ -30,6 +32,7 @@ class QueueProc(threading.Thread):
         self.uid_sessions= dict()
         self.conns = dict()
         self.paths = dict() 
+        self.chats = []
 
     
     # convert a list of connections to keys
@@ -179,6 +182,17 @@ class QueueProc(threading.Thread):
                                     diff = before ^ self.paths[path]['uids']
                                     if len(diff) > 0:
                                         self.updateViewers(path,conn_id)
+                        elif isinstance(msg,event.Chat):
+                            self.chats.append(msg.msg)
+                            uid = self.conns[conn_id]['uid']
+                            if '/chat' in self.paths:
+                                conn = self.pool.connection()
+                                cur = conn.cursor()
+                                user = database.fetchUser(cur,uid)
+                                cur.close()
+                                conn.close()
+                                for c in self.paths['/chat']['conns']:
+                                    self.send(c,['chat',{'date':datetime.now().isoformat(),'message':msg.msg,'user':user}])
                     else:
                         self.send(conn_id,['authRejected']);
             except Exception as e:

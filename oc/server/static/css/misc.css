@@ -17,6 +17,7 @@ button.default {
 	padding:2px 6px;
 	text-decoration:none;
 	text-shadow:1px 1px 0px #ffffff;
+	cursor:pointer;
 }
 button.default:hover {
 	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );

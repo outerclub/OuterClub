@@ -53,7 +53,6 @@ body{
     height:43px;
     background: rgba(0,0,0,0.8);
     color: white;
-    overflow: hidden;
     position: fixed;
     z-index: 999;
     top: 0;
@@ -61,7 +60,7 @@ body{
     -moz-box-shadow: 0 0 3px #000; 
     box-shadow: 0 0 3px #000; 
 }
-#menu ul {
+#menu ul.links {
     float: left;
     overflow:hidden;
 }
@@ -83,12 +82,11 @@ body{
 	color:#ff8211;
 }
 
-#menu li {
+#menu .links li {
     float:left
 }
 #menu .online {
     float:left;
-    margin: 15px 11px;
     font-weight:bold;
 }
 #menu .input{
@@ -125,7 +123,27 @@ body{
     border: 0;
     float: left
 }
-#refer {
+#chat {
+	position:absolute;
+	background-color: rgba(0,0,0,0.5);
+	top:43px;
+	right:0;
+	width:275px;
+}
+
+#chat h2 {
+	padding:5px;
+	font-weight:bold
+}
+#chat ul{
+	padding: 0 10px 5px 10px
+}
+#chat .date {
+	color: gray;
+}
+#menu .online .notify {
+	color: red;
+	font-weight:bold;
 }
 
 

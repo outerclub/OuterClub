@@ -12,6 +12,8 @@ class EventConnection(SockJSConnection):
             rtg.StaticQueue.instance.put(event.Register(message['register'],self))
         if 'key' in message:
             rtg.StaticQueue.instance.put(event.Auth(self,message['key']))
+        if 'chat' in message:
+            rtg.StaticQueue.instance.put(event.Chat(self,message['chat']))
 
     def on_close(self):
         rtg.StaticQueue.instance.put(event.Close(self))

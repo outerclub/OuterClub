@@ -243,7 +243,7 @@ oc.Category.View.prototype.go = function(url) {
 
 
 oc.Category.View.prototype.updateRegistrations = function() {
-    var registrations=['/happening','/user/'+this.userView.user.id,'/category/'+this.category.id];
+    var registrations=['/chat','/happening','/user/'+this.userView.user.id,'/category/'+this.category.id];
 
     for (var id in this.idConversationsIndex)
         registrations.push('/conversation/'+id);

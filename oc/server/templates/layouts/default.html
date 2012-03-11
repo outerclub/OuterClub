@@ -34,26 +34,32 @@
 </head>
 <body>
 <div id="menu" style="display: none">
-    <ul>
+    <ul class="links">
     <li id="miniLogo"><a class="active" href="#!/welcome"></a></li>
     <li class="link"><a name="category" href="#!/category/general">CATEGORIES</a></li>
     <li class="link"><a href="#!/trending">TRENDING NOW</a></li>
     <li class="link"><a href="#!/leaderboard">LEADERBOARD</a></li>
     </ul>
     <div class="right">
-        <div class="online">
-        Users Online: <span>1</span>
-        </div>
         <div id="miniProfile">
             <a href="#!/user/{{ user_id }}">
                 <img height="43" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" />
-                <span class="name">{{ username }}</a>
+                <span class="name">{{ username }}</span>
             </a>
             <div class="text">
                 Prestige: <span class="prestige">{{ prestige }}</span> <a href="{{ url_for('logout') }}">Log Out</a>
             </div>
         </div>
-        <button rel="#refer" class="default">Invite a Friend</a>
+        <button rel="#refer" class="default">Invite a Friend</button>
+        <div class="online">
+	        <button id="chatButton" class="default">Global Chat (<span>1</span>)<span class="notify"></span></button>
+        </div>
+        <div id="chat">
+        	<h2>Welcome to OuterClub global chat!</h2>
+        	<ul>
+        	</ul>
+        	<input type="text" name="msg" size="40" />
+    	 </div>
     <!--<div class="search">
     <input type="text" name="search" />
     <span>Search</span>

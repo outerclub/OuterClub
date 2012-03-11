@@ -23,3 +23,7 @@ class Auth:
         self.key = key
 class QueueKill:
     pass
+class Chat:
+    def __init__(self,conn,msg):
+        self.conn = conn
+        self.msg = msg

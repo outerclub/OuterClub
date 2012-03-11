@@ -105,7 +105,7 @@ oc.User.View = function(user,categories,socket) {
 };
 oc.User.View.prototype.init =  function() {
     var self = this;
-    self.socket.send({'register':['/happening','/user/'+self.user.id]});
+    self.socket.send({'register':['/chat','/happening','/user/'+self.user.id]});
     self.socket.addCallback('user',function(data) {
         // increase prestige
         if (data['prestige'] != self.user.prestige)

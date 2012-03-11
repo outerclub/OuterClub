@@ -70,7 +70,14 @@ oc.Main = function(userView,categories,socket) {
     this.newsView = new oc.News.View(this.socket);
 
 };
+
+/**
+ * @type {number}
+ * @const
+ */
+oc.Main.MAX_CHAT_ITEMS = 20;
 oc.Main.prototype.start = function() {
+    var self = this;
     this.socket.addCallback('users',function(num) {
         goog.dom.query('.online span')[0].innerHTML = num;
         // reveal everything
@@ -79,8 +86,38 @@ oc.Main.prototype.start = function() {
                 (new goog.fx.dom.FadeInAndShow(item,500)).play();
         });
     });
-
-    var self = this;
+   	var chat = goog.dom.getElement("chat");
+    this.socket.addCallback('chat',function(data) {
+    	var msg = data['message'];
+    	var user = oc.User.extractFromJson(data['user']);
+    	var date = goog.date.fromIsoString(data['date']);
+    	goog.dom.query('ul',chat)[0].appendChild(goog.dom.htmlToDocumentFragment('<li><span class="date">'+date.toUsTimeString(true,false)+'</span> '+user.name+": "+msg+'</li>'));
+    	
+    	if (!goog.style.isElementShown(chat))
+    	{
+    		goog.dom.query('#menu .online .notify')[0].innerHTML = '*';
+    	}
+    	var chatItems = goog.dom.query('li',chat);
+    	if (chatItems.length > oc.Main.MAX_CHAT_ITEMS)
+    		goog.dom.removeNode(chatItems[0]);
+    });
+    goog.events.listen(goog.dom.getElement('chatButton'),goog.events.EventType.CLICK,function(e) {
+    	var isClosed = !goog.style.isElementShown(chat);
+    	goog.style.showElement(chat,isClosed);
+    	
+    	// opening
+    	if (isClosed)
+		{
+    		goog.dom.query('#menu .online .notify')[0].innerHTML = '';
+		}
+    });
+    goog.events.listen(goog.dom.query('input',chat)[0],goog.events.EventType.KEYPRESS,function(e) {
+    	if (e.keyCode == goog.events.KeyCodes.ENTER)
+		{
+    		self.socket.send({'chat':this.value});
+    		this.value = '';
+		}
+    });
 
     // gate to another section
     var menuItems = goog.dom.query('#menu ul a'); 
@@ -270,7 +307,7 @@ oc.Main.prototype.start = function() {
             goog.dom.classes.add(menuItem,'active');
 
             // register for events
-            var registrations = ['/happening','/user/'+self.userView.user.id];
+            var registrations = ['/chat','/happening','/user/'+self.userView.user.id];
             if (t == '!/welcome')
             {
                 registrations.push('/news');
