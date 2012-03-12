@@ -25,6 +25,7 @@ def blurb():
             cur.execute('update user_category_blurb set text=%s where user_id=%s and cat_id=%s',(blurb,uid,cat_id))
     else:
         cur.execute('insert into user_category_blurb (user_id,cat_id,text) values (%s,%s,%s)',(uid,cat_id,blurb))
+    db.invalidateUserCache(cur,uid)
     
     conn.commit()
     cur.close()
@@ -48,6 +49,7 @@ def covers():
         conn = app.config['pool'].connection()
         cur = conn.cursor()
         cur.execute('update user set cover_image=%s where user_id=%s',(request.form['cover'],uid))
+        db.invalidateUserCache(cur,uid)
         conn.commit()
         cur.close()
         conn.close()
@@ -75,6 +77,7 @@ def avatars():
         conn = app.config['pool'].connection()
         cur = conn.cursor()
         cur.execute('update user set avatar_image=%s where user_id=%s',(request.form['avatar'],uid))
+        db.invalidateUserCache(cur,uid)
         conn.commit()
         cur.close()
         conn.close()

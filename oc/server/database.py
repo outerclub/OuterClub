@@ -1,17 +1,55 @@
 import util
 import datetime
 import pickle
+cache = dict()
+def fetchCategoryPosts(cur,cat_id):
+    # fetch the conversations for this category
+    res = cur.execute('select d_id,title,postDate,user_id,content from conversation where cat_id=%s order by postDate desc',(cat_id,))
+    posts = []
+    maxResponses = 4
+    for conversation in cur.fetchall():
+        key = 'd_id_%s'%(conversation[0])
+        if not key in cache:
+            # collect the last responses
+            cur.execute('select user_id,replyDate,content from response where d_id=%s order by replyDate desc limit %s',(conversation[0],maxResponses))
+            responses = []
+            for response in cur.fetchall():
+                responses.insert(0,{'user':fetchUser(cur,response[0]),'date':response[1].isoformat(),'content':util.replaceMentions(cur,util.escape(response[2]))})
+    
+            # fetch the poster
+            user = fetchUser(cur,conversation[3])
+    
+            # add in the original post, if applicable
+            if (len(responses) < maxResponses):
+                responses.insert(0,{'user':user,'date':(conversation[2]).isoformat(),'content':util.replaceMentions(cur,util.escape(conversation[4]))})
+    
+            # count replies
+            cur.execute('select COUNT(*) from response where d_id=%s',(conversation[0],))
+            numReplies = cur.fetchone()[0]
+    
+            # count participants
+            cur.execute('select DISTINCT user_id from response where d_id=%s',(conversation[0],))
+            uids = set()
+            for u in cur.fetchall():
+                uids.add(u[0])
+            uids.add(user['user_id'])
+            
+            numUsers = len(uids)
+            convo = {'id':conversation[0], 'title':conversation[1],  \
+                     'user':user, \
+                     'date': (conversation[2]).isoformat(),'responses':responses,'numReplies':numReplies,'numUsers':numUsers}
+            cache[key] = convo
+
+        posts.append(cache[key])
+    return posts
+    
+
 def fetchResponses(cursor,d_id,user_id):
     cursor.execute('select r_id,user_id,replyDate,content from response where d_id=%s order by replyDate asc', (d_id,))
     
     responses = []
-    users = dict()
     for resp in cursor.fetchall():
-        # cache users
-        if not (resp[1] in users):
-            users[resp[1]] = fetchUser(cursor,resp[1])
-
-        responses.append({'r_id':resp[0],'user':users[resp[1]], \
+        responses.append({'r_id':resp[0],'user':fetchUser(cursor,resp[1]), \
                           'date': resp[2].isoformat(), 'content': util.replaceMentions(cursor,util.escape(resp[3]))})
     return responses
 
@@ -52,14 +90,37 @@ def fetchTasks(cursor,user_id):
         tasks.append({'task_id':t[0],'type':t[1],'done':t[2],'external_id':t[3]})
     return tasks
 
-def fetchUser(cursor,user_id):
+def invalidateConversation(cursor,d_id):
+    key = 'd_id_%s'%d_id
+    if key in cache:
+        del cache[key]
+def invalidateUserCache(cursor,user_id):
+    conversations = set()
+    # find any conversations that rely on this user
+    cursor.execute('select d_id from conversation where user_id=%s',(user_id,))
+    for r in cursor.fetchall():
+        conversations.add(r[0])
+    cursor.execute('select d_id from response where user_id=%s',(user_id,))
+    for r in cursor.fetchall():
+        conversations.add(r[0])
+    
+    key = 'uid_%s'%user_id
+    if key in cache:
+        del cache[key]
+    
+    for d_id in conversations:
+        key = 'd_id_%s'%d_id
+        if key in cache:
+            del cache[key]
+
+def fetchUserNoCache(cursor,user_id):
     res = cursor.execute('select name,avatar_image,prestige,cover_image,admin,invites from user where user_id=%s',(user_id,))
     user = cursor.fetchone()
     userData =  {'name':user[0],'avatar_image':user[1],'user_id':user_id,'prestige':user[2],'cover_image':user[3],'admin':user[4],'invites':user[5]}
-    res = cursor.execute('select cat_id,name from user_guild inner join category using (cat_id) where user_id=%s',(user_id,))
+    #res = cursor.execute('select cat_id,name from user_guild inner join category using (cat_id) where user_id=%s',(user_id,))
     guilds = dict()
-    for guild in cursor.fetchall():
-        guilds[guild[0]] = guild[1]
+    #for guild in cursor.fetchall():
+    #    guilds[guild[0]] = guild[1]
     userData['guilds'] = guilds
 
     res = cursor.execute('select cat_id,text from user_category_blurb where user_id=%s',(user_id,))
@@ -67,8 +128,14 @@ def fetchUser(cursor,user_id):
     for r in cursor.fetchall():
         blurbs[r[0]] = r[1]
     userData['blurbs'] = blurbs
-
     return userData
+
+def fetchUser(cursor,user_id):
+    key = "uid_%s" % user_id
+    if (not key in cache):
+        cache[key] = fetchUserNoCache(cursor,user_id)
+
+    return cache[key]
 
 def fetchQuestion(cursor):
     res = cursor.execute('select cat_id from category where name=%s',('question of the week',))

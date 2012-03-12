@@ -102,6 +102,7 @@ def reply():
      
     # insert the response
     cur.execute('insert into response (d_id,user_id,replyDate,content) values (%s,%s,NOW(),%s)',(d_id,uid,data))
+    db.invalidateConversation(cur,d_id)
     conn.commit()
     r_id = cur.lastrowid
     
@@ -131,6 +132,9 @@ def upvote():
     if (cur.fetchone()[0] == 0):
         cur.execute('insert into upvote (user_id, context_id,object_id, type) values (%s,%s,%s,%s)',(uid,d_id,object_id,util.Upvote.UserType))
         cur.execute('update user set prestige=prestige+1 where user_id=%s',(object_id,))
+        
+        # invalidate cache
+        db.invalidateUserCache(cur,uid)
         
         self = db.fetchUser(cur,uid)
         db.insertNews(cur,object_id,{'content':'<a href="#!/user/%s"><img height="30" src="/static/images/avatars/%s" /> %s</a> gave you a coffee!' % (uid,self['avatar_image'],self['name'])})

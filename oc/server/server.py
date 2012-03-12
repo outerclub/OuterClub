@@ -114,50 +114,7 @@ def category(category):
     
     # verify that this user has access to this category
     if not isPrivate or (isPrivate and cat_id in self['guilds']):
-        # fetch the conversations for this category
-        res = cur.execute('select d_id,title,postDate,user_id,content from conversation where cat_id=%s order by postDate desc',(cat_id,))
-        posts = []
-        maxResponses = 4
-        userCache = dict()
-        for conversation in cur.fetchall():
-            # collect the last responses
-            cur.execute('select user_id,replyDate,content from response where d_id=%s order by replyDate desc limit %s',(conversation[0],maxResponses))
-            responses = []
-            for response in cur.fetchall():
-                r_uid = response[0]
-                if not r_uid in userCache:
-                    userCache[r_uid] = db.fetchUser(cur,r_uid)
-                responses.insert(0,{'user':userCache[r_uid],'date':response[1].isoformat(),'content':util.replaceMentions(cur,util.escape(response[2]))})
-
-            if not conversation[3] in userCache:
-                userCache[conversation[3]] = db.fetchUser(cur,conversation[3])
-            # fetch the poster
-            user = userCache[conversation[3]]
-
-            # add in the original post, if applicable
-            if (len(responses) < maxResponses):
-                responses.insert(0,{'user':user,'date':(conversation[2]).isoformat(),'content':util.replaceMentions(cur,util.escape(conversation[4]))})
-
-            # count replies
-            cur.execute('select COUNT(*) from response where d_id=%s',(conversation[0],))
-            numReplies = cur.fetchone()[0]
-
-            # count participants
-            cur.execute('select DISTINCT user_id from response where d_id=%s',(conversation[0],))
-            uids = set()
-            for u in cur.fetchall():
-                uids.add(u[0])
-            uids.add(user['user_id'])
-                
-            numUsers = len(uids)
-
-
-            posts.append({'id':conversation[0], 'title':conversation[1],  \
-                          'user':user, \
-                          'date': (conversation[2]).isoformat(),'responses':responses,'numReplies':numReplies,'numUsers':numUsers})
-        cur.close()
-        conn.close()
-        
+        posts = db.fetchCategoryPosts(cur,cat_id)
         category = ' '.join(c.capitalize() for c in category.split())
 
         return flask.jsonify(posts=posts,id=cat_id,private=isPrivate)

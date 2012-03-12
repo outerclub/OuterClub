@@ -188,7 +188,7 @@ class QueueProc(threading.Thread):
                             if '/chat' in self.paths:
                                 conn = self.pool.connection()
                                 cur = conn.cursor()
-                                user = database.fetchUser(cur,uid)
+                                user = database.fetchUserNoCache(cur,uid)
                                 cur.close()
                                 conn.close()
                                 for c in self.paths['/chat']['conns']:

@@ -37,7 +37,7 @@ class TRtgHandler:
         cur.execute('select d_id,response.user_id,replyDate,response.content,cat_id,category.thumb,conversation.title from response inner join (conversation inner join category using (cat_id)) using(d_id) \
                     where r_id=%s',(r_id))
         res = cur.fetchone()
-        user = database.fetchUser(cur,res[1])
+        user = database.fetchUserNoCache(cur,res[1])
 
         newContent = util.replaceMentions(cur,util.escape(res[3]))
         cur.close()
@@ -55,7 +55,7 @@ class TRtgHandler:
         cur.execute('select user_id,postDate,content,category.thumb,cat_id,title from conversation inner join category using (cat_id) \
                      where d_id=%s',(d_id,))
         convo = cur.fetchone()
-        user = database.fetchUser(cur,convo[0])
+        user = database.fetchUserNoCache(cur,convo[0])
         cur.close()
         conn.close()
 
@@ -74,7 +74,7 @@ class TRtgHandler:
     def userModified(self,user_id):
         conn = self.pool.connection()
         cur = conn.cursor()
-        user = database.fetchUser(cur,user_id)
+        user = database.fetchUserNoCache(cur,user_id)
         cur.close()
         conn.close()
 
