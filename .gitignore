@@ -8,3 +8,4 @@ logs
 *.cache
 config.py
 .*project
+build

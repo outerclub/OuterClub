@@ -24,8 +24,18 @@ a:hover {
 body{
     font-family: 'Helvetica Neue',Arial, sans-serif;
     font-size: 80%;
-    background: black url(/static/images/background.png) repeat-x fixed top center;
+    background: black url(/static/images/background.jpg) repeat-x fixed top center;
     color:white;
+}
+#altBody {
+   background: black url(/static/images/city.jpg) repeat-x fixed;
+width: 1600px;
+height: 1164px;
+z-index: 99;
+position: fixed;
+z-index: -1;
+top: 0; 
+	
 }
 #outer {
     margin: 43px auto 0px auto;
@@ -140,6 +150,9 @@ body{
 }
 #chat .date {
 	color: gray;
+}
+#chat .user {
+	font-weight:bold
 }
 #menu .online .notify {
 	color: red;

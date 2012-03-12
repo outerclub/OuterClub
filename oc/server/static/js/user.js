@@ -206,7 +206,7 @@ oc.User.View.prototype.go = function(user_id) {
                                 table += '<div><img class="';
                                 if (u.cover_image == c)
                                     table += 'active';
-                                 table += '" name="'+c+'" src="/static/images/covers/thumbs/'+c+'" /></div>';
+                                 table += '" name="'+c+'" width="200" src="/static/images/covers/thumbs/'+c+'" /></div>';
                             }
                             var center = goog.dom.query('.center',coverOverlay)[0];
             

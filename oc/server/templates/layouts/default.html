@@ -15,7 +15,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/category.css') }}"/>
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/conversation.css') }}"/>
 {% else %}
-    <link rel="stylesheet" type="text/css" media="screen" href="/static/css/{{ config['COMPILE']['css']['file'] }}"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/build/{{ config['COMPILE']['css']['file'] }}"/>
 {% endif %}
 {% if not config['DEBUG'] %}
 <script type="text/javascript">
@@ -33,6 +33,8 @@
 {% endif %}
 </head>
 <body>
+<div id="altBody" style="display:none">
+</div>
 <div id="menu" style="display: none">
     <ul class="links">
     <li id="miniLogo"><a class="active" href="#!/welcome"></a></li>
@@ -89,9 +91,9 @@ window['DEBUG'] = {% if config['DEBUG'] %}true{% else %}false{% endif%};
     <script type="text/javascript" src="/static/sockjs-0.2.1.min.js"></script>
     <script type="text/javascript" src="/static/d3.v2.min.js"></script>
 {% if config['DEBUG'] %}
-   <script type="text/javascript" src="http://localhost:9810/compile?id=outerclub"></script>
+   <script type="text/javascript" src="/static/build/all.js"></script>
 {% else %}
-    <script type="text/javascript" src="/static/js/{{ config['COMPILE']['js']['file'] }}"></script>
+    <script type="text/javascript" src="/static/build/{{ config['COMPILE']['js']['file'] }}"></script>
 {% endif %}
 {% block footers %} {% endblock %}
 </body>

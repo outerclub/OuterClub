@@ -5,7 +5,7 @@
 }
 #viewer .menu {
     position:fixed;
-    background-color: rgba(180,180,180,0.6);
+    background-color: rgba(0,0,0,0.7);
     width:160px;
     
     -moz-box-shadow: 0 0 3px #000;
@@ -17,7 +17,7 @@
 #viewer .menu li {
 }
 #viewer .menu li a:hover,#viewer .menu a.active {
-    background-color:#333;
+    background-color: rgba(119, 161, 204, 0.7);
 }
 #viewer .menu li a{
     color:white;
@@ -56,7 +56,6 @@
 }
 .heading h2{
     color: #FFFFFF;
-    text-transform: uppercase;
     font-family: BebasRegular;
 	text-shadow: 1px 1px 2px #000000;
     display: inline;
@@ -87,12 +86,14 @@
     position:absolute;
 }
 .post a h1{
+	font-family:BebasRegular;
     font-size: 200%;
     color: white;
     left:4px;
     top:5px;
     text-shadow: 1px 1px 1px #000000;
     filter: dropshadow(color=#000000,offx=1,offy=1);
+    word-spacing:4px;
 }
 .post .innerTop,.post .innerBottom {
     -moz-box-shadow: 0 0 3px #000;
@@ -124,7 +125,7 @@
  * Post bottom section.
  */
 .post .innerBottom {
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.7);
     overflow:hidden;
     padding-top: 5px;
 }
@@ -164,7 +165,7 @@
    }
 .post textarea {
     width:284px;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.4);
     border: 0;
     color: white;
     padding: 5px;

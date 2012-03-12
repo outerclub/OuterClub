@@ -91,7 +91,7 @@ oc.Main.prototype.start = function() {
     	var msg = data['message'];
     	var user = oc.User.extractFromJson(data['user']);
     	var date = goog.date.fromIsoString(data['date']);
-    	goog.dom.query('ul',chat)[0].appendChild(goog.dom.htmlToDocumentFragment('<li><span class="date">'+date.toUsTimeString(true,false)+'</span> '+user.name+": "+goog.string.htmlEscape(msg)+'</li>'));
+    	goog.dom.query('ul',chat)[0].appendChild(goog.dom.htmlToDocumentFragment('<li><span class="date">'+date.toUsTimeString(true,false)+'</span> <span class="user">'+user.name+"</span>: "+goog.string.htmlEscape(msg)+'</li>'));
     	
     	if (!goog.style.isElementShown(chat))
     	{
@@ -287,6 +287,13 @@ oc.Main.prototype.start = function() {
          goog.array.forEach(menuItems,function(i) {
             goog.dom.classes.remove(i,'active');
         });
+         
+        if (t == '!/welcome' || t == '')
+        {
+       		goog.style.showElement(goog.dom.getElement('altBody'),false);
+       	} else {
+       		goog.style.showElement(goog.dom.getElement('altBody'),true);
+       	}
 
         if (t == '!/about' || t ==  '!/faq')
         {

@@ -10,7 +10,7 @@
     position: absolute;
     width:190px;
     padding:5px 10px 5px 10px;
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(0,0,0,0.3);
 }
 
 /**
@@ -46,7 +46,7 @@
  */
 #conversation .underlay {
     overflow:hidden;
-    background-color:rgba(0,0,0,0.5);
+    background-color:rgba(55,55,55,0.9);
     padding-bottom:10px;
 }
 #conversation .responses {
@@ -154,12 +154,15 @@
     display:block;
     border: 0;
     font-size:120%;
+    background-color:rgba(0,0,0,0.6);
+    padding:5px;
+    color:white;
 }
 .reply button {
     cursor: pointer;
     width:100%;
     display:block;
-    background-color: #3b4147;
+    background-color: rgba(91, 97, 113, 0.6) ;
     text-align: right;
     color: white;
     border: 0;

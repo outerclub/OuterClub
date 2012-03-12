@@ -137,7 +137,8 @@ oc.Category.View.prototype.go = function(url) {
         }
         var panelElement = goog.dom.query('.panel',viewerElement)[0];
         
-        oc.Nav.hideAll();
+	    oc.Nav.hideAll();
+	    goog.style.showElement(goog.dom.query('.footer')[0],false);
         goog.style.showElement(conversationElement,false);
         goog.style.showElement(panelElement,true);
         goog.style.showElement(viewerElement,true);
@@ -179,6 +180,7 @@ oc.Category.View.prototype.go = function(url) {
         oc.Nav.setTitle(self.category.name);
         self.updateRegistrations();
         self.refresh();
+        goog.style.showElement(goog.dom.query('.footer')[0],true);
         if (scroll)
         {
             var afterViewerHeight = goog.style.getSize(viewerElement).height;
@@ -376,7 +378,7 @@ oc.Category.View.prototype.insertPost = function(id,postElement) {
             textarea.rows = goog.string.countOf(textarea.value,'\n')+2;
             self.push(id,goog.style.getSize(textarea).height-before);
             */
-        } else if (e.keyCode == goog.events.KeyCodes.BACKSPACE)
+        }/* else if (e.keyCode == goog.events.KeyCodes.BACKSPACE)
         {
             var textarea = this;
             var spl = textarea.value.split('\n');
@@ -390,10 +392,7 @@ oc.Category.View.prototype.insertPost = function(id,postElement) {
             }
             self.push(id,goog.style.getSize(textarea).height-before);
         }
-        /*
-        {
-        }
-        */
+            */
     });
     // clickhandler
     goog.events.listen(goog.dom.query('a.convo',postElement)[0],goog.events.EventType.CLICK,function(e) {
