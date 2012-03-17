@@ -393,6 +393,10 @@ oc.Main.prototype.start = function() {
        	} else {
        		goog.style.showElement(goog.dom.getElement('altBody'),true);
        	}
+        if (t.indexOf('!/category/') == 0)
+        	goog.style.setStyle(goog.dom.getElement('frame'),'min-height','0');
+        else
+            oc.Nav.ResetFrame();
 
         if (t == '!/about' || t ==  '!/faq')
         {
@@ -457,15 +461,10 @@ oc.Main.prototype.start = function() {
  * Resizes the frames to fit the viewport properly.
  */
 oc.Main.prototype.resize = function() {
-    var frameElement = goog.dom.getElement("frame");
-    if (goog.style.isElementShown(goog.dom.getElement('altBody')))
-    {
-    	var viewportSize = goog.dom.getViewportSize();
-    	goog.style.setStyle(frameElement,'min-height',(viewportSize.height-100)+'px');
-   	}
-    else
-    	goog.style.setStyle(frameElement,'min-height','1000px');
-    this.categoryView.refresh();
+	if (goog.style.isElementShown(goog.dom.getElement('viewer')))
+		this.categoryView.refresh();
+	else
+		oc.Nav.ResetFrame();
 };
 
 // ensure that main starts with categories
@@ -476,7 +475,7 @@ goog.net.XhrIo.send('/categories',function(e) {
     goog.array.forEach(data,function(cat) {
         var obj = oc.Category.extractFromJson(cat);
         categories[obj.id] = obj; 
-        var html = oc.Templates.Category.menuItem({name:obj.name,url:obj.url});
+        var html = oc.Templates.Category.menuItem({image:obj.thumb,name:obj.name,url:obj.url});
         var element = goog.dom.htmlToDocumentFragment(html)
 
         goog.dom.appendChild(menu,element);

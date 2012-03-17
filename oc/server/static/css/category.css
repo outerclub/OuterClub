@@ -4,7 +4,7 @@
     overflow:hidden;
 }
 #viewer .menu {
-    position:fixed;
+    position:absolute;
     background-color: rgba(0,0,0,0.7);
     width:160px;
     
@@ -14,7 +14,11 @@
     padding: 5px 0 5px 0;
     z-index:1;
 }
+#viewer .menu li img{
+	float:left;
+}
 #viewer .menu li {
+	border-bottom:1px solid rgba(0,0,0,0.5);
 }
 #viewer .menu li a:hover,#viewer .menu a.active {
     background-color: rgba(119, 161, 204, 0.7);
@@ -22,8 +26,13 @@
 #viewer .menu li a{
     color:white;
     font-weight:bold;
-    padding: 5px 10px;
     display:block;
+    overflow:hidden;
+}
+#viewer .menu li .name {
+	display:block;
+	margin:7px 0 0 5px;
+	float:left;	
 }
 #viewer .content {
 }

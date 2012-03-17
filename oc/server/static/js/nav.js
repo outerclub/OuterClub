@@ -20,6 +20,18 @@ oc.Nav.setTitle = function(t) {
     title.innerHTML = t+' - OuterClub';
 };
 
+oc.Nav.ResetFrame = function() {
+    var frameElement = goog.dom.getElement("frame");
+    if (goog.style.isElementShown(goog.dom.getElement('altBody')))
+    {
+    	var viewportSize = goog.dom.getViewportSize();
+    	goog.style.setStyle(frameElement,'min-height',(viewportSize.height-100)+'px');
+   	}
+    else
+    	goog.style.setStyle(frameElement,'min-height','1000px');
+}
+
+
 /**
  * @param {string} href
  */

@@ -1,11 +1,12 @@
 {namespace oc.Templates.Category}
 
 /**
- * @param name
+ * @param image
  * @param url
+ * @param name
  */
 {template .menuItem}
-<li><a name="{$url}" href="#!/category/{$url}">{$name}</a></li>
+<li><a name="{$url}" href="#!/category/{$url}"><img height="30" src="/static/images/categories/{$image}" /> <span class="name">{$name}</span></a></li>
 {/template}
 
 /**

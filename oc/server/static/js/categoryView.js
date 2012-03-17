@@ -457,10 +457,7 @@ oc.Category.View.prototype.setCategory = function(id,showHeading,canCreate) {
  * @return {number}
  */
 oc.Category.View.prototype.computeMenuHeight = function() {
-    var viewportSize = goog.dom.getViewportSize();
-    var topH = goog.style.getSize(goog.dom.getElement('menu')).height;
-    var bottomH = goog.style.getSize(goog.dom.query('.footer')[0]).height;
-    return viewportSize.height-topH-bottomH; 
+    return goog.style.getSize(goog.dom.query('#viewer .menu')[0]).height;
     
 };
 
