@@ -24,7 +24,7 @@ a:hover {
 body{
     font-family: 'Helvetica Neue',Arial, sans-serif;
     font-size: 80%;
-    background: black url(/static/images/background.jpg) repeat-x fixed top center;
+    background: black url(/static/images/background.jpg) repeat-x top center;
     color:white;
 }
 #altBody {
@@ -147,7 +147,10 @@ body{
 */
 #chat {
 	width:600px;
-	margin:120px auto 0 auto;
+	position:absolute;
+	margin-left:-300px;
+	left:50%;
+	top:180px;
 	background-color:rgba(0,0,0,0.5);
 	-webkit-border-radius:5px;
 	-moz-border-radius:5px;
