@@ -31,7 +31,7 @@ def c():
     
 def compile():
     t()
-    local('java -jar tools/closure-stylesheets-20111230.jar --allow-unrecognized-functions %s/reset.css %s/misc.css %s/footer.css %s/layout.css %s/welcome.css %s/about.css %s/trending.css %s/user.css %s/category.css %s/conversation.css > .c.css'.replace('%s',BUILD_DIR))
+    local('java -jar tools/closure-stylesheets-20111230.jar --allow-unrecognized-functions %s/reset.css %s/misc.css %s/footer.css %s/layout.css %s/welcome.css %s/about.css %s/trending.css %s/user.css %s/category.css %s/conversation.css > .c.css'.replace('%s',BASE_DIR+'/css'))
     
     checksum=local("md5sum .c.css | awk '{print $1}'",capture=True)
     css_file = '%s.c.css' % checksum
@@ -50,7 +50,7 @@ def compile():
         --compiler_flags="--compilation_level=ADVANCED_OPTIMIZATIONS" \
         --compiler_flags="--warning_level=VERBOSE" \
         --compiler_flags="--jscomp_error=checkTypes" \
-        > %s/all.js'.replace('%s',BUILD_DIR))
+        > .c.js'.replace('%s',BUILD_DIR))
     checksum=local("md5sum .c.js | awk '{print $1}'",capture=True)
     js_file = '%s.c.js' % checksum
     local('mv .c.js %s/%s' %(BUILD_DIR,js_file) )

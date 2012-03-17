@@ -31,7 +31,6 @@ body{
    background: black url(/static/images/city.jpg) repeat-x fixed;
 	width: 2574px;
 	height: 1200px;
-	z-index: 99;
 	position: fixed;
 	z-index: -1;
 	top: 0; 
