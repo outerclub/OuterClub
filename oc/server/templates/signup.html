@@ -257,14 +257,6 @@ $(document).ready(function() {
         $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").keypress(function() {
             $(this).next('span').hide();
         });
-        
-        // preload the signup images
-        var preload = new Image();
-        /*
-        preload.src = '/static/images/signup/0.png';
-        preload.src = '/static/images/signup/1.png';
-        preload.src = '/static/images/signup/2.png';
-        */
         $('.dots button').click(function() {
             $('.dots button').each(function() {
                 if ($(this).hasClass('dotActive')) {
@@ -344,6 +336,10 @@ $(document).ready(function() {
                 dataType: 'json'
             });
         });
+        
+        // preload images
+        var preload = new Image();
+        preload.src = '/static/images/city.jpg';
         preload.src = '/static/images/background.png';
     }
 });

@@ -441,10 +441,12 @@ oc.Main.prototype.start = function() {
  * Resizes the frames to fit the viewport properly.
  */
 oc.Main.prototype.resize = function() {
-    var viewportSize = goog.dom.getViewportSize();
     var frameElement = goog.dom.getElement("frame");
     if (goog.style.isElementShown(goog.dom.getElement('altBody')))
+    {
+    	var viewportSize = goog.dom.getViewportSize();
     	goog.style.setStyle(frameElement,'min-height',(viewportSize.height-100)+'px');
+   	}
     else
     	goog.style.setStyle(frameElement,'min-height','1000px');
     this.categoryView.refresh();
