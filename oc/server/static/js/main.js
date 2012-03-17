@@ -3,7 +3,6 @@ goog.provide('oc.Main');
 goog.require('oc.Socket');
 goog.require('oc.Category.View');
 goog.require('oc.Nav');
-goog.require('oc.News.View');
 goog.require('oc.User');
 goog.require('oc.User.View');
 goog.require('oc.Trending');
@@ -111,6 +110,22 @@ oc.Main.prototype.start = function() {
     this.socket.addCallback('happening',function(data) {
     	self.newHappening(data,true);
     });
+    var initTwitter = function() {
+	    goog.net.XhrIo.send('/twitter',function(e) {
+	        var data = e.target.getResponseJson();
+	        var twitter = goog.dom.query('.twitter .tweets')[0];
+	        twitter.innerHTML = '';
+	        goog.array.forEach(data,function(tweet) {
+	            var text = tweet['text'];
+	            text = text.replace(/(#\w+)/g,'<span class="hi">$1</span>');
+	            text = text.replace(/(@\w+)/g,'<span class="hi">$1</span>');
+	            var date = new goog.date.DateTime(new Date(Date.parse(tweet['created_at'])));
+	            var frag = goog.dom.htmlToDocumentFragment('<div class="tweet">'+text+' &mdash; <span class="date">'+oc.Util.prettyDate(date)+'</span></div>');
+	            goog.dom.appendChild(twitter,frag);
+	        }); 
+	    });
+    }
+   	initTwitter();
     var initHappening = function(data)
     {
     	self.happening = [];
@@ -415,6 +430,7 @@ oc.Main.prototype.start = function() {
                 if (t == '!/welcome')
 	            {
                 	initHappening(self.happening);
+                	initTwitter();
 	        	}
             }
         } else if (t.indexOf('!/user/') == 0) {

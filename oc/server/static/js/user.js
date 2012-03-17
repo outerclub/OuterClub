@@ -1,5 +1,6 @@
 goog.provide('oc.User');
 goog.provide('oc.User.View');
+goog.require('oc.News.View')
 goog.require('oc.Socket');
 goog.require('oc.Nav');
 goog.require('oc.overlay');
