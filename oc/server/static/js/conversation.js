@@ -53,9 +53,10 @@ goog.inherits(oc.Conversation,oc.Conversation.Response);
  * @param {goog.date.DateTime} date
  * @param {string} content
  * @param {oc.User} user
+ * @param {string=} mini
  * @constructor
  */
-oc.Conversation.Response = function(id,date,content,user) {
+oc.Conversation.Response = function(id,date,content,user,mini) {
     /**
      * @type {oc.User}
      */
@@ -70,7 +71,13 @@ oc.Conversation.Response = function(id,date,content,user) {
      * @type {number}
      */
     this.id = id;
-
+    
+    mini = mini || content;
+    /**
+     * @type {string}
+     */
+    this.mini = mini;
+    
     /**
      * @type {string}
      */
@@ -86,7 +93,9 @@ oc.Conversation.Response.extractFromJson = function(json) {
         json['r_id'],
         goog.date.fromIsoString(json['date']),
         json['content'],
-        oc.User.extractFromJson(json['user']));
+        oc.User.extractFromJson(json['user']),
+        json['short']
+        );
 };
 
 /**

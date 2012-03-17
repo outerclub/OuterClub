@@ -29,13 +29,12 @@ body{
 }
 #altBody {
    background: black url(/static/images/city.jpg) repeat-x fixed;
-width: 1600px;
-height: 1164px;
-z-index: 99;
-position: fixed;
-z-index: -1;
-top: 0; 
-	
+	width: 2574px;
+	height: 1200px;
+	z-index: 99;
+	position: fixed;
+	z-index: -1;
+	top: 0; 
 }
 #outer {
     margin: 43px auto 0px auto;
@@ -133,6 +132,7 @@ top: 0;
     border: 0;
     float: left
 }
+/*
 #chat {
 	position:absolute;
 	background-color: rgba(0,0,0,0.7);
@@ -145,14 +145,58 @@ top: 0;
 	padding:5px;
 	font-weight:bold
 }
+*/
+#chat {
+	width:600px;
+	margin:120px auto 0 auto;
+	background-color:rgba(0,0,0,0.5);
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
+	border-radius:5px;
+	overflow:hidden;
+}
+#chat a span.user {
+	color:white;
+}
+#chat a span.user:hover {
+	text-decoration:underline
+}
 #chat ul{
-	padding: 0 10px 5px 10px
+	padding: 10px 10px 5px 10px
+}
+#chat ul.messages {
+	float:left;
+	width:448px;
+	border-right:1px solid gray;
+}
+#chat ul.messages li {
+	line-height:1
+}
+#chat ul.users {
+	float:right;
+	width:110px;	
+}
+#chat ul.users li {
+	margin-bottom:1px;
+}
+#chat ul.users img {
+	vertical-align:middle;
+	margin-right:5px;	
 }
 #chat .date {
-	color: gray;
+	color: #aaa;
 }
 #chat .user {
 	font-weight:bold
+}
+#chat input {
+	overflow:hidden;
+	width:100%;
+	border:0;
+	background-color:rgba(0,0,0,0.5);
+	font-size:100%;
+	color:white;
+	padding:3px;
 }
 #menu .online .notify {
 	color: red;
@@ -238,7 +282,7 @@ button.decorated{
 	background: url(/static/images/button.png);
     border: 0;
 	color: white;
-    height: 31px;
+    height: 34px;
     width: 161px;
 }
 .error {

@@ -64,43 +64,70 @@ oc.Main = function(userView,categories,socket) {
      */
     this.leaderboard = new oc.Leaderboard(this.userView);
 
-    /**
-     * @type {oc.News.View}
-     */
-    this.newsView = new oc.News.View(this.socket);
-
 };
 
-/**
- * @type {number}
- * @const
- */
-oc.Main.MAX_CHAT_ITEMS = 20;
 oc.Main.prototype.start = function() {
     var self = this;
-    this.socket.addCallback('users',function(num) {
-        goog.dom.query('.online span')[0].innerHTML = num;
+   	var chat = goog.dom.getElement("chat");
+   	var chatMessages = goog.dom.query('ul.messages',chat)[0];
+   	var chatUsers= goog.dom.query('ul.users',chat)[0];
+   	var fixChatHeight = function() {
+   		var h;
+    	var chatItems = goog.dom.query('li',chat);
+    	for (var x=0; x < chatItems.length; x++)
+    	{
+    		h = goog.style.getSize(chat).height;
+    		if (h > 500)
+    			goog.dom.removeNode(chatItems[x]);
+    	}
+   	}
+    var addChatItem = function(data)
+    {
+    	var msg = data['message'];
+    	var user = oc.User.extractFromJson(data['user']);
+    	var date = goog.date.fromIsoString(data['date']);
+    	chatMessages.appendChild(
+    			goog.dom.htmlToDocumentFragment(
+    					oc.Templates.Main.chatItem({
+    						date:date.toIsoTimeString(false),
+    						name:user.name,
+    						content:msg,
+    						user_id:user.id
+    					})));
+    }
+    this.socket.addCallback('chat_init',function(chatItems) {
+    	goog.style.showElement(chat,true);
+    	goog.array.forEach(chatItems,addChatItem);
+    	fixChatHeight();
+    });
+    this.socket.addCallback('users',function(users) {
+    	chatUsers.innerHTML = '';
+    	goog.array.forEach(users,function(u) {
+    		chatUsers.appendChild(goog.dom.htmlToDocumentFragment(
+    				oc.Templates.Main.userItem({
+    					avatar_image:u['avatar_image'],
+    					name:u['name'],
+    					user_id:u['user_id']
+    				})));
+    	});
+        //goog.dom.query('.online span')[0].innerHTML = num;
         // reveal everything
         goog.array.forEach(goog.dom.query('#miniProfile,#menu,.footer'),function(item) {
             if (!goog.style.isElementShown(item))
                 (new goog.fx.dom.FadeInAndShow(item,500)).play();
         });
     });
-   	var chat = goog.dom.getElement("chat");
     this.socket.addCallback('chat',function(data) {
-    	var msg = data['message'];
-    	var user = oc.User.extractFromJson(data['user']);
-    	var date = goog.date.fromIsoString(data['date']);
-    	goog.dom.query('ul',chat)[0].appendChild(goog.dom.htmlToDocumentFragment('<li><span class="date">'+date.toUsTimeString(true,false)+'</span> <span class="user">'+user.name+"</span>: "+goog.string.htmlEscape(msg)+'</li>'));
-    	
+    	addChatItem(data);
+    	fixChatHeight();
+    	/*
     	if (!goog.style.isElementShown(chat))
     	{
     		goog.style.setStyle(goog.dom.query('#menu .online span')[0],'color','red');
     	}
-    	var chatItems = goog.dom.query('li',chat);
-    	if (chatItems.length > oc.Main.MAX_CHAT_ITEMS)
-    		goog.dom.removeNode(chatItems[0]);
+    	*/
     });
+    /*
     goog.events.listen(goog.dom.getElement('chatButton'),goog.events.EventType.CLICK,function(e) {
     	var isClosed = !goog.style.isElementShown(chat);
     	goog.style.showElement(chat,isClosed);
@@ -111,6 +138,7 @@ oc.Main.prototype.start = function() {
     		goog.style.setStyle(goog.dom.query('#menu .online span')[0],'color','inherit');
 		}
     });
+    */
     goog.events.listen(goog.dom.query('input',chat)[0],goog.events.EventType.KEYPRESS,function(e) {
     	if (e.keyCode == goog.events.KeyCodes.ENTER)
 		{
@@ -315,11 +343,6 @@ oc.Main.prototype.start = function() {
 
             // register for events
             var registrations = ['/chat','/happening','/user/'+self.userView.user.id];
-            if (t == '!/welcome')
-            {
-                registrations.push('/news');
-                self.newsView.refresh();
-            }
             self.socket.send({'register':registrations});
 
             if (t == '!/trending')
@@ -357,6 +380,9 @@ oc.Main.prototype.start = function() {
  * Resizes the frames to fit the viewport properly.
  */
 oc.Main.prototype.resize = function() {
+    var viewportSize = goog.dom.getViewportSize();
+    var frameElement = goog.dom.getElement("frame");
+   	goog.style.setStyle(frameElement,'min-height',(viewportSize.height-100)+'px');
     this.categoryView.refresh();
 };
 

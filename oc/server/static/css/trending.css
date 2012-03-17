@@ -1,6 +1,6 @@
 #trending,#leaderboard {
     margin: 60px auto 20px auto;
-    width:905px;
+    width:875px;
 
 }
 #leaderboard .cell {
@@ -57,7 +57,7 @@
 
 }
 #trending .entry .text {
-    width: 645px; 
+    width: 615px; 
 }
 .entry a:hover {
     color: white;

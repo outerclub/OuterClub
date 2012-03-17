@@ -3,7 +3,7 @@ from datetime import datetime
 
 BASE_DIR = 'oc/server/static'
 BUILD_DIR = BASE_DIR+'/build'
-def build_templates():
+def t():
     local('mkdir -p %s' % BUILD_DIR)
     local('java -jar tools/SoyToJsSrcCompiler.jar \
         --shouldProvideRequireSoyNamespaces \
@@ -11,7 +11,6 @@ def build_templates():
         --outputPathFormat %s/soy.js \
         oc/server/static/js/*.soy' % BUILD_DIR)
 def c():
-    build_templates()
     local('python tools/closure-library-read-only/closure/bin/calcdeps.py  \
         --path tools/closure-library-read-only/closure/goog \
         --path tools/soyutils_usegoog.js \
@@ -31,7 +30,7 @@ def c():
         > %s/all.js'.replace('%s',BUILD_DIR))
     
 def compile():
-    build_templates()
+    t()
     local('java -jar tools/closure-stylesheets-20111230.jar --allow-unrecognized-functions %s/reset.css %s/misc.css %s/footer.css %s/layout.css %s/welcome.css %s/about.css %s/trending.css %s/user.css %s/category.css %s/conversation.css > .c.css'.replace('%s',BUILD_DIR))
     
     checksum=local("md5sum .c.css | awk '{print $1}'",capture=True)

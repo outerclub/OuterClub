@@ -42,7 +42,6 @@ def index():
     g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige'],'invites':user['invites']})
     g.update({'categories':[]})
 
-    g.update({'announcements':db.fetchAnnouncements(cur)})
     #g.update({'tasks':db.fetchTasks(cur,user['user_id'])})
 
     g.update({'question':db.fetchQuestion(cur)})

@@ -286,10 +286,12 @@ oc.Category.View.prototype.push = function(id,pixels) {
  */
 oc.Category.View.prototype.responseToElement = function(r) {
     var newR = oc.Conversation.Response.extractFromJson(r);
-    var content = newR.content.replace(/^\/me/,'');
+    var content = newR.mini.replace(/^\/me/,'');
     var html = oc.Templates.Category.miniResponse({
         border:true,
-        content:oc.Util.replaceLinks(goog.string.newLineToBr(content)),
+        content:oc.Util.replaceLinks(
+        		goog.string.newLineToBr(content)
+        		),
         date:oc.Util.prettyDate(newR.date),
         user:newR.user
        });
@@ -579,7 +581,7 @@ oc.Conversation.View.prototype.go = function(id) {
             }
         });
         
-        goog.dom.query('.cover',self.rootElement)[0].innerHTML = '<img width="905" src="/static/images/covers/'+self.conversation.user.cover_image+'" />';
+        goog.dom.query('.cover',self.rootElement)[0].innerHTML = '<img width="875" src="/static/images/covers/'+self.conversation.user.cover_image+'" />';
         goog.dom.query('.room h2',self.rootElement)[0].innerHTML = goog.string.htmlEscape(self.conversation.title,false);
 
         goog.array.forEach(goog.dom.query('.conversation',self.rootElement),function(c) {

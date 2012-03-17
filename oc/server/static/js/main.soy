@@ -32,3 +32,22 @@
     </div>
 </div>
 {/template}
+
+/**
+ * @param date
+ * @param name
+ * @param content
+ * @param user_id
+ */
+{template .chatItem}
+<li><span class="date">{$date}</span> <a href="#!/user/{$user_id}"><span class="user">{$name}</span></a>: {$content}</li>
+{/template}
+
+/**
+ * @param avatar_image
+ * @param name
+ * @param user_id
+ */
+{template .userItem}
+<li><img height="20" src="/static/images/avatars/{$avatar_image}" /><a href="#!/user/{$user_id}"><span class="user">{$name}</span></a></li>
+{/template}

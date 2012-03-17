@@ -20,14 +20,23 @@
             {if $isMe}class="me" style="cursor: pointer"{/if}
             src="/static/images/avatars/{$avatar_image}" />
     </a>
-<h2>{$name}</h2>
-<h3>{if $isMe}Your {/if}Blurbs</h3>
-{foreach $cat_id in $categoryIds}
-<div class="blurb">
-<span>{$categories[$cat_id].name}</span>
-<input {if not $isMe}disabled="disabled"{/if} size="55" maxlength="60" type="text" name="{$cat_id}" 
-{if $blurbs[$cat_id]}value="{$blurbs[$cat_id]}"{/if}/>
-</div>
-{/foreach}
+	<h2>{$name}</h2>
+	{if $isMe}
+    <div class="news">
+        <h3>Recent activity</h3>
+        <div class="feed">
+        </div>
+    </div>
+    {/if}
+	<div class="blurbs">
+		<h3>{if $isMe}Your {/if}Blurbs</h3>
+		{foreach $cat_id in $categoryIds}
+		<div class="blurb">
+		<span>{$categories[$cat_id].name}</span>
+		<input {if not $isMe}disabled="disabled"{/if} size="50" maxlength="60" type="text" name="{$cat_id}" 
+		{if $blurbs[$cat_id]}value="{$blurbs[$cat_id]}"{/if}/>
+		</div>
+		{/foreach}
+	</div>
 </div>
 {/template}

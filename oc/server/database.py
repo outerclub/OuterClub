@@ -14,14 +14,14 @@ def fetchCategoryPosts(cur,cat_id):
             cur.execute('select user_id,replyDate,content from response where d_id=%s order by replyDate desc limit %s',(conversation[0],maxResponses))
             responses = []
             for response in cur.fetchall():
-                responses.insert(0,{'user':fetchUser(cur,response[0]),'date':response[1].isoformat(),'content':util.replaceMentions(cur,util.escape(response[2]))})
+                responses.insert(0,{'user':fetchUser(cur,response[0]),'date':response[1].isoformat(),'content':util.replaceMentions(cur,util.escape(response[2]),True)})
     
             # fetch the poster
             user = fetchUser(cur,conversation[3])
     
             # add in the original post, if applicable
             if (len(responses) < maxResponses):
-                responses.insert(0,{'user':user,'date':(conversation[2]).isoformat(),'content':util.replaceMentions(cur,util.escape(conversation[4]))})
+                responses.insert(0,{'user':user,'date':(conversation[2]).isoformat(),'content':util.replaceMentions(cur,util.escape(conversation[4]),True)})
     
             # count replies
             cur.execute('select COUNT(*) from response where d_id=%s',(conversation[0],))
@@ -73,14 +73,6 @@ def fetchLeaderboard(cursor):
         users.append({'rank':i,'user_id':u[0],'name':u[1],'prestige':u[2],'avatar_image':u[3]})
         i += 1
     return  users
-        
-def fetchAnnouncements(cursor):
-    cursor.execute('select a_id,title,content,postDate,user_id from announcement order by postDate desc');
-    
-    announcements = []
-    for a in cursor.fetchall():
-        announcements.append({'a_id':a[0],'title':a[1],'content':a[2],'postDate': a[3].strftime('%d %B %Y'),'user_id':a[4]})
-    return announcements
 
 def fetchTasks(cursor,user_id):
     cursor.execute('select task_id,type,done,external_id from task where user_id=%s',(user_id,))

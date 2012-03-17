@@ -2,6 +2,7 @@
     position: relative;
     width:905px;
     margin: 60px auto 20px auto;
+    overflow:hidden;
 }
 .profile a[rel='#avatar'] img {
     position:absolute;
@@ -60,7 +61,7 @@
 }
 .blurb input {
     border: 0;
-    font-size: 120%;
+    font-size: 100%;
     background-color: rgba(0,0,0,0.5);
     color: white;
     margin:0;
@@ -72,6 +73,32 @@
     text-align:right;
     margin-right:7px;
     font-weight:bold;
+}
+.blurbs {
+	width:510px;
+	float:left;
+}
+
+.news {
+	float:left;
+	width:390px;
+	
+}
+.news .item {
+    overflow:hidden;
+    margin-bottom:3px
+}
+.news .date {
+    float:left;
+    font-weight:bold;
+}
+.news .content {
+    float:left;
+    margin-left:5px;
+    color: #bbb;
+}
+.news img {
+    vertical-align: middle;
 }
 
 /**

@@ -94,6 +94,11 @@ oc.User.View = function(user,categories,socket) {
     this.categories = categories;
 
     /**
+     * @type {oc.News.View}
+     */
+    this.news = new oc.News.View(socket);
+    
+    /**
      * @type {oc.User}
      */
     this.user = user;
@@ -165,6 +170,7 @@ oc.User.View.prototype.go = function(user_id) {
         // write the profile HTML
         var html = oc.Templates.User.show({cover_image:u.cover_image,avatar_image:u.avatar_image,name:u.name,isMe:isMe,blurbs:u.blurbs,categories:self.categories,categoryIds:categoryIds});
         dynamic.innerHTML = html;
+        self.news.refresh();
         var profileElement = goog.dom.query('.profile',dynamic)[0];
 
         // display default text if necessary

@@ -2,48 +2,38 @@
     overflow: hidden;
     margin:60px 20px;
 }
-#welcome h1 {
-    color: #77a1cc;
-    font-family: BebasRegular;
-    font-size: 200%;
-    margin-bottom: 10px;
+/*
+#say {
+	width:500px;
+	text-align:center;
+	margin: 200px auto 0 auto;
 }
-#welcome h1 span {
-    color: white;
-    font-size: 120%;
+#say textarea {
+	background-color:rgba(0,0,0,0.5);
+	border:0;
+	padding:3px;
+	width:400px;
+	color:white;
+	height:100px;
+	-webkit-border-radius:5px;
+	margin-top:140px;
 }
-#welcome > div {
-    background-color: rgba(0,0,0,0.5);
-    padding: 15px;
-    margin-bottom: 3px;
+#say h1{
+	font-weight:bold;
+	color:white;
+	font-size:200%;
+	text-shadow:1px 1px 1px #333;
 }
-#welcome blockquote {
-    padding: 15px;
-    font-size: 150%;
-}
-#welcome blockquote .author {
-    color: #888
-}
-.news,.twitter {
+*/
+.twitter {
     width:342px;
     margin-left:3px;
     float:right;
 }
-.news .item {
-    overflow:hidden;
-    margin-bottom:3px
-}
-.news .date {
-    float:left;
-    font-weight:bold;
-}
-.news .content {
-    float:left;
-    margin-left:5px;
-    color: #bbb;
-}
-.news img {
-    vertical-align: middle;
+.twitter {
+    background-color: rgba(0,0,0,0.5);
+    padding: 15px;
+    margin-bottom: 3px;
 }
 .twitter {
     clear: right;
@@ -56,32 +46,6 @@
 } 
 .twitter .date {
     color: #bbb;
-    font-style:italic;
-}
-.announcements {
-    width: 342px;
-    float:left;
-}
-.announcements img {
-    float: left;
-    margin: 0 5px 10px 0;
-}
-.announcement {
-}
-.announcements .border {
-    margin-bottom: 10px;
-    border-bottom:1px solid #555;
-    padding-bottom:10px;
-}
-.announcement h2{
-    font-weight: bold;
-    font-size: 160%;
-}
-.announcement p {
-    margin-bottom: 5px;
-}
-.announcement .date {
-    color: #aaa;
     font-style:italic;
 }
 .question textarea {

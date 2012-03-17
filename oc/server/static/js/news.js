@@ -42,15 +42,10 @@ oc.News.View = function(socket) {
      * @type {Array.<oc.News.Item>}
      */
     this.items = [];
-
-    socket.addCallback('news',function(data) {
-        
-    });
-    this.refresh();
 };
 oc.News.View.prototype.refresh = function() {
     var self = this; 
-    var feed = goog.dom.query("#welcome .news .feed")[0];
+    var feed = goog.dom.query(".news .feed")[0];
     goog.net.XhrIo.send('/news',function(e) {
         var data = goog.json.unsafeParse(e.target.getResponseText())['news'];
         feed.innerHTML = '';
@@ -82,7 +77,7 @@ oc.News.View.prototype.refresh = function() {
  * @param {oc.News.Item} item
  */
 oc.News.View.prototype.createItem = function(item) {
-    var feed = goog.dom.query('#welcome .news .feed')[0];
+    var feed = goog.dom.query('.news .feed')[0];
     var date;
      
     if (goog.date.isSameDay(item.date))

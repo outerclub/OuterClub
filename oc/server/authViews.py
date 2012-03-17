@@ -48,7 +48,7 @@ def login():
     else:
         return flask.jsonify(error='E-mail or password was not valid.');
 
-@app.route('/invite',methods=['POST'])
+@app.route('/invite',methods=['GET','POST'])
 def invite():
     #return render_template('invite.html',name='test')
     if not viewFunctions.isLoggedIn():
@@ -99,6 +99,7 @@ def invite():
     
 @app.route('/signup',methods=['GET','POST'])
 def signup():
+    print request.args
     # display the page?
     if request.method == 'GET':
         # write the key, if exists

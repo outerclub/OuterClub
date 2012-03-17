@@ -10,7 +10,6 @@ oc.Util.replaceLinks = function(str) {
     var url_replace = '$1$4$7$10$13<a class="external" target="_blank" href="$2$5$8$11$14">$2$5$8$11$14</a>$3$6$9$12';
     return str.replace(url_pattern, url_replace);
 };
-
 /**
  * @param {goog.date.Date} date
  * @return {string}

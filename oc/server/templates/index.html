@@ -16,22 +16,6 @@ Welcome
 </div>
 <div id="frame">
     <div id="welcome" title="Welcome">
-        <div class="announcements">
-            <h1>Announcements</h1>
-            {% for a in announcements %}
-                <div class="announcement {% if not loop.last %}border{% endif %}">
-                    <img src="/static/images/icons/oc.png" />
-                    <h2>{{ a.title }}</h2>
-                    <p>{{ a.content.replace('\n','<br />')|safe }}</p>
-                    <span class="date">{{ a.postDate }}</span>
-                </div>
-            {% endfor %}
-        </div>
-        <div class="news">
-            <h1>Recent activity</h1>
-            <div class="feed">
-            </div>
-        </div>
         <div class="twitter">
         {% if not config['DEBUG'] %}
             <a href="https://twitter.com/outerclub" class="twitter-follow-button" data-show-count="false">Follow @outerclub</a>
@@ -40,6 +24,13 @@ Welcome
             <div class="tweets">
             </div>
         </div>
+        <div id="chat" style="display:none">
+        	<ul class="messages">
+        	</ul>
+        	<ul class="users">
+        	</ul>
+        	<input type="text" name="msg" size="40" />
+    	 </div>
         {% if question %}
         <div class="question">
             <h1><span>Question</span> of the Week</h1>

@@ -18,6 +18,8 @@ class WebserverConfig:
     EMAIL_USER = None
     EMAIL_PASSWORD = None
     ERROR_EMAIL = None
+    
+    FB_APPID = '251976601561013'
 
 class RtgConfig:
     PORT = 9090

@@ -11,7 +11,7 @@ def blurb():
         return ''
 
     cat_id = request.form['cat_id']
-    blurb = request.form['blurb']
+    blurb = request.form['blurb'].strip()
     uid = viewFunctions.getUid()
 
     conn = app.config['pool'].connection()

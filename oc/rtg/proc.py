@@ -13,26 +13,29 @@ class QueueProc(threading.Thread):
     MAX_HAPPENING = 5
     def save(self):
         f = open('.store.cache','w')
-        pickle.dump(self.happening,f)
+        pickle.dump({'happening':self.happening,'chats':self.chats},f)
         f.close() 
 
     def init(self,config):
         self.pool = PooledDB(creator=MySQLdb,mincached=10,host=config.MYSQL_SERVER,user=config.MYSQL_USER,passwd=config.MYSQL_PASSWORD,db=config.MYSQL_DATABASE)
         try:
             h = pickle.load(open('.store.cache','r'))
-            self.happening = h
+            self.happening = h['happening']
+            self.chats = h['chats']
             if len(self.happening) > QueueProc.MAX_HAPPENING:
                 self.happening = self.happening[-QueueProc.MAX_HAPPENING:]
             print 'RTG: reloaded store'
         except Exception as e:
             self.happening = []
+            self.chats = []
+        
+        self.users = []
         self.queue = Queue.Queue()
         self.auth = dict()
 
         self.uid_sessions= dict()
         self.conns = dict()
         self.paths = dict() 
-        self.chats = []
 
     
     # convert a list of connections to keys
@@ -55,11 +58,27 @@ class QueueProc(threading.Thread):
         cur.close()
         conn.close()
         return ret
+    def addOnlineUser(self,uid):
+        conn = self.pool.connection()
+        cur = conn.cursor()
+        cur.execute('select user_id,name,avatar_image from user where user_id=%s',(uid,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+        self.users.append({'user_id':user[0],'name':user[1],'avatar_image':user[2]})
+        self.updateOnline()
+    def removeOnlineUser(self,uid):
+        x = 0
+        while (x < len(self.users)):
+            if (self.users[x]['user_id'] == uid):
+                self.users.pop(x)
+            else:
+                x += 1
+        self.updateOnline()
     def updateOnline(self):
-        users = len(self.uid_sessions.keys())
-        if '/happening' in self.paths:
-            for conn in self.paths['/happening']['conns']: 
-                self.send(conn,['users',users])
+        if '/chat' in self.paths:
+            for conn in self.paths['/chat']['conns']: 
+                self.send(conn,['users',self.users])
 
     def updateViewers(self,path,conn_id):
         viewers = self.fetchViewerInfo(self.connsToUids(self.paths[path]['conns']))
@@ -126,7 +145,7 @@ class QueueProc(threading.Thread):
                             self.uid_sessions[myConn['uid']].remove(conn_id)
                             if len(self.uid_sessions[myConn['uid']]) == 0:
                                 del self.uid_sessions[myConn['uid']]
-                            self.updateOnline()
+                                self.removeOnlineUser(myConn['uid'])
                         del self.conns[conn_id]
                     elif isinstance(msg,event.Auth):
                         # success?
@@ -137,14 +156,14 @@ class QueueProc(threading.Thread):
                             self.conns[conn_id]['paths'] = set() 
                             if not uid in self.uid_sessions:
                                 self.uid_sessions[uid] = []
+                                self.addOnlineUser(uid)
                             
                             self.uid_sessions[uid].append(conn_id)
                             self.send(conn_id,['happening_init',self.happening])
-                            users = len(self.uid_sessions.keys())
-                            self.send(conn_id,['users',users])
+                            self.send(conn_id,['chat_init',self.chats])
+                            self.send(conn_id,['users',self.users])
                         else:
                             self.send(conn_id,['authRejected']);
-                        self.updateOnline()
                     # process events that require authentication
                     elif conn_id in self.conns and 'uid' in self.conns[conn_id]:
                         if isinstance(msg,event.Register):
@@ -183,16 +202,22 @@ class QueueProc(threading.Thread):
                                     if len(diff) > 0:
                                         self.updateViewers(path,conn_id)
                         elif isinstance(msg,event.Chat):
-                            self.chats.append(msg.msg)
                             uid = self.conns[conn_id]['uid']
+                            conn = self.pool.connection()
+                            cur = conn.cursor()
+                            user = database.fetchUserNoCache(cur,uid)
+                            cur.close()
+                            conn.close()
+                            chatItem = {'date':datetime.now().isoformat(),'message':msg.msg,'user':user}
+                            self.chats.append(chatItem)
                             if '/chat' in self.paths:
-                                conn = self.pool.connection()
-                                cur = conn.cursor()
-                                user = database.fetchUserNoCache(cur,uid)
-                                cur.close()
-                                conn.close()
                                 for c in self.paths['/chat']['conns']:
-                                    self.send(c,['chat',{'date':datetime.now().isoformat(),'message':msg.msg,'user':user}])
+                                    self.send(c,['chat',chatItem])
+                            
+                            #cut off chats
+                            if (len(self.chats) > 35):
+                                self.chats = self.chats[1:]
+                            self.save()
                     else:
                         self.send(conn_id,['authRejected']);
             except Exception as e:

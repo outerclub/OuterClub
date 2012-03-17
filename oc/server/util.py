@@ -28,37 +28,70 @@ def escape(s):
     return cgi.escape(s)
 
 MENTION_REGEX = re.compile(r'(^|\W)(@\w+)',flags=re.MULTILINE)
-def replaceMentions(cur,data):
+def replaceMentions(cur,data,truncate=False):
     users = findMentions(cur,data)
     isAction = data.startswith('/me')
     
     accum = ''
     matches = MENTION_REGEX.finditer(data)
     end = 0
+    numWords = 0
+    MAX_WORDS = 30
     for m in matches:
-        accum += data[end:m.start()]
-        name = m.group(2)
-        if (len(name) > 1):
-            accum += m.group(1)
-            name = name[1:]
-            lname = name.lower()
-            if lname in users and users[lname] != None:
-                u = users[lname] 
-                
-                if isAction:
-                    accum += '<a class="mention" href="#!/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (u['user_id'],u['avatar_image'])
+        section = data[end:m.start()]
+        sectionSpl = section.split()
+        
+        # is this overflowing?
+        if not truncate or (truncate and numWords+len(sectionSpl)+1 <= MAX_WORDS):
+            accum += section
+            name = m.group(2)
+            if (len(name) > 1):
+                accum += m.group(1)
+                name = name[1:]
+                lname = name.lower()
+                if lname in users and users[lname] != None:
+                    u = users[lname] 
+                    
+                    if isAction:
+                        accum += '<a class="mention" href="#!/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (u['user_id'],u['avatar_image'])
+                    else:
+                        accum += '<a class="mention" href="#!/user/%s">@%s</a>' % (u['user_id'],name)
                 else:
-                    accum += '<a class="mention" href="#!/user/%s">@%s</a>' % (u['user_id'],name)
+                    accum += m.group()
             else:
                 accum += m.group()
+            end = m.end()
+            numWords += len(sectionSpl)+1
         else:
-            accum += m.group()
-        end = m.end()
+            #overflow
+            cutSection = sectionSpl[:MAX_WORDS-numWords]
+            if (section.find(' ') == 0):
+                accum += ' '
+            accum += ' '.join(cutSection)
+            numWords += len(cutSection)
+            accum += '...'
+            break
+            
     # found matches
-    if (end > 0):
-        accum += data[end:]
+    if truncate:
+        if (numWords < MAX_WORDS and end > 0):
+            section = data[end:]
+            sectionSpl = section.split()
+            if (section.find(' ') == 0):
+                accum += ' '
+            accum += ' '.join(sectionSpl[:MAX_WORDS-numWords])
+            if (len(sectionSpl) > MAX_WORDS-numWords):
+                accum += '...'
+        elif numWords == 0:
+            section = data.split()
+            accum = ' '.join(section[:MAX_WORDS])
+            if len(section) > MAX_WORDS:
+                accum += '...'
     else:
-        accum = data
+        if (end > 0):
+            accum += data[end:]
+        else:
+            accum = data
     return accum
 
 def findMentions(cur,data):

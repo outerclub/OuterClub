@@ -39,11 +39,13 @@ class TRtgHandler:
         res = cur.fetchone()
         user = database.fetchUserNoCache(cur,res[1])
 
-        newContent = util.replaceMentions(cur,util.escape(res[3]))
+        escaped = util.escape(res[3])
+        newContent = util.replaceMentions(cur,escaped)
+        shortContent = util.replaceMentions(cur,escaped,True)
         cur.close()
         conn.close()
         
-        payload = {'date':res[2].isoformat(),'content':newContent,'user':user,'r_id':r_id,'d_id':res[0]}
+        payload = {'date':res[2].isoformat(),'content':newContent,'short':shortContent,'user':user,'r_id':r_id,'d_id':res[0]}
         self.queue.put(event.Message('/conversation/%d' % (res[0]), 'response',payload))
 
         happening_data = {'user':user,'date':res[2].isoformat(),'category_image':res[5],'category_id':res[4],'d_id':res[0],'title': res[6],'r_id':r_id,'content':newContent}
@@ -56,13 +58,13 @@ class TRtgHandler:
                      where d_id=%s',(d_id,))
         convo = cur.fetchone()
         user = database.fetchUserNoCache(cur,convo[0])
-        cur.close()
-        conn.close()
 
-        # just escape, shouldn't be any mentions
         newContent = util.escape(convo[2])
 
-        payload = {'id':d_id,'date':convo[1].isoformat(),'title':convo[5],'user':user,'content':newContent}
+        payload = {'id':d_id,'date':convo[1].isoformat(),'title':convo[5],'user':user,'content':newContent,'short':util.replaceMentions(cur,newContent,True)}
+        cur.close()
+        conn.close()
+        
         self.queue.put(event.Message('/category/%d' % (convo[4]),'conversation',payload))
 
         happening_data = {'user':user,'date':convo[1].isoformat(),'category_image':convo[3],'d_id':d_id,'title':convo[5],'content':newContent}
