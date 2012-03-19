@@ -88,7 +88,8 @@ class QueueProc(threading.Thread):
                 self.send(conn,['viewers',viewers])
 
     def send(self,conn_id,payload):
-        self.conns[conn_id]['conn'].send(json.dumps(payload))
+        if conn_id in self.conns:
+            self.conns[conn_id]['conn'].send(json.dumps(payload))
 
     def run(self):
         while True:

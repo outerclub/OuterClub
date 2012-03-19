@@ -61,7 +61,7 @@ def login():
                 
                 # try to match fb login against e-mail and link
                 if (res != None):
-                    cur.execute('update user set fbId=%s,fbName=%s where email=%s',(userID,email))
+                    cur.execute('update user set fbId=%s,fbName=%s where email=%s',(userID,name,email))
                     conn.commit()
                     ret =  flask.jsonify(key=initAuth(res[0]))
                 else:
