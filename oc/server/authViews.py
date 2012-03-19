@@ -69,6 +69,7 @@ def login():
                         error = None
                         invite_uid = None
                         # do we require an invite key?
+                        '''
                         if not app.debug:
                             # did the user provide an invite key?
                             if not ('k' in request.form):
@@ -80,6 +81,12 @@ def login():
                                     error = "Sorry, OuterClub is not accepting signups at this time."
                                 else:
                                     invite_uid = row[2]
+                        '''
+                        if 'k' in request.form:
+                            cur.execute('select email,code,user_id from invite_key where code=%s',(request.form['k'],))
+                            row = cur.fetchone()
+                            if (row):
+                                invite_uid = row[2]
                         if (not error):
                             alias = request.form['alias']
                             if len(alias) == 0:

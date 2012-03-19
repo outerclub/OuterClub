@@ -88,7 +88,7 @@ oc.Category.View.COLUMN_WIDTH = 285;
  * @type {number}
  * @const
  */
-oc.Category.View.MAX_RESPONSES = 4;
+oc.Category.View.MAX_RESPONSES = 3;
 
 /**
  * @type {number}

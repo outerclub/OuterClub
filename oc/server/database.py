@@ -6,7 +6,7 @@ def fetchCategoryPosts(cur,cat_id):
     # fetch the conversations for this category
     res = cur.execute('select d_id,title,postDate,user_id,content from conversation where cat_id=%s order by postDate desc',(cat_id,))
     posts = []
-    maxResponses = 4
+    maxResponses = 3
     for conversation in cur.fetchall():
         key = 'd_id_%s'%(conversation[0])
         if not key in cache:
