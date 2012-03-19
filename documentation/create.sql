@@ -29,7 +29,7 @@ CREATE TABLE `announcement` (
   `postDate` datetime NOT NULL,
   `user_id` int(11) NOT NULL,
   PRIMARY KEY (`a_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,7 +67,7 @@ CREATE TABLE `conversation` (
   `content` text NOT NULL,
   PRIMARY KEY (`d_id`),
   KEY `cat_id_index` (`cat_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=97 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -81,6 +81,7 @@ CREATE TABLE `invite_key` (
   `email` varchar(255) NOT NULL,
   `code` varchar(255) NOT NULL,
   `myDate` datetime NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
   KEY `code_index` (`code`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -114,7 +115,7 @@ CREATE TABLE `response` (
   `content` text NOT NULL,
   PRIMARY KEY (`r_id`),
   KEY `d_id_index` (`d_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=637 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -161,15 +162,18 @@ CREATE TABLE `user` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
   `avatar_image` varchar(255) DEFAULT NULL,
   `prestige` int(11) NOT NULL,
   `cover_image` varchar(255) DEFAULT NULL,
   `admin` tinyint(1) NOT NULL DEFAULT '0',
   `last_login` datetime DEFAULT NULL,
+  `invites` int(11) DEFAULT '0',
+  `fbId` int(11) DEFAULT NULL,
+  `fbName` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   KEY `name_index` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=36 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -210,4 +214,4 @@ CREATE TABLE `user_guild` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2012-02-29 23:22:43
+-- Dump completed on 2012-03-18 21:56:25

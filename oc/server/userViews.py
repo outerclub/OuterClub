@@ -101,6 +101,13 @@ def userId(id):
     conn = app.config['pool'].connection()
     cur = conn.cursor()
     user = db.fetchUser(cur,id)
+    
+    # self ?
+    if int(id) == viewFunctions.getUid():
+        cur.execute('select fbId,fbName from user where user_id=%s',(id,))
+        res = cur.fetchone()
+        user['fbId'] = res[0]
+        user['fbName'] = res[1]
     cur.close()
     conn.close()
     return flask.jsonify(user=user)

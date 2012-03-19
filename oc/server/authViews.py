@@ -7,8 +7,10 @@ import uuid
 import hashlib
 from datetime import datetime
 from ..rtg.t_rtg.ttypes import TAuth
+import json
 import util
 import re
+import urllib2
 
 def initAuth(id):
     auth = TAuth()
@@ -33,20 +35,148 @@ def initAuth(id):
 def login():
     if viewFunctions.isLoggedIn():
         return ''
-
-    # check to see if user exists
-    conn = app.config['pool'].connection()
-    cur = conn.cursor()
-    cur.execute('select user_id,avatar_image,password from user where email=%s and password=%s', (request.form['l_email'],hashlib.sha224(request.form['l_password']).hexdigest()))
-    test = cur.fetchone()
-    cur.close()
-    conn.close()
-
-    if test != None:
-        return flask.jsonify(key=initAuth(test[0]))
-    # user doesn't exist!
+    
+    if 'userID' in request.form and 'accessToken' in request.form:
+        try:
+            fetch = json.loads(urllib2.urlopen("https://graph.facebook.com/me?access_token=%s" % (request.form['accessToken'])).read())
+        except:
+            fetch = dict()
+        if (not 'error' in fetch and 'id' in fetch and fetch['id'] == request.form['userID']):
+            userID = request.form['userID']
+            name = fetch['first_name']+' '+fetch['last_name']
+            email = fetch['email']
+            
+            # check to see if user exists and has linked facebook account
+            conn = app.config['pool'].connection()
+            cur = conn.cursor()
+            cur.execute('select user_id,avatar_image from user where fbId=%s', (userID,))
+            test = cur.fetchone()
+            
+            ret = ''
+            if test != None:
+                ret = flask.jsonify(key=initAuth(test[0]))
+            else:
+                cur.execute('select user_id from user where email=%s',(email,))
+                res = cur.fetchone()
+                
+                # try to match fb login against e-mail and link
+                if (res != None):
+                    cur.execute('update user set fbId=%s,fbName=%s where email=%s',(userID,email))
+                    conn.commit()
+                    ret =  flask.jsonify(key=initAuth(res[0]))
+                else:
+                    if ('alias' in request.form):
+                        error = None
+                        invite_uid = None
+                        # do we require an invite key?
+                        if not app.debug:
+                            # did the user provide an invite key?
+                            if not ('k' in request.form):
+                                error = "Sorry, OuterClub is not accepting signups at this time."
+                            else:
+                                cur.execute('select email,code,user_id from invite_key where code=%s',(request.form['k'],))
+                                row = cur.fetchone()
+                                if (not row):
+                                    error = "Sorry, OuterClub is not accepting signups at this time."
+                                else:
+                                    invite_uid = row[2]
+                        if (not error):
+                            alias = request.form['alias']
+                            if len(alias) == 0:
+                                error = "Alias cannot be empty."
+                            elif len(alias) <= 2:
+                                error = "Alias must be greater than 2 characters long."
+                            elif len(alias) > 12:
+                                error = "Alias was too long."
+                            elif not re.match("^\w+$",alias):
+                                error = "Alias can only contain alphanumeric characters or underscores."
+                    
+                            else:
+                                # check to see if user exists
+                                cur.execute('select user_id,avatar_image from user where LCASE(name)=%s', (alias,))
+                                test = cur.fetchone()
+                        
+                                # if the user exists
+                                if (test != None):
+                                    error = "Alias already in use."
+                        if (not error):
+                            avatar = 'generic.png'
+                            cover = 'default.jpg'
+                            # process the form submission
+                            res = cur.execute('insert into user (name,email,avatar_image,prestige,cover_image,fbId,fbName) values (%s,%s,%s,0,%s,%s,%s)', ( \
+                                          alias, \
+                                          email, \
+                                          avatar, \
+                                          cover, \
+                                          userID, \
+                                          name))
+                    
+                            uid = cur.lastrowid
+                            
+                            if invite_uid:
+                                # increment the user prestige only if not admin
+                                cur.execute('update user set prestige=prestige+3 where user_id=%s and admin=0',(invite_uid,))
+                    
+                            # delete the invite key
+                            if ('k' in request.form):
+                                res = cur.execute('delete from invite_key where code=%s',(request.form['k'],))
+                    
+                            conn.commit()
+                    
+                            # push the prestige change
+                            if invite_uid:
+                                app.config['transport'].open()
+                                app.config['client'].userModified(invite_uid);
+                                app.config['transport'].close()
+                    
+                            # initialize the user
+                            ret = flask.jsonify(key=initAuth(uid))
+                        if (error):
+                            ret = flask.jsonify(error=error)
+                    else:
+                        # display signup button
+                        ret = flask.jsonify(signup=True)
+            cur.close()
+            conn.close()
+            return ret
+        return ''
     else:
-        return flask.jsonify(error='E-mail or password was not valid.');
+        # check to see if user exists
+        conn = app.config['pool'].connection()
+        cur = conn.cursor()
+        cur.execute('select user_id,avatar_image,password from user where email=%s and password=%s', (request.form['l_email'],hashlib.sha224(request.form['l_password']).hexdigest()))
+        test = cur.fetchone()
+        cur.close()
+        conn.close()
+    
+        if test != None:
+            return flask.jsonify(key=initAuth(test[0]))
+        # user doesn't exist!
+        else:
+            return flask.jsonify(error='E-mail or password was not valid.');
+
+@app.route('/connect',methods=['POST'])
+def connect():
+    if not viewFunctions.isLoggedIn():
+        return ''
+    
+    if 'userID' in request.form and 'accessToken' in request.form:
+        try:
+            fetch = json.loads(urllib2.urlopen("https://graph.facebook.com/me?access_token=%s" % (request.form['accessToken'])).read())
+        except:
+            fetch = dict()
+        if (not 'error' in fetch and 'id' in fetch and fetch['id'] == request.form['userID']):
+            userID = request.form['userID']
+            name = fetch['first_name']+' '+fetch['last_name']
+    
+            conn = app.config['pool'].connection()
+            cur = conn.cursor()
+            cur.execute('update user set fbId=%s,fbName=%s where user_id=%s', (userID,name,viewFunctions.getUid()))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return flask.jsonify(fbName=name)
+    return ''
 
 @app.route('/invite',methods=['GET','POST'])
 def invite():
@@ -97,110 +227,17 @@ def invite():
         return '{}'
          
     
-@app.route('/signup',methods=['GET','POST'])
+@app.route('/signup')
 def signup():
-    print request.args
-    # display the page?
-    if request.method == 'GET':
-        # write the key, if exists
-        k = ''
-        if ('k' in request.args):
-            k = request.args['k'] 
-        return render_template('signup.html',k=k)
+    # write the key, if exists
+    k = ''
+    if ('k' in request.args):
+        k = request.args['k'] 
+    return render_template('signup.html',k=k)
 
-    error = None
-    conn = app.config['pool'].connection()
-    cur = conn.cursor()
-
-    invite_uid = None
-    # do we require an invite key?
-    if not app.debug:
-        # did the user provide an invite key?
-        if not ('k' in request.form):
-            error = "Sorry, OuterClub is not accepting signups at this time."
-        else:
-            cur.execute('select email,code,user_id from invite_key where code=%s',(request.form['k'],))
-            row = cur.fetchone()
-            if (not row):
-                error = "Sorry, OuterClub is not accepting signups at this time."
-            else:
-                invite_uid = row[2]
-
-    if not error:
-        if len(request.form['email']) == 0:
-            error = "E-mail cannot be empty."
-        elif not util.emailValid(request.form['email']):
-            error = "E-mail was not valid."
-            
-        # check to see if email exists
-        cur.execute('select user_id from user where LCASE(email)=%s', (request.form['email'],))
-        test = cur.fetchone()
-        
-        if (test != None):
-            error = "E-mail already in use."
-    
-    # test for user
-    if not error:
-        if len(request.form['username']) == 0:
-            error = "Username cannot be empty."
-        elif len(request.form['username']) <= 2:
-            error = "Username must be greater than 2 characters long."
-        elif len(request.form['username']) > 12:
-            error = "Username was too long."
-        elif not re.match("^\w+$",request.form['username']):
-            error = "Username can only contain alphanumeric characters or underscores."
-        elif request.form['password'] != request.form['confirm']:
-            error = "Passwords did not match."
-
-        else:
-            # check to see if user exists
-            cur.execute('select user_id,avatar_image from user where LCASE(name)=%s', (request.form['username'],))
-            test = cur.fetchone()
-    
-            # if the user exists
-            if (test != None):
-                error = "Username already in use."
-            elif len(request.form['password']) == 0:
-                error = "Password cannot be empty."
-    
-    # any errors?
-    if (error):
-        if cur:
-            cur.close()
-        if conn:
-            conn.close()
-        return flask.jsonify(error=error)
-    else:
-        avatar = 'generic.png'
-        cover = 'default.jpg'
-        # process the form submission
-        res = cur.execute('insert into user (name,email,password,avatar_image,prestige,cover_image) values (%s,%s,%s,%s,0,%s)', (request.form['username'],request.form['email'],hashlib.sha224(request.form['password']).hexdigest(),avatar,cover))
-
-        uid = cur.lastrowid
-        
-        if invite_uid:
-            # increment the user prestige only if not admin
-            cur.execute('update user set prestige=prestige+3 where user_id=%s and admin=0',(invite_uid,))
-
-        # delete the invite key
-        res = cur.execute('delete from invite_key where code=%s',(request.form['k'],))
-
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        # push the prestige change
-        if invite_uid:
-            app.config['transport'].open()
-            app.config['client'].userModified(invite_uid);
-            app.config['transport'].close()
-
-        # initialize the user
-        return flask.jsonify(key=initAuth(uid))
-    
 @app.route('/logout')
 def logout():
-    redir = flask.redirect(flask.url_for('signup'))
+    redir = flask.redirect(flask.url_for('signup',check=False))
     resp = app.make_response(redir)
     resp.set_cookie('key',expires=datetime.now())
     return resp

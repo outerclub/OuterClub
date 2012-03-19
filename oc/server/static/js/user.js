@@ -67,6 +67,16 @@ oc.User.prototype.admin;
 oc.User.prototype.blurbs;
 
 /**
+ * @type {number}
+ */
+oc.User.prototype.fbId;
+
+/**
+ * @type {string}
+ */
+oc.User.prototype.fbName;
+
+/**
  * @param {Object} json
  * @return {oc.User}
  */
@@ -79,6 +89,8 @@ oc.User.extractFromJson = function(json) {
     u.guilds = json['guilds'];
     u.admin = json['admin'];
     u.blurbs = json['blurbs'];
+    u.fbId = json['fbId'];
+    u.fbName = json['fbName'];
     return u;
 }
 
@@ -169,16 +181,61 @@ oc.User.View.prototype.go = function(user_id) {
         var categoryIds = goog.object.getKeys(self.categories);
 
         // write the profile HTML
-        var html = oc.Templates.User.show({cover_image:u.cover_image,avatar_image:u.avatar_image,name:u.name,isMe:isMe,blurbs:u.blurbs,categories:self.categories,categoryIds:categoryIds});
+        var html = oc.Templates.User.show({
+        		cover_image:u.cover_image,
+        		avatar_image:u.avatar_image,
+        		name:u.name,
+        		isMe:isMe,
+        		blurbs:u.blurbs,
+        		categories:self.categories,
+        		categoryIds:categoryIds,
+        		fbId:u.fbId,
+        		fbName:u.fbName});
         dynamic.innerHTML = html;
-        self.news.refresh();
         var profileElement = goog.dom.query('.profile',dynamic)[0];
-
+        
         // display default text if necessary
         var blurbInputs = goog.dom.query('.blurb input',profileElement);
 
         // allow profile customization if isMe
         if (isMe) {
+        	var fbConnect = goog.dom.query('.fb a[name="connect"]',profileElement);
+        	if (fbConnect.length > 0)
+        	{
+        		fbConnect = fbConnect[0];
+        		goog.events.listen(fbConnect,goog.events.EventType.CLICK,function(e) {
+        			window['FB']['login'](function(resp) {
+        				if (resp.status === 'connected')
+        				{
+        					var userID = resp['authResponse']['userID'];
+        					goog.net.XhrIo.send('/connect',
+        							function(e) {
+        								var data = e.target.getResponseJson();
+        								if ('fbName' in data)
+        								{
+        									var frag =oc.Templates.User.fb({
+        										fbId:userID,
+        										fbName:data['fbName']
+        									});
+        									var fb = goog.dom.query('.fb',profileElement)[0];
+        									fb.innerHTML = frag;
+        									self.user.fbId = userID;
+        									self.user.fbName = data['fbName'];
+        								}
+	        					},
+	        					'POST',goog.uri.utils.buildQueryDataFromMap({
+	        						'userID':userID,
+	        						'accessToken':resp['authResponse']['accessToken']
+        					}));
+        				}
+        					
+        			});
+        			e.preventDefault();
+        		});
+        	}
+        	
+        	self.news.refresh();
+        	
             // click handlers for blurbs
             goog.array.forEach(blurbInputs,function(input) {
                 goog.events.listen(input,goog.events.EventType.FOCUSOUT,function() {
@@ -192,7 +249,7 @@ oc.User.View.prototype.go = function(user_id) {
             var coverOverlay = goog.dom.htmlToDocumentFragment('<div id="cover" class="overlay">'+
                     '<div class="border"><h2>Select Cover</h2><div class="center"></div></div></div>');
             
-            goog.dom.append(profileElement,coverOverlay);
+            goog.dom.appendChild(profileElement,coverOverlay);
 
             /**
              * @param {function()} close
@@ -248,7 +305,7 @@ oc.User.View.prototype.go = function(user_id) {
             var avatarOverlay = /** @type {Element} */ goog.dom.htmlToDocumentFragment('<div id="avatar" class="overlay">'+
                     '<div class="border"><h2>Select Avatar</h2><div align="center"></div></div>');
             
-            goog.dom.append(profileElement,avatarOverlay);
+            goog.dom.appendChild(profileElement,avatarOverlay);
 
             /**
              * @param {function()} close

@@ -3,133 +3,91 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>OuterClub</title>
-
+    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/reset.css') }}" />
     <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/misc.css') }}" />
-    <link rel="stylesheet" type="text/css" media="screen" href="{{ url_for('static',filename='css/footer.css') }}" />
-<style type="text/css">
-input,body {
-    font-family: Helvetica, Arial, Sans-serif;
-}
-body {
-    font-size: 12px;
-    background-color: #333;
-    margin: 0;
-} 
-#blackBg {
-    background-color: #000
-}
-#blackBg .footer {
-    color: #ccc;
-}
-#center {
-	clear: both;
-    margin: 0 auto 0 auto;
-    height: 980px;
-    background: url('/static/images/signup/bg.png') no-repeat top center;
-    text-align: center;
-    position: relative;
-}
-#center .error {
-    color: #c33;
-    display: none;
-    margin-top: 10px;
-    position:relative;
-    margin-bottom: -28px;
-    font-size: 16px;
-}
-.footer .error {
-    display: inline;
-    color: #c33;
-    margin-left: 5px;
-}
-.footer input {
-    font-size: 14px;
-    padding: 1px;
-}
-.footer input[type='text'],.footer input[type='password'] {
-    border: 1px solid #444;
-    background-color: #111;
-    color: #efefef;
-    padding: 4px;
-}
-
-.slideshow {
-	position:relative;
-	top:140px;
-	height: 469px;
-	/*background: url(/static/images/signup/0.png) no-repeat top center;*/
-}
-
-/**
- * Input fields
- */
-.wrap {
-    width: 219px;
-    height: 42px;
-    margin: 25px 3px auto;
-    background: url('/static/images/signup/bubble.png') no-repeat;
-    display: inline-block;
-    color: #3798b4;
-    position: relative;
-}
-.wrap span {
-    position: absolute;
-    top: 13px;
-    left: 22px;
-    z-index: 1;
-    font-size: 16px;
-}
-.wrap span.light {
-    color: #67b8d4;
-}
-.wrap input {
-    background: url('/static/images/new/transparent.png') repeat;
-    border: 0;
-    font-size: 16px;
-    color: white;
-    margin: 12px 0 0 0px;
-    z-index: 99;
-}
-
-/**
- * Buttons.
- */
-#center button[type='submit'] {
-    height: 128px;
-    width: 306px;
-    background: url('/static/images/signup/submit.png') no-repeat;
-    border: 0;
-    margin-top: 5px
-}
-
-#center button[type='submit']:hover {
-    background: url('/static/images/signup/submit_hover.png') no-repeat;
-}
-.dots {
-    position:relative;
-	margin-top: 70px;
-	z-index: 99;
-    visibility:hidden;
-}
-button {
-	cursor: pointer;
-}
-button.dot:hover,button.dotActive {
-	background: url('/static/images/signup/dot_hover.png') no-repeat;
-}
-button.dot,button.dotActive {
-	height: 27px;
-	width: 27px;
-	border: 0;
-}
-button.dot {
-	background: url('/static/images/signup/dot.png') no-repeat;
+    <style type="text/css">
+    body {
+    	background:url(/static/images/background.jpg) no-repeat top center;
+    }
+    #frame {
+    	color:white;
+	    min-height: 700px;
+		padding-top: 300px;
+		width: 350px;
+		font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
+		margin: 0 auto;
+		text-align: center;
+		padding-right:50px;
+    }
+    #frame label {
+    	font-weight:bold;
+    }
+    #old {
+    	text-align: right;
+		margin-right: 50px;
 	}
-.clear {
-    clear: both;
-}
-</style>
-{% if not config['DEBUG'] %}
+	#frame .field {
+	margin-bottom:3px;
+	}
+	#frame .rule {
+		margin: 30px 0 30px 0;
+		color: #777;
+		font-size: 80%;
+		height: 0;
+		border-top: 1px solid #555;
+		position: relative;
+	}
+	#old label {
+		color:#efefef;
+	}
+	.rule p {
+		position: absolute;
+		left: 43%;
+		top: -8px;
+		padding: 0 14px;
+		background-color: rgba(0, 0, 0, 0.8);
+	}
+	#login {
+		background-color: rgba(0, 0, 0, 0.5);
+		padding: 20px;
+		-webkit-border-radius: 5px;
+		-moz-border-radius:5px;
+		border-radius:5px;
+	}
+	#login a {
+		color:white;
+	}
+	#login a:hover {
+		color:orange;
+	}
+	#login input {
+		border: 0;
+		font-size: 100%;
+		background-color: rgba(70,70,70, 0.8);
+		-webkit-border-radius: 2px;
+		-moz-border-radius:2px;
+		border-radius:2px;
+		color: white;
+		font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
+		padding: 3px;	
+		margin:0;
+	}
+	#alias {
+		margin-top:5px;
+		font-size:80%;
+	}
+	.error {
+		color:#f22;
+		margin-top: 4px;
+		font-weight:bold;
+	}
+	#old .error {
+		font-size:80%;
+	}
+    .fb-login-button {
+    }
+    </style>
+    {% if not config['DEBUG'] %}
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-29349455-1']);
@@ -142,11 +100,17 @@ button.dot {
   })();
 </script>
 {% endif %}
-</head>
-<body>
-<!-- 
+ </head>
+ <body>
    <div id="fb-root"></div>
       <script>
+		
+		function getURLParameter(name) {
+		    return decodeURI(
+		        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+		    );
+		};
+		var loggedOut = getURLParameter('check') == 'False';
         window.fbAsyncInit = function() {
           FB.init({
             appId      : '{{ config['FB_APPID'] }}',
@@ -155,6 +119,63 @@ button.dot {
             xfbml      : true,
             oauth      : true,
           });
+          var init = function(response)
+          {
+       	    var uid = response.authResponse.userID;
+       	    var accessToken = response.authResponse.accessToken;
+       	    var postData = { userID:uid,accessToken:accessToken};
+       	    if ($("#alias").is(":visible"))
+       	    {
+       	    	var alias = $('#alias input').val();
+       	    	postData['alias'] = alias;
+       	    }
+       	    var k = $("input[name='k']").val();
+       	    
+       	    if (k != '')
+       	    	postData['k'] = k;
+            $.ajax({
+                type:'POST',
+                url:'login',
+                data: postData,
+                success:function(data) {
+                	if (data)
+                	{
+                		if ('key' in data)
+	                		setKey(data.key);
+                		else if ('signup' in data)
+                		{
+                			$("#alias").fadeIn();
+                			$("#alias input").unbind();
+                			$("#alias input").keypress(function(e) {
+				                var keycode = e.keyCode ? e.keyCode : e.which;
+				                if (keycode == 13)
+				                    init(response);
+                			});
+                			$("#alias button").unbind();
+                			$("#alias button").click(function() {
+                				init(response);
+                			});
+                		} else if ('error' in data)
+                		{
+                			$("#alias .error").html(data['error']);
+                			$("#alias .error").fadeIn();	
+                		}
+                	}
+                },
+                dataType:'json'
+	            });
+          }
+             FB.Event.subscribe('auth.authResponseChange', function(response) {
+            	 if (response.status == 'connected')
+            		 init(response);
+        	 }); 
+             if (!loggedOut)
+           	 {
+	             FB.Event.subscribe('auth.statusChange',function(response){
+		        	  if (response.status === 'connected')
+		        		  init(response);
+	             });
+           	 }
         };
         (function(d){
            var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
@@ -163,186 +184,92 @@ button.dot {
            d.getElementsByTagName('head')[0].appendChild(js);
          }(document));
       </script>
-      <div class="fb-login-button" data-scope="email">Login with Facebook</div>
-      -->
-<div id="blackBg">
-    <div class="footer" style="border:0;border-bottom: 1px solid #333">
-     <div class="footer_menu">
-        <div class="footer_menu_left">
-            E-mail <input type="text" name="l_email" size="16" /> &nbsp;Password <input type="password" name="l_password" size="16" />
-            <button type="submit" name="login" class="default">Log In</button><div class="error">
-            </div>
-            </form>
-        </div>
-     </div>
-    </div>
-    <div id="center">
-    	<div class="slideshow">
-    	</div>
-    	<div class="dots">
-    		<button class="dotActive" />
-    		<button class="dot" />
-    		<button class="dot" />
-    	</div>
-        <div class="wrap">
-            <input type="text" name='email' />
-            <span>EMAIL ADDRESS</span>
-        </div>
-        <div class="wrap">
-            <input type="text" name='username' />
-            <span>ALIAS</span>
-        </div>
-        <div class="wrap">
-            <input type="password" name='password'/>
-            <span>PASSWORD</span>
-        </div>
-        <div class="wrap">
-            <input type="password" name='confirm'/>
-            <span>CONFIRM PASSWORD</span>
-        </div>
-        <div class="error">
-        </div>
-        <div class="clear"></div>
-        <button type="submit" name="signup" />
-    </div>
-    <div class="footer">
-        <div class="footer_menu">
-            <div class="footer_menu_left">
-            </div>
-            <div class="footer_menu_right">
-                &copy; 2012 OuterClub
-            </div>
-        </div>
-    </div>
-</div>
-
-<script type="text/javascript" src="/static/jquery-1.7.1.min.js"></script>
-<script type="text/javascript">
-function showError(msg) {
-    $("#center .error").html(msg);
-    if ($("#center .error").css('display') == 'none')
-    {
-        $("#center .error").fadeIn();
-    }
-}
-function getURLParameter(name) {
-    return decodeURI(
-        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
-    );
-};
-var wait = 7000;
-function slideshow() {
-    var active = $(".dots .dotActive").index();
-    var next = active < 2 ? active + 1 : 0;
-    $($(".dots").children().get(next)).click();
-    setTimeout('slideshow()',wait);
-}
-$(document).ready(function() {
-    if ($.browser.msie) {
-        $(".footer:first,.slideshow,.dots,.wrap,button").hide();
-        $("#center").append('<div style="font-size:200%;padding-top:400px;color:white">Sorry, OuterClub does not support Internet Explorer at this time.</div>');
-    } else {
-        $("span").mousedown(function() {
-            $(this).prev('input').focus();
-            return false;
-        });
-        $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").focusin(function() {
-            $(this).next('span').addClass('light');
-        });
-        $("input[name='username'],input[name='password'],input[name='email'],input[name='confirm']").focusout(function() {
-            if ($(this).val() == '')
-                $(this).next('span').show();
-             $(this).next('span').removeClass('light');
-        });
-        $("input[name='username'],input[name='email'],input[name='password'],input[name='confirm']").keypress(function() {
-            $(this).next('span').hide();
-        });
-        $('.dots button').click(function() {
-            $('.dots button').each(function() {
-                if ($(this).hasClass('dotActive')) {
-                    $(this).removeClass('dotActive');
-                    $(this).addClass('dot');
-                }
-            });
-            $(this).removeClass('dot');
-            $(this).addClass('dotActive');
-            var no = $(this).index();
-            $('.slideshow').fadeOut(function() {
-                $(this).css('background-image','url(/static/images/signup/'+no+'.png)');
-                $(this).fadeIn();
-            });
-
-        });
-        //setTimeout('slideshow()',wait);
-        var setKey = function(key) {
-            var today = new Date();
-            today.setDate(today.getDate() + 4*7);
-            today.setTime(today.getTime()+(30*60*60*24));
-            document.cookie = 'key='+key+';expires='+today.toUTCString();
-            window.location = '/';
-        };
-
-        var login = function() {
-            $.ajax({
-                type:'POST',
-                url:'login',
-                data: { l_email: $("input[name='l_email']").val(), l_password: $("input[name='l_password']").val()},
-                success:function(data) {
-                    if ('error' in data) {
-                        $('.footer_menu_left .error').html(data['error']);
-                    }
-                    if ('key' in data) {
-                        setKey(data.key);
-                    }
-                },
-                dataType:'json'
-            });
-        };
-        var defaultE = getURLParameter('e');
-        if (defaultE != 'null')
-            $("input[name='l_email']").val(defaultE);
-    
-        var defaultP = getURLParameter('p');
-        if (defaultP != 'null')
-            $("input[name='l_password']").val(defaultP);
-
-        if (defaultE != 'null' && defaultP != 'null')
-            login();
-        
-        $("button[name='login']").click(login);
-        $("input[name='l_password'],input[name='l_email']").keypress(function(e) {
-            if ($("input[name='l_password']").val() != '' && $("input[name='l_email']").val() != '')
-            {
-                var keycode = e.keyCode ? e.keyCode : e.which;
-                if (keycode == 13)
-                    login();
-            }
-        });
-        $("button[name='signup']").click(function() {
-            $.ajax({
-                type:'POST',
-                url:'signup',
-                data: { username: $("input[name='username']").val(), email: $("input[name='email']").val(),
-                    password: $("input[name='password']").val(),confirm:$("input[name='confirm']").val(),
-                    k: '{{ k }}' },
-                success:function(data) {
-                    if ('error' in data) {
-                        showError(data['error']);
-                    }
-                    if ('key' in data) {
-                        setKey(data.key);
-                    }
-                },
-                dataType: 'json'
-            });
-        });
-        
-        // preload images
-        var preload = new Image();
-        preload.src = '/static/images/city.jpg';
-        preload.src = '/static/images/background.png';
-    }
-});
-</script>
-</body>
-</html>
+      <div id="frame">
+      	<div id="login">
+      		<div class="fb-login-button" data-scope="email">Login with Facebook</div>
+      		<div id="alias" style="display:none">
+      			<div class="field">
+      				<label for="alias">Enter an alias</label> <input type="text" name="alias" />
+      			</div>
+      			<input type="hidden" name="k" value="{{ k }}" />
+      			<button class="default">Sign up!</button><div class="error" style="display:none"></div>
+      			</div>
+      		<div class="rule"><p>OR</p></div>
+      		<div id="old">
+      			<div class="field">
+      				<label for="l_email">Email</label> <input type="text" name="l_email" />
+      			</div>
+      			<div class="field">
+      				<label for="l_password">Password</label> <input type="password" name="l_password" /><br />
+      			</div>
+      			<button name="login" class="default">Log in</button>
+      			<div class="error" style="display:none"></div>
+      			<div style="font-size:80%; color:#ccc;margin-top:5px">Note: Current users can link their Facebook account through the user profile.</div>
+      		</div>
+      	</div>
+      </div>
+      <!--  
+      <a class="fb_button fb_button_medium" target="_blank" href="">
+      	<span class="fb_button_text">Login with Facebook</span>
+      	</a>
+      	-->
+		<script type="text/javascript" src="/static/jquery-1.7.1.min.js"></script>
+      	<script type="text/javascript">
+		        function setKey(key) {
+		            var today = new Date();
+		            today.setDate(today.getDate() + 4*7);
+		            today.setTime(today.getTime()+(30*60*60*24));
+		            document.cookie = 'key='+key+';expires='+today.toUTCString();
+		            window.location = '/';
+		        };
+      	$(document).ready(function() {
+			if (loggedOut)
+			{
+				$("#login").html('<a href="/">Login again</a>');
+			}
+	        var preload = new Image();
+	        preload.src = '/static/images/city.jpg';
+		    if ($.browser.msie) {
+		    	var text = 'Sorry, OuterClub does not support Internet Explorer at this time.';
+		    } else {
+		        var login = function() {
+		            $.ajax({
+		                type:'POST',
+		                url:'login',
+		                data: { l_email: $("input[name='l_email']").val(), l_password: $("input[name='l_password']").val()},
+		                success:function(data) {
+		                    if ('error' in data) {
+		                    	$("#old .error").fadeIn();
+		                       $('#old .error').html(data['error']);
+		                    }
+		                    if ('key' in data) {
+		                        setKey(data.key);
+		                    }
+		                },
+		                dataType:'json'
+		            });
+		        };
+		        var defaultE = getURLParameter('e');
+		        if (defaultE != 'null')
+		            $("input[name='l_email']").val(defaultE);
+		    
+		        var defaultP = getURLParameter('p');
+		        if (defaultP != 'null')
+		            $("input[name='l_password']").val(defaultP);
+		
+		        if (defaultE != 'null' && defaultP != 'null')
+		            login();
+		        $('#old button').click(login);
+		        $("input[name='l_password'],input[name='l_email']").keypress(function(e) {
+		            if ($("input[name='l_password']").val() != '' && $("input[name='l_email']").val() != '')
+		            {
+		                var keycode = e.keyCode ? e.keyCode : e.which;
+		                if (keycode == 13)
+		                    login();
+		            }
+		        });
+		    }
+      	});
+      	</script>
+ </body>
+ </html>

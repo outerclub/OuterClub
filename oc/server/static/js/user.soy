@@ -8,6 +8,8 @@
  * @param blurbs
  * @param categories
  * @param categoryIds
+ * @param fbId
+ * @param fbName
  */
 {template .show}
 <div class="profile frame">
@@ -22,11 +24,12 @@
     </a>
 	<h2>{$name}</h2>
 	{if $isMe}
-    <div class="news">
-        <h3>Recent activity</h3>
-        <div class="feed">
-        </div>
-    </div>
+		{call .fb data="all"/}
+	    <div class="news">
+	        <h3>Recent activity</h3>
+	        <div class="feed">
+	        </div>
+	    </div>
     {/if}
 	<div class="blurbs">
 		<h3>{if $isMe}Your {/if}Blurbs</h3>
@@ -39,4 +42,19 @@
 		{/foreach}
 	</div>
 </div>
+{/template}
+
+/**
+ * @param fbId
+ * @param fbName
+ */
+{template .fb}
+	<div class="fb">
+		<span class="account"><img src="/static/images/fb.gif" /> Facebook</span>{sp}
+		{if $fbId}	
+			Connected as: <a target="_blank" href="http://www.facebook.com/profile.php?id={$fbId}">{$fbName}</a>
+		{else}
+			<a name="connect" href="#">Not connected</a>
+		{/if}
+	</div>
 {/template}
