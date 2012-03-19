@@ -170,3 +170,13 @@ def insertNews(cursor,user_id,item):
         cursor.execute('insert into object (id,value) values (%s,%s)',(key,data))
     else:
         cursor.execute('update object set value=%s where id=%s',(data,key))
+
+def fetchNewUsers(cur):
+    cur.execute('select user_id,name,signup_date from user order by user_id desc limit 5')
+    users = []
+    for u in cur.fetchall():
+        d = {'name':u[1],'user_id':u[0]}
+        if (u[2] != None):
+            d['signup_date'] = u[2].strftime('%Y-%m-%d')
+        users.append(d)
+    return users

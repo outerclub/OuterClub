@@ -28,6 +28,14 @@ Welcome
             <div class="tweets">
             </div>
         </div>
+        <div class="newUsers">
+        <h1>New Users</h1>
+        <ol>
+        {% for u in newUsers %}
+        <li><a href="#!/user/{{ u['user_id'] }}">{{ u['name'] }}</a>{% if 'signup_date' in u %} joined on {{ u['signup_date'] }}.{% endif %}</li>
+        {% endfor %} 
+        </ol>
+        </div>
         <div id="chat" style="display:none">
         	<ul class="messages">
         	</ul>

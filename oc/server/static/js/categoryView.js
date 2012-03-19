@@ -504,6 +504,14 @@ oc.Conversation.View = function(category_view,socket,userView) {
  */
 oc.Conversation.View.prototype.resize = function() {
     var viewerElement = goog.dom.getElement('viewer');
+    var responsesElement= goog.dom.query('.responses',this.rootElement)[0];
+    var conversations = goog.dom.query('.responses .conversation',this.rootElement);
+    var total = 0;
+    goog.array.forEach(conversations,function(c) {
+    	total += goog.style.getSize(c).height;
+    });
+    goog.style.setHeight(responsesElement,Math.min(total+10,400));
+    
     var underlayElement = goog.dom.query('.underlay',this.rootElement)[0];
     // set to auto and then find the height
     goog.style.setStyle(underlayElement,'height','auto');
@@ -614,13 +622,10 @@ oc.Conversation.View.prototype.go = function(id) {
                     (new goog.fx.dom.FadeInAndShow(errorView,500)).play();
                 } else {
                     var anim = new goog.fx.dom.FadeOut(errorView,200);
-                    /*
-                    no auto-scroll for now.
                     goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function(e) {
-                        var body = goog.dom.query('body')[0];
-                        body.scrollTop += 50;
+                        var responsesElement = goog.dom.query('.responses',self.rootElement)[0];
+                        responsesElement.scrollTop = responsesElement.scrollHeight;
                     });
-                    */
                     anim.play();
                     textarea.value = '';
                     textarea.focus();

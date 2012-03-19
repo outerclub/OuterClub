@@ -286,6 +286,7 @@ button.decorated{
 	color: white;
     height: 34px;
     width: 161px;
+    word-spacing:2px
 }
 .error {
     color: #c33;

@@ -50,7 +50,7 @@
     padding-bottom:10px;
 }
 #conversation .responses {
-    overflow: auto;
+    overflow-y:auto;
     padding: 5px 0 5px 0;
     position:relative;
 }
@@ -95,7 +95,7 @@
 .conversation .content {
     padding: 5px 10px;
     float: left;
-    width: 575px;
+    width: 560px;
     color: white;
     min-height: 30px;
     font-size: 120%;

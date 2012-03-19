@@ -231,6 +231,7 @@
 	        preload.src = '/static/images/city.jpg';
 		    if ($.browser.msie) {
 		    	var text = 'Sorry, OuterClub does not support Internet Explorer at this time.';
+		    	$("#login").html('<h1>'+text+'</h1>');
 		    } else {
 		        var login = function() {
 		            $.ajax({

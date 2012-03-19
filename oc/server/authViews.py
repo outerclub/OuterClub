@@ -110,7 +110,7 @@ def login():
                             avatar = 'generic.png'
                             cover = 'default.jpg'
                             # process the form submission
-                            res = cur.execute('insert into user (name,email,avatar_image,prestige,cover_image,fbId,fbName) values (%s,%s,%s,0,%s,%s,%s)', ( \
+                            res = cur.execute('insert into user (name,email,avatar_image,prestige,cover_image,fbId,fbName,signup_date) values (%s,%s,%s,0,%s,%s,%s,NOW())', ( \
                                           alias, \
                                           email, \
                                           avatar, \
@@ -204,7 +204,7 @@ def invite():
     name = request.form['name'] 
     email = request.form['email'].strip()
     if len(name) == 0:
-        error = 'Friend name must be provided.'
+        name = email
     elif len(email) == 0:
         error = 'Friend e-mail address must be provided.'
     elif not util.emailValid(email):

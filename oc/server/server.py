@@ -42,6 +42,7 @@ def index():
     g.update({'user_id':uid,'username':user['name'],'avatar':user['avatar_image'],'prestige':user['prestige'],'invites':user['invites']})
     g.update({'categories':[]})
 
+    g.update({'newUsers':db.fetchNewUsers(cur)})
     #g.update({'tasks':db.fetchTasks(cur,user['user_id'])})
 
     g.update({'question':db.fetchQuestion(cur)})
@@ -54,7 +55,7 @@ def index():
 def twitter():
     if not app.config['DEBUG']:
         if not 'twitter' in app.config or (datetime.now()-app.config['twitter']['time']).seconds >= 60*30:
-            data = urllib2.urlopen('http://api.twitter.com/1/statuses/user_timeline.json?screen_name=outerclub&include_rts=true&include_entities=true&count=5').read()
+            data = urllib2.urlopen('http://api.twitter.com/1/statuses/user_timeline.json?screen_name=outerclub&include_rts=true&include_entities=true&count=4').read()
             app.config['twitter'] = {'data':data,'time':datetime.now()}
         return app.config['twitter']['data']
     return '[]'

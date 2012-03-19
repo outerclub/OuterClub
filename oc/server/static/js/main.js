@@ -330,9 +330,6 @@ oc.Main.prototype.start = function() {
             );
     });
     
-    /**
-     * New conversation box hints.
-     */
     var inputs = goog.dom.query("#newConversation .titleField input,#newConversation textarea");
     goog.array.forEach(inputs,function(i) {
         goog.events.listen(i,goog.events.EventType.FOCUSIN,function () {
@@ -348,6 +345,7 @@ oc.Main.prototype.start = function() {
         });
     });
 
+    /*
     // question of the week
     var questionLink = goog.dom.query("#welcome .question a")[0];
     if (goog.isDef(questionLink)) {
@@ -356,6 +354,7 @@ oc.Main.prototype.start = function() {
             e.preventDefault(); 
         });
     }
+    */
 
     goog.events.listen(window,goog.events.EventType.RESIZE,function() {
         self.resize();
