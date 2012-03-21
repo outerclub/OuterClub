@@ -212,7 +212,7 @@ oc.User.View.ResizePrestige = function(element, flash, opt_end, opt_fast, opt_ac
   /**
    * @type {Array.<number>}
    */
-   this.startColorText = goog.color.hexToRgb('#cccccc');
+   this.startColorText = goog.color.hexToRgb('#dddddd');
    
    
   /**

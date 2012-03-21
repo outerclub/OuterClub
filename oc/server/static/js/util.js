@@ -154,57 +154,57 @@ oc.Util.parsePrestige = function(prestige) {
 	if (prestige < 5)
 	{
 		rank = 0;
-		name="Green";
+		name="L0 - Green";
 		percent = (prestige)/5;
 	}else if (prestige < 11)
 	{
 		rank = 1;
-		name="Sad Intern";
+		name="L1 - Sad Intern";
 		percent = (prestige-5)/(11-5);
 	}else if (prestige < 18)
 	{
 		rank = 2;
-		name="Desk Drone";
+		name="L2 - Desk Drone";
 		percent = (prestige-11)/(18-11);
 	}else if (prestige < 26)
 	{
 		rank = 3;
-		name="Smooth Talker";
+		name="L3 - Smooth Talker";
 		percent = (prestige-18)/(26-18);
 	}else if (prestige < 35)
 	{
 		rank = 4;
-		name="Editor-in-Chief";
+		name="L4 - Editor-in-Chief";
 		percent = (prestige-26)/(35-26);
 	}else if (prestige < 45)
 	{
 		rank = 5;
-		name="Creative Director";
+		name="L5 - Creative Director";
 		percent = (prestige-35)/(45-35);
 	}else if (prestige < 57)
 	{
 		rank = 6;
-		name="I'm a Boss";
+		name="L6 - I'm a Boss";
 		percent = (prestige-45)/(57-45);
 	}else if (prestige < 71)
 	{
 		rank = 7;
-		name="Pioneer";
+		name="L7 - Pioneer";
 		percent = (prestige-57)/(71-57);
 	}else if (prestige < 87)
 	{
 		rank = 8;
-		name="Rock Star";
+		name="L8 - Rock Star";
 		percent = (prestige-71)/(87-71);
 	}else if (prestige < 105)
 	{
 		rank = 9;
-		name="Freakin' Ninja";
+		name="L9 - Freakin' Ninja";
 		percent = (prestige-87)/(105-87);
 	}else
 	{
 		rank = 10;
-		name="Hall of Fame";
+		name="L10 - Hall of Fame";
 		percent = 0;
 	}
 	return {name:name,rank:rank,percent:percent};
