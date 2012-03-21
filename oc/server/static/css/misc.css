@@ -63,7 +63,7 @@ button.default:active {
         
           background-color: #77A1CC;
           /*background-image: -webkit-gradient(linear, left top, left bottom, from(#77A1CC), to(#6786a4));*/
-          background-image: -webkit-linear-gradient(top, #77A1CC, #6786a4);
-          background-image: -moz-linear-gradient(top, #77A1CC, #6786a4);
-          background-image: linear-gradient(top, #77A1CC, #6786a4);
+          /* @alternate */ background-image: -webkit-linear-gradient(top, #77A1CC, #6786a4);
+          /* @alternate */ background-image: -moz-linear-gradient(top, #77A1CC, #6786a4);
+          /* @alternate */ background-image: linear-gradient(top, #77A1CC, #6786a4);
 }
