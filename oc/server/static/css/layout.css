@@ -74,7 +74,6 @@ body{
 }
 #menu .right {
     float: right;
-    overflow: hidden;
 }
 #menu .link a {
     font-weight: bold;
@@ -210,8 +209,12 @@ body{
  * Profile card.
  */
 #miniProfile {
-    overflow: hidden;
-    float:left
+    float:left;
+    margin-right:10px;
+}
+#miniProfile > * {
+	float:left;
+	display:block;
 }
 #miniProfile img,#miniProfile .name {
     float:left
@@ -219,19 +222,30 @@ body{
 #miniProfile .name {
     font-family: 'BebasRegular';
     font-size: 140%;
-    margin: 11px 10px;
+    margin: 10px 10px;
     color:white;
 }
 #miniProfile a:hover .name {
 	color:#ff8211;
 }
-#miniProfile .text {
-    float:left;
-    margin: 11px 10px 11px 0;
+#miniProfile .prestige-bar {
+	margin-top:11px;
 }
-#miniProfile .prestige {
-    font-weight: bold;
-    font-size: 140%;
+#miniProfile .rank {
+	margin: 13px 7px 0 0;
+	font-weight: bold;
+	color: gray;
+}
+#userMenu {
+	text-align:center;
+	margin-top:43px;
+	display: block;
+	background-color: rgba(0, 0, 0, 0.8);
+	padding: 10px 15px;	
+	float:none;
+	-webkit-border-radius: 0 0 3px 3px;
+	-moz-border-radius: 0 0 3px 3px;
+	border-radius: 0 0 3px 3px;
 }
 
 .frame {

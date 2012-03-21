@@ -132,6 +132,7 @@ def upvote():
     if (cur.fetchone()[0] == 0):
         cur.execute('insert into upvote (user_id, context_id,object_id, type) values (%s,%s,%s,%s)',(uid,d_id,object_id,util.Upvote.UserType))
         cur.execute('update user set prestige=prestige+1 where user_id=%s',(object_id,))
+        conn.commit()
         
         # invalidate cache
         db.invalidateUserCache(cur,uid)
@@ -141,7 +142,7 @@ def upvote():
         conn.commit()
 
         app.config['transport'].open()
-        app.config['client'].userModified(object_id);
+        app.config['client'].userModified(object_id)
         app.config['transport'].close()
     cur.close()
     conn.close()

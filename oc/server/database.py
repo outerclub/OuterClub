@@ -172,7 +172,7 @@ def insertNews(cursor,user_id,item):
         cursor.execute('update object set value=%s where id=%s',(data,key))
 
 def fetchNewUsers(cur):
-    cur.execute('select user_id,name,signup_date from user order by user_id desc limit 5')
+    cur.execute('select user_id,name,signup_date from user order by user_id desc limit 10')
     users = []
     for u in cur.fetchall():
         d = {'name':u[1],'user_id':u[0]}

@@ -181,7 +181,6 @@ oc.Main.prototype.start = function() {
     					user_id:u['user_id']
     				})));
     	});
-        //goog.dom.query('.online span')[0].innerHTML = num;
         // reveal everything
         goog.array.forEach(goog.dom.query('#miniProfile,#menu,.footer'),function(item) {
             if (!goog.style.isElementShown(item))
@@ -191,31 +190,51 @@ oc.Main.prototype.start = function() {
     this.socket.addCallback('chat',function(data) {
     	addChatItem(data);
     	fixChatHeight();
-    	/*
-    	if (!goog.style.isElementShown(chat))
-    	{
-    		goog.style.setStyle(goog.dom.query('#menu .online span')[0],'color','red');
-    	}
-    	*/
     });
-    /*
-    goog.events.listen(goog.dom.getElement('chatButton'),goog.events.EventType.CLICK,function(e) {
-    	var isClosed = !goog.style.isElementShown(chat);
-    	goog.style.showElement(chat,isClosed);
-    	
-    	// opening
-    	if (isClosed)
-		{
-    		goog.style.setStyle(goog.dom.query('#menu .online span')[0],'color','inherit');
-		}
-    });
-    */
+    
     goog.events.listen(goog.dom.query('input',chat)[0],goog.events.EventType.KEYPRESS,function(e) {
     	if (e.keyCode == goog.events.KeyCodes.ENTER)
 		{
     		self.socket.send({'chat':this.value});
     		this.value = '';
 		}
+    });
+    
+    // do the hover dropdown menu
+    var myUser = goog.dom.getElement('myUser');
+    var userMenu = goog.dom.getElement('userMenu');
+    var isFading = false;
+    var timer;
+    goog.events.listen(myUser,goog.events.EventType.MOUSEOVER,function(e) {
+    	if (!isFading && !goog.style.isElementShown(userMenu))
+    	{
+    		var anim = (new goog.fx.dom.FadeInAndShow(userMenu,300));
+    		goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+    			isFading = false;
+    		});
+    		anim.play();
+    		isFading = true;
+    	}
+    });
+    goog.events.listen(myUser,goog.events.EventType.MOUSEOUT,function(e) {
+    	if (!isFading && goog.style.isElementShown(userMenu))
+    	{
+    		timer = window.setTimeout(function() {
+	    		var anim = (new goog.fx.dom.FadeOutAndHide(userMenu,300));
+	    		goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
+	    			isFading = false;
+	    		});
+	    		anim.play();
+	    		isFading = true;
+    		},100);
+    	}
+    });
+    // this is an awful hack for mouse bubbling
+    var ignore = goog.dom.query("#myUser *,#myUser");
+    goog.array.forEach(ignore,function(i) {
+	    goog.events.listen(i,goog.events.EventType.MOUSEOVER,function(e) {
+	    	window.clearTimeout(timer);
+	    });
     });
 
     // gate to another section

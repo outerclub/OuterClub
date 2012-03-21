@@ -40,6 +40,7 @@
    outline: 1px solid  white;
 }
 .profile h3 {
+	word-spacing:3px;
     font-family: BebasRegular;
     font-size: 200%;
     margin: 10px 0 10px 0;

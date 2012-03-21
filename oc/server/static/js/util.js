@@ -142,6 +142,75 @@ oc.Util.humanDate = function(date) {
 };
 
 /**
+ * @typedef {{rank:number,name:string,percent:number}}
+ */
+oc.prestige;
+/**
+ * @param {number} prestige
+ * @return {oc.prestige}
+ */
+oc.Util.parsePrestige = function(prestige) {
+	var rank,name,percent;
+	if (prestige < 5)
+	{
+		rank = 0;
+		name="Green";
+		percent = (prestige)/5;
+	}else if (prestige < 11)
+	{
+		rank = 1;
+		name="Sad Intern";
+		percent = (prestige-5)/(11-5);
+	}else if (prestige < 18)
+	{
+		rank = 2;
+		name="Desk Drone";
+		percent = (prestige-11)/(18-11);
+	}else if (prestige < 26)
+	{
+		rank = 3;
+		name="Smooth Talker";
+		percent = (prestige-18)/(26-18);
+	}else if (prestige < 35)
+	{
+		rank = 4;
+		name="Editor-in-Chief";
+		percent = (prestige-26)/(35-26);
+	}else if (prestige < 45)
+	{
+		rank = 5;
+		name="Creative Director";
+		percent = (prestige-35)/(45-35);
+	}else if (prestige < 57)
+	{
+		rank = 6;
+		name="I'm a Boss";
+		percent = (prestige-45)/(57-45);
+	}else if (prestige < 71)
+	{
+		rank = 7;
+		name="Pioneer";
+		percent = (prestige-57)/(71-57);
+	}else if (prestige < 87)
+	{
+		rank = 8;
+		name="Rock Star";
+		percent = (prestige-71)/(87-71);
+	}else if (prestige < 105)
+	{
+		rank = 9;
+		name="Freakin' Ninja";
+		percent = (prestige-87)/(105-87);
+	}else
+	{
+		rank = 10;
+		name="Hall of Fame";
+		percent = 0;
+	}
+	return {name:name,rank:rank,percent:percent};
+}
+
+/**
  * @type {number}
  * @const
  */

@@ -10,6 +10,7 @@
  * @param categoryIds
  * @param fbId
  * @param fbName
+ * @param rank
  */
 {template .show}
 <div class="profile frame">
@@ -23,6 +24,7 @@
             src="/static/images/avatars/{$avatar_image}" />
     </a>
 	<h2>{$name}</h2>
+	<h3>Rank: <span style="color:#222">{$rank}</span></h3>
 	{if $isMe}
 		{call .fb data="all"/}
 	    <div class="news">

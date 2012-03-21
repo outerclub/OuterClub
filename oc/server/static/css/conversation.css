@@ -68,7 +68,11 @@
     background-color: rgba(91,144,194,0.3);
 }
 
-.conversation .user img {
+.conversation .description img{
+	display:inline-block;
+	vertical-align:middle;	
+}
+.conversation .user img.avatar {
     float: right;
 }
 

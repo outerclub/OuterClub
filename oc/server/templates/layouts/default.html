@@ -63,13 +63,20 @@
     </ul>
     <div class="right">
         <div id="miniProfile">
-            <a href="#!/user/{{ user_id }}">
-                <img height="43" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" />
-                <span class="name">{{ username }}</span>
-            </a>
-            <div class="text">
-                Prestige: <span class="prestige">{{ prestige }}</span> <a href="{{ url_for('logout') }}">Log Out</a>
-            </div>
+        	<div id="myUser">
+	            <a id="myAvatar" href="#!/user/{{ user_id }}">
+	                <img height="43" src="{{ url_for('static',filename='images/avatars/'+avatar) }}" />
+	                <span class="name">{{ username }}</span>
+	            </a>
+	            <div id="userMenu" style="display:none">
+	                <a href="{{ url_for('logout') }}">Log Out</a>
+	            </div>
+	        </div>
+	        <div class="rank"></div>
+        		<div class="prestige-bar" data-percent="0">
+        			<span class="percent">0%</span>
+        			<span class="inner" style="width:0%"></span>
+        		</div> 
         </div>
         <button rel="#refer" class="default">Invite a Friend</button>
         <!-- 

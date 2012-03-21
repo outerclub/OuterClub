@@ -24,6 +24,9 @@ oc.Leaderboard.prototype.go = function() {
     var self = this;
     goog.net.XhrIo.send('/leaderboard',function(e) {
         var users = goog.json.unsafeParse(e.target.getResponseText())['users'];
+        goog.array.forEach(users,function(u) {
+        	//u['rankName'] = oc.Util.parsePrestige(goog.string.toNumber(u['prestige'])).name;
+        });
         var leaderboard = goog.dom.query('#leaderboard')[0];
         oc.Nav.setTitle(leaderboard.getAttribute('title'));
 

@@ -506,11 +506,13 @@ oc.Conversation.View.prototype.resize = function() {
     var viewerElement = goog.dom.getElement('viewer');
     var responsesElement= goog.dom.query('.responses',this.rootElement)[0];
     var conversations = goog.dom.query('.responses .conversation',this.rootElement);
+    /*
     var total = 0;
     goog.array.forEach(conversations,function(c) {
     	total += goog.style.getSize(c).height;
     });
     goog.style.setHeight(responsesElement,Math.min(total+10,400));
+    */
     
     var underlayElement = goog.dom.query('.underlay',this.rootElement)[0];
     // set to auto and then find the height
@@ -707,7 +709,15 @@ oc.Conversation.View.prototype.createResponse = function(fadeIn,response,categor
             content = content.replace(/^\/me/,oc.Templates.Category.actionMe({user:response.user}));
 
         var canVote = goog.array.contains(self.conversation.votableUsers,response.user.id);
-        var html = oc.Templates.Category.response({isAction:isAction,response:response,content:content,date:date,canVote:canVote});
+        var html = oc.Templates.Category.response(
+        		{isAction:isAction,
+        	 	 name:response.user.name,
+        		 user_id:response.user.id,
+        		 avatar_image:response.user.avatar_image,
+        		 rank: oc.Util.parsePrestige(response.user.prestige).name,
+        		 content:content,
+        		 date:date,
+        		 canVote:canVote});
 
         var element = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
         goog.style.showElement(element,false);

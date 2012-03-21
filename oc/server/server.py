@@ -162,17 +162,28 @@ def post():
     conn = app.config['pool'].connection()
     cur = conn.cursor()
 
-    user = db.fetchUser(cur,viewFunctions.getUid())
+    uid = viewFunctions.getUid()
     # insert the post
-    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)',(request.form['area'],user['user_id'],request.form['title'].encode('utf-8'),request.form['content'].encode('utf-8')))
+    cur.execute('insert into conversation (cat_id,user_id,title,postDate,content) values (%s,%s,%s,NOW(),%s)', \
+                (request.form['area'], \
+                 uid, \
+                 request.form['title'].encode('utf-8'), \
+                 request.form['content'].encode('utf-8')))
     conn.commit()
 
     d_id = cur.lastrowid
+    cur.execute('update user set prestige=prestige+1 where user_id=%s',(uid,))
+    conn.commit()
+    
+    # invalidate cache
+    db.invalidateUserCache(cur,uid)
+    
     cur.close()
     conn.close()
 
     app.config['transport'].open()
     app.config['client'].conversation(d_id)
+    app.config['client'].userModified(uid)
     app.config['transport'].close()
     
     return '{}'
