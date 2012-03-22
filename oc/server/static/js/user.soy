@@ -15,7 +15,7 @@
 {template .show}
 <div class="profile frame">
     <a rel="#cover">
-        <img width="905" name="{$cover_image}" {if $isMe}class="me" style="cursor: pointer"{/if}
+        <img width="875" height="323" name="{$cover_image}" {if $isMe}class="me" style="cursor: pointer"{/if}
     src="/static/images/covers/{$cover_image}" />
     </a>
     <a rel="#avatar">
@@ -59,4 +59,38 @@
 			<a name="connect" href="#">Not connected</a>
 		{/if}
 	</div>
+{/template}
+
+/**
+ * @param current_cover
+ */
+{template .coverSelect}
+<div class="coverSelect">
+<div class="preview">
+<h1>Preview</h1>
+<img height="100" width="271" src="/static/images/covers/{$current_cover}" />
+</div>
+Recommended size: 875x323.<br />
+<form name="preview" action="/cover" enctype="multipart/form-data" method="POST">
+	<input name="cover" type="file" />
+</form>
+<input type="submit" name="submit" value="Save" disabled="disabled"/>
+</div>
+{/template}
+
+/**
+ * @param current_avatar
+ */
+{template .avatarSelect}
+<div class="avatarSelect">
+<div class="preview">
+<h1>Preview</h1>
+<img height="100" width="100" src="/static/images/avatars/{$current_avatar}" />
+</div>
+Recommended size: 100x100.<br />
+<form name="preview" action="/avatar" enctype="multipart/form-data" method="POST">
+	<input name="avatar" type="file" />
+</form>
+<input type="submit" name="submit" value="Save" disabled="disabled"/>
+</div>
 {/template}

@@ -10,3 +10,6 @@ config.py
 .*project
 build
 tools
+upload
+avatar-*
+cover-*

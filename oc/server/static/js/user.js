@@ -18,6 +18,7 @@ goog.require('goog.fx.Transition');
 goog.require('goog.uri.utils');
 goog.require('goog.color');
 goog.require('goog.async.Delay');
+goog.require('goog.net.IframeIo');
 goog.require('goog.object');
 
 /**
@@ -436,97 +437,72 @@ oc.User.View.prototype.go = function(user_id) {
              * @param {function()} close
              */
             var coversCallback = function(close) {
-                    goog.net.XhrIo.send('/covers',function(e) {
-                        var covers = goog.json.unsafeParse(e.target.getResponseText())['covers'];
-                        var table = '';
-                        var pageSize = covers.length;
-                        var paginate = function(pageNo) {
-                            var start = pageNo*pageSize;
-                            var table = '';
-                            var hasRight = start+pageSize < covers.length;
-                            var hasLeft = start != 0;
-                            for (var i=start; i < start+pageSize; i++)
-                            {
-                                var c = covers[i];
-                                table += '<div><img class="';
-                                if (u.cover_image == c)
-                                    table += 'active';
-                                 table += '" name="'+c+'" width="200" src="/static/images/covers/thumbs/'+c+'" /></div>';
-                            }
-                            var center = goog.dom.query('.center',coverOverlay)[0];
-            
-                           // var anim = new goog.fx.dom.FadeOutAndHide(center,500);
-                            //anim.play();
-                            //goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
-                                center.innerHTML = table;
-                                var images = goog.dom.query('img',center);
-                                goog.array.forEach(images,function(img) {
-                                    goog.events.listen(img,goog.events.EventType.CLICK,function() {
-                                        if (this.getAttribute('name') != u.cover_image) {
-                                            self.changeCover(this.getAttribute('name'));
-                                        }
-                                        center.innerHTML = '';
-                                        close();
-                                    });
-                                    goog.events.listen(img,goog.events.EventType.MOUSEOVER,function() {
-                                        goog.dom.classes.add(img,'hover');
-                                    });
-                                    goog.events.listen(img,goog.events.EventType.MOUSEOUT,function() {
-                                        goog.dom.classes.remove(img,'hover');
-                                    });
-                                });
-                                (new goog.fx.dom.FadeInAndShow(center,500)).play();
-                       //     });
-                        };
-                        paginate(0);
-                    });
+                var center = goog.dom.query('.center',coverOverlay)[0];
+                center.innerHTML = '';
+                var selectEl = /** @type {Element} **/ goog.dom.htmlToDocumentFragment(oc.Templates.User.coverSelect({current_cover:self.user.cover_image}));
+                var previewFormEl = goog.dom.query('form[name="preview"]',selectEl)[0];
+                var fileInputEl = goog.dom.query('input[type="file"]',previewFormEl)[0];
+                var submitEl = goog.dom.query('input[type="submit"]',selectEl)[0];
+               	submitEl.setAttribute('disabled','disabled');
+               	
+                goog.dom.appendChild(center,selectEl);
+                goog.events.listen(fileInputEl,goog.events.EventType.CHANGE,function(e) {
+               		goog.events.removeAll(submitEl);
+                	var io = new goog.net.IframeIo();
+                	
+                	io.sendFromForm(previewFormEl);
+                	goog.events.listen(io,goog.net.EventType.COMPLETE,function(e2) {
+                		var file = io.getResponseJson()['file'];
+                		goog.dom.query('img',selectEl)[0].setAttribute('src','/static/upload/'+file);
+                		submitEl.removeAttribute('disabled');
+                		goog.events.listen(submitEl,goog.events.EventType.CLICK,function(e3) {
+                			goog.net.XhrIo.send('/cover',function() {
+                                self.changeCover(file);
+                				close();
+                			},'POST',
+                			goog.uri.utils.buildQueryDataFromMap({'temp_file':file}));
+                			
+                		});
+                	});
+                });
             };
             oc.overlay(goog.dom.query("a[rel='#cover']",profileElement)[0],coversCallback);
     
             var avatarOverlay = /** @type {Element} */ goog.dom.htmlToDocumentFragment('<div id="avatar" class="overlay">'+
-                    '<div class="border"><h2>Select Avatar</h2><div align="center"></div></div>');
+                    '<div class="border"><h2>Select Avatar</h2><div class="center"></div></div>');
             
             goog.dom.appendChild(profileElement,avatarOverlay);
 
-            /**
-             * @param {function()} close
-             */
             var avatarsCallback = function(close) {
-                goog.net.XhrIo.send('/avatars',function(e) {
-                    var avatars = goog.json.unsafeParse(e.target.getResponseText())['avatars'];
-                    var table = "<table>";
-                    goog.array.forEach(avatars,function(a,i) {
-                        if (i % 9 == 0)
-                            table += "<tr>";
-                        table += '<td><img class="';
-                        if (u.avatar_image == a)
-                            table += 'active';
-                         table += '" name="'+a+'" src="/static/images/avatars/thumbs/'+a+'" /></td>';
-                        if ((i+1) % 9 == 0)
-                            table += "</tr>";
-                    });
-                    table += "</table>";
-                    var tableView = goog.dom.query("div[align='center']",avatarOverlay)[0];
-                    tableView.innerHTML = table; 
-                    var images = goog.dom.query('img',avatarOverlay);
-                    goog.array.forEach(images,function(img) {
-                        goog.events.listen(img,goog.events.EventType.CLICK,function() {
-                            if (this.getAttribute('name') != u.avatar_image) {
-                                self.changeAvatar(this.getAttribute('name'));
-                            }
-                            tableView.innerHTML = '';
-                            close();
-                        });
-                        goog.events.listen(img,goog.events.EventType.MOUSEOVER,function() {
-                            goog.dom.classes.add(img,'hover');
-                        });
-                        goog.events.listen(img,goog.events.EventType.MOUSEOUT,function() {
-                            goog.dom.classes.remove(img,'hover');
-                        });
-                    });
-                   
+                var center = goog.dom.query('.center',avatarOverlay)[0];
+                center.innerHTML = '';
+                var selectEl = /** @type {Element} **/ goog.dom.htmlToDocumentFragment(oc.Templates.User.avatarSelect({current_avatar:self.user.avatar_image}));
+                var previewFormEl = goog.dom.query('form[name="preview"]',selectEl)[0];
+                var fileInputEl = goog.dom.query('input[type="file"]',previewFormEl)[0];
+                var submitEl = goog.dom.query('input[type="submit"]',selectEl)[0];
+               	submitEl.setAttribute('disabled','disabled');
+               	
+                goog.dom.appendChild(center,selectEl);
+                goog.events.listen(fileInputEl,goog.events.EventType.CHANGE,function(e) {
+               		goog.events.removeAll(submitEl);
+                	var io = new goog.net.IframeIo();
+                	
+                	io.sendFromForm(previewFormEl);
+                	goog.events.listen(io,goog.net.EventType.COMPLETE,function(e2) {
+                		var file = io.getResponseJson()['file'];
+                		goog.dom.query('img',selectEl)[0].setAttribute('src','/static/upload/'+file);
+                		submitEl.removeAttribute('disabled');
+                		goog.events.listen(submitEl,goog.events.EventType.CLICK,function(e3) {
+                			goog.net.XhrIo.send('/avatar',function() {
+                                self.changeAvatar(file);
+                				close();
+                			},'POST',
+                			goog.uri.utils.buildQueryDataFromMap({'temp_file':file}));
+                			
+                		});
+                	});
                 });
-            }
+            };
             oc.overlay(goog.dom.query("a[rel='#avatar']",profileElement)[0],avatarsCallback);
       }
     }); // getJson

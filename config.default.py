@@ -20,6 +20,11 @@ class WebserverConfig:
     ERROR_EMAIL = None
     
     FB_APPID = '251976601561013'
+    
+    UPLOAD_FOLDER='oc/server/static/upload'
+    COVERS_FOLDER = 'oc/server/static/images/covers'
+    AVATARS_FOLDER = 'oc/server/static/images/avatars'
+    MAX_CONTENT_LENGTH=10*1024*1024
 
 class RtgConfig:
     PORT = 9090

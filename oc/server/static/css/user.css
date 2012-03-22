@@ -1,6 +1,6 @@
 .profile {
     position: relative;
-    width:905px;
+    width:875px;
     margin: 60px auto 20px auto;
     overflow:hidden;
 }
@@ -12,16 +12,6 @@
 }
 .profile a[rel='#avatar']:hover img.me {
     border:5px solid #333;
-}
-.profile .overlay .hover, .profile .overlay .active{
-    opacity: 1;
-}
-.profile .overlay .active {
-    outline: 1px solid #222;
-}
-.profile .overlay img {
-    opacity: 0.5;
-    cursor: pointer;
 }
 
 .profile > h2 {
@@ -85,7 +75,7 @@
 
 .news {
 	float:left;
-	width:390px;
+	width:360px;
 	
 }
 .news .item {
@@ -114,13 +104,13 @@
 .center {
     margin: 0 auto 0 auto;
 }
-.center > div {
-    float: left;
+.center h1 {
+	font-size:200%;
 }
 #cover {
-    width: 640px;
+    width: 400px;
 }
 #cover .center {
-    height: 400px;
+    height: 225px;
     overflow: auto;
 }

@@ -588,7 +588,7 @@ oc.Conversation.View.prototype.go = function(id) {
             }
         });
         
-        goog.dom.query('.cover',self.rootElement)[0].innerHTML = '<img width="875" src="/static/images/covers/'+self.conversation.user.cover_image+'" />';
+        goog.dom.query('.cover',self.rootElement)[0].innerHTML = '<img width="875" height="323" src="/static/images/covers/'+self.conversation.user.cover_image+'" />';
         goog.dom.query('.room h2',self.rootElement)[0].innerHTML = goog.string.htmlEscape(self.conversation.title,false);
 
         goog.array.forEach(goog.dom.query('.conversation',self.rootElement),function(c) {
