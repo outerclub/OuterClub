@@ -108,7 +108,7 @@ def login():
                                     error = "Alias already in use."
                         if (not error):
                             avatar = 'generic.png'
-                            cover = 'default.jpg'
+                            cover = 'default.png'
                             # process the form submission
                             res = cur.execute('insert into user (name,email,avatar_image,prestige,cover_image,fbId,fbName,signup_date) values (%s,%s,%s,0,%s,%s,%s,NOW())', ( \
                                           alias, \
