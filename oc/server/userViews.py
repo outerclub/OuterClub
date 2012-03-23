@@ -43,9 +43,9 @@ def blurb():
 
 @app.route('/avatar',methods=['POST'])
 def avatar():
-    return filefunc('avatar',100,100)
+    return filefunc('avatar',100,100,50,50)
     
-def filefunc(type,width,height):
+def filefunc(type,width,height,t_width,t_height):
     if not viewFunctions.isLoggedIn():
         return ''
     if type in request.files:
@@ -74,6 +74,11 @@ def filefunc(type,width,height):
             try:
                 full_path = os.path.join(app.config['UPLOAD_FOLDER'],temp_file)
                 open(full_path)
+                subprocess.call([app.config['IMAGEMAGICK_CONVERT'], \
+                                 full_path, \
+                                 '-resize', \
+                                 '%sx%s!' % (t_width,t_height), \
+                                 os.path.join(app.config['%s_FOLDER' % (type.upper())]+'/thumbs',temp_file)])
                 os.rename(full_path,os.path.join(app.config['%s_FOLDER' % (type.upper())],temp_file))
                 
                 # update the user
@@ -95,7 +100,7 @@ def filefunc(type,width,height):
     
 @app.route('/cover',methods=['POST'])
 def cover():
-    return filefunc('cover',875,323)
+    return filefunc('cover',875,323,285,105)
     
 '''
 @app.route('/covers',methods=['GET','POST'])

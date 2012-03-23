@@ -53,7 +53,7 @@ def replaceMentions(cur,data,truncate=False):
                     u = users[lname] 
                     
                     if isAction:
-                        accum += '<a class="mention" href="#!/user/%s"><img width="30" height="30" src="/static/images/avatars/%s" /></a>' % (u['user_id'],u['avatar_image'])
+                        accum += '<a class="mention" href="#!/user/%s"><img width="30" height="30" src="/static/images/avatars/thumbs/%s" /></a>' % (u['user_id'],u['avatar_image'])
                     else:
                         accum += '<a class="mention" href="#!/user/%s">@%s</a>' % (u['user_id'],name)
                 else:

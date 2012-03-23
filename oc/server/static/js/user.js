@@ -467,7 +467,10 @@ oc.User.View.prototype.go = function(user_id) {
 			                		submitEl.removeAttribute('disabled');
 			                		goog.events.listen(submitEl,goog.events.EventType.CLICK,function(e3) {
 			                			goog.net.XhrIo.send(uri,function() {
-			                                self.changeAvatar(file);
+			                				if (uri == '/avatar')
+			                					self.changeAvatar(file);
+			                				else
+			                					self.changeCover(file);
 			                				close();
 			                			},'POST',
 			                			goog.uri.utils.buildQueryDataFromMap({'temp_file':file}));
