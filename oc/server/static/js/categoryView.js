@@ -94,7 +94,7 @@ oc.Category.View.MAX_RESPONSES = 3;
  * @type {number}
  * @const
  */
-oc.Category.View.MARGIN_LEFT = 185;
+oc.Category.View.MARGIN_LEFT = 155;
 
 /** @typedef {{id: number,element:Element}} */
 oc.Category.View.Conversation;
@@ -117,9 +117,10 @@ oc.Category.View.prototype.go = function(url) {
         // only scroll if paging through categories
         var scroll = goog.style.isElementShown(viewerElement) && !goog.style.isElementShown(conversationElement);
         var scrollDirection = 0;
-        var beforeViewerHeight = goog.style.getSize(viewerElement).height;
+        var beforeViewerHeight;
         if (scroll)
-        {
+        { 
+        	beforeViewerHeight= goog.style.getSize(viewerElement).height;
             var currentElement = goog.dom.query('.panel',viewerElement)[0];
             var scrollElement = goog.dom.query('.scrollPanel',viewerElement)[0];
             // swap the two
@@ -145,6 +146,8 @@ oc.Category.View.prototype.go = function(url) {
 
         var contentElement = goog.dom.query('.content',panelElement)[0];
         contentElement.innerHTML = '<div class="posts"></div>';
+        
+        var postsElement = goog.dom.query('.posts',contentElement)[0];
     
 
         // iterate over all the posts backwards
@@ -162,14 +165,19 @@ oc.Category.View.prototype.go = function(url) {
                 numUsers:p['numUsers'],
                 user_name:p['user']['name']});
             var d = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
-            self.insertPost(parseInt(p['id'],10),d,false);
+            self.insertPost(parseInt(p['id'],10),d,postsElement);
 
             var responsesElement = goog.dom.query('.responses',d)[0];
             var lastElement;
+            var totalHeight = 0;
             for (var j=0; j < p['responses'].length; j++) {
                 lastElement = self.responseToElement(p['responses'][j]);
-                oc.Util.slide(lastElement,responsesElement,oc.Category.View.MAX_RESPONSES,false,false);
+                goog.dom.appendChild(responsesElement,lastElement);
+                goog.style.setPosition(lastElement,0,totalHeight);
+                var myHeight = goog.style.getSize(lastElement).height;
+                totalHeight += myHeight;
             }
+            goog.style.setHeight(responsesElement,totalHeight);
             // remove the border from the bottom
             goog.dom.classes.remove(lastElement,'border');
         };
@@ -230,7 +238,8 @@ oc.Category.View.prototype.go = function(url) {
             user_name:data['user']['name']});
         var d = /** @type {Element} */ goog.dom.htmlToDocumentFragment(html);
         (new goog.fx.dom.FadeInAndShow(d,500)).play();
-        self.insertPost(parseInt(data['id'],10),d,true);
+        var postsElement = goog.dom.query('#viewer .panel .posts')[0];
+        self.insertPost(parseInt(data['id'],10),d,postsElement);
 
         var responsesElement = goog.dom.query('.responses',d)[0];
         var lastElement = self.responseToElement(data);
@@ -310,10 +319,15 @@ oc.Category.View.prototype.refresh = function() {
                        )/(oc.Category.View.COLUMN_WIDTH+this.columnPadding));
 
     var heights = [];
+    var lastValues = [];
+    
 
     // push initial zero heights
     for (var i=0; i < this.columns; i++)
+    {
         heights.push(0);
+        lastValues.push({'pos':0,'h':0});
+    }
 
     // set the first height according to the 0,0 conversation
     if (this.conversations.length > 0)
@@ -325,18 +339,22 @@ oc.Category.View.prototype.refresh = function() {
         var newLeft = 0; 
         var newTop = 0;
         var upperIndex = i-this.columns;
+        var columnIndex = i % this.columns;
         // move to same row?
-        if (i % this.columns != 0)
+        if (columnIndex != 0)
         {
-            newLeft = (i % this.columns)*(oc.Category.View.COLUMN_WIDTH+this.columnPadding);
+            newLeft = (columnIndex)*(oc.Category.View.COLUMN_WIDTH+this.columnPadding);
         }
         // is there an element above the new position?
         if (upperIndex >= 0)
         {
+        	newTop = lastValues[columnIndex]['pos']+lastValues[columnIndex]['h'];
             newTop =goog.style.getPosition(this.conversations[upperIndex].element).y+goog.style.getSize(this.conversations[upperIndex].element).height + this.columnPadding;
         }
         var currentHeight = goog.style.getSize(this.conversations[i].element).height;
-        heights[i%this.columns] = newTop+currentHeight;
+        heights[columnIndex] = newTop+currentHeight;
+        lastValues[columnIndex]['pos'] = newTop;
+        lastValues[columnIndex]['h'] = currentHeight;
         goog.style.setPosition(this.conversations[i].element,newLeft,newTop);
     }
 
@@ -347,11 +365,11 @@ oc.Category.View.prototype.refresh = function() {
 /**
  * @param {number} id
  * @param {Element} postElement
+ * @param {Element} rootElement
  */
-oc.Category.View.prototype.insertPost = function(id,postElement) {
-    var rootElement = goog.dom.query('#viewer .panel .posts')[0];
+oc.Category.View.prototype.insertPost = function(id,postElement,rootElement) {
+	goog.style.showElement(postElement,true);
     goog.dom.insertChildAt(rootElement,postElement,0);
-    goog.style.showElement(postElement,true);
     this.conversations.splice(0,0,{'id':id,'element':postElement});
 
     for (var i= 0; i < this.conversations.length; i++)

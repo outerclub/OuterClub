@@ -169,7 +169,10 @@ class QueueProc(threading.Thread):
                     elif conn_id in self.conns and 'uid' in self.conns[conn_id]:
                         if isinstance(msg,event.Register):
                             reg=[]
+                            hasCategory = False
                             for p in msg.paths:
+                                if 'category' in p:
+                                    hasCategory = True
                                 if not p in self.conns[conn_id]['paths']:
                                     reg.append(['ins',p])
                             for p in self.conns[conn_id]['paths']:
@@ -196,7 +199,7 @@ class QueueProc(threading.Thread):
                                 
                                 if (path.startswith('/conversation/')):
                                     # send the current list of viewers if requested
-                                    if (path in msg.paths):
+                                    if (not hasCategory and path in msg.paths):
                                         self.send(conn_id, ['viewers',self.fetchViewerInfo(self.paths[path]['uids'])])
                                     # send to others if viewers has changed
                                     diff = before ^ self.paths[path]['uids']

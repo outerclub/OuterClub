@@ -40,14 +40,15 @@ def local_dev():
     local('python -u %s/rtg.py &' % (pwd))
     local('python -u %s/main.py &' % (pwd))
     
-def ext_start(pwd):
-    run('mkdir -p logs')
-    with settings(warn_only=True):
-        local('pkill -f "%s"' % pwd)
-    run('rm -f logs/*.log logs/*.err')
-    run('rm -f %s/upload/*' % BASE_DIR)
-    run('screen -d -m sh -c "python -u %s/rtg.py > logs/rtg.log 2>&1"' % pwd,pty=False)
-    run('screen -d -m sh -c "python -u %s/main.py > logs/main.log 2>&1"' % pwd,pty=False)
+def ext_restart(pwd):
+    with cd(pwd):
+        run('mkdir -p logs')
+        with settings(warn_only=True):
+            local('pkill -f "%s"' % pwd)
+        run('rm -f logs/*.log logs/*.err')
+        run('rm -f %s/upload/*' % BASE_DIR)
+        run('screen -d -m sh -c "python -u %s/rtg.py > logs/rtg.log 2>&1"' % pwd,pty=False)
+        run('screen -d -m sh -c "python -u %s/main.py > logs/main.log 2>&1"' % pwd,pty=False)
     
 def ext_compile():
     run('git pull')
@@ -80,23 +81,21 @@ def ext_compile():
     checksum=run("md5sum .c.js | awk '{print $1}'")
     js_file = '%s.c.js' % checksum
     run('mv .c.js %s/%s' %(BUILD_DIR,js_file) )
-
-    f = open('.c.properties','w')
-    f.write('[css]\nfile=%s\n' % (css_file))
-    f.write('[js]\nfile=%s\n' % (js_file))
-    f.close()
+    run('echo -e "[css]\nfile=%s\n[js]\nfile=%s" > .c.properties' % (css_file,js_file))
     
 def ext_deployStatic():
     run('mkdir -p /var/www')
     run('cp -r %s /var/www' % (BASE_DIR))
+    
 def ext_deployProd():
     with cd('TheOuterClub'):
         d = run('pwd')
         ext_compile()
         ext_deployStatic()
-        ext_start(d)
+        ext_restart(d)
+        
 def ext_deployDev():
     with cd('OuterClub-dev'):
         d = run('pwd')
         ext_compile()
-        ext_start(d)
+        ext_restart(d)

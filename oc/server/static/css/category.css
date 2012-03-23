@@ -6,7 +6,7 @@
 #viewer .menu {
     position:absolute;
     background-color: rgba(0,0,0,0.7);
-    width:160px;
+    width:130px;
     
     -moz-box-shadow: 0 0 3px #000;
     -webkit-box-shadow: 0 0 3px #000;
@@ -18,7 +18,7 @@
 	float:left;
 }
 #viewer .menu li {
-	border-bottom:1px solid rgba(0,0,0,0.5);
+	/*border-bottom:1px solid rgba(0,0,0,0.5);*/
 }
 #viewer .menu li a:hover,#viewer .menu a.active {
     background-color: rgba(119, 161, 204, 0.7);
@@ -31,13 +31,14 @@
 }
 #viewer .menu li .name {
 	display:block;
-	margin:7px 0 0 5px;
+/*	margin:7px 0 0 5px;*/
+	padding: 5px 0 5px 8px;	
 	float:left;	
 }
 #viewer .content {
 }
 #viewer .panel,#viewer .scrollPanel {
-    left:185px;
+    left:155px;
 }
 #viewer .panel,#viewer .scrollPanel {
     position:absolute;
