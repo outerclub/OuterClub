@@ -180,13 +180,13 @@ def fetchWeekly(cur):
         cur.execute('select category.name,user_id,title,content from conversation inner join category using (cat_id) where d_id=%s',(d_id,))
         test = cur.fetchone()
         name = util.formatCategoryName(test[0]);
-        title = util.escape(test[2])
-        item = {'user':fetchUser(cur,test[1]),'content':util.escape(test[3]).replace('\n','<br />')}
+        title = util.escape(test[2].encode('utf-8'))
+        item = {'user':fetchUser(cur,test[1]),'content':util.escape(test[3].encode('utf-8')).replace('\n','<br />')}
         
         cur.execute('select user_id,content from response where d_id=%s order by replyDate desc limit '+str(MAX_RESPONSES),(d_id,))
         responses = []
         for r2 in cur.fetchall():
-            responses.insert(0,{'user':fetchUser(cur,r2[0]),'content':util.escape(r2[1]).replace('\n','<br />')})
+            responses.insert(0,{'user':fetchUser(cur,r2[0]),'content':util.escape(r2[1].encode('utf-8')).replace('\n','<br />')})
         if (responses < MAX_RESPONSES):
             responses.insert(0,item)
         convos.append({'title':title,'category_name':name,'responses':responses})
