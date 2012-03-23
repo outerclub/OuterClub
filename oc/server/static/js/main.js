@@ -203,29 +203,20 @@ oc.Main.prototype.start = function() {
     // do the hover dropdown menu
     var myUser = goog.dom.getElement('myUser');
     var userMenu = goog.dom.getElement('userMenu');
-    var isFading = false;
     var timer;
     goog.events.listen(myUser,goog.events.EventType.MOUSEOVER,function(e) {
-    	if (!isFading && !goog.style.isElementShown(userMenu))
+    	if (!goog.style.isElementShown(userMenu))
     	{
     		var anim = (new goog.fx.dom.FadeInAndShow(userMenu,300));
-    		goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
-    			isFading = false;
-    		});
     		anim.play();
-    		isFading = true;
     	}
     });
     goog.events.listen(myUser,goog.events.EventType.MOUSEOUT,function(e) {
-    	if (!isFading && goog.style.isElementShown(userMenu))
+    	if (goog.style.isElementShown(userMenu))
     	{
     		timer = window.setTimeout(function() {
 	    		var anim = (new goog.fx.dom.FadeOutAndHide(userMenu,300));
-	    		goog.events.listen(anim,goog.fx.Transition.EventType.FINISH,function() {
-	    			isFading = false;
-	    		});
 	    		anim.play();
-	    		isFading = true;
     		},100);
     	}
     });
