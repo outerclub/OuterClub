@@ -171,6 +171,26 @@ def insertNews(cursor,user_id,item):
     else:
         cursor.execute('update object set value=%s where id=%s',(data,key))
 
+def fetchWeekly(cur):
+    cur.execute('select d_id,count(*) from response where replyDate > (select subtime(now(), \'7 00:00:00\')) group by d_id order by count(*) desc limit 5')
+    MAX_RESPONSES = 3
+    convos = []
+    for r in cur.fetchall():
+        d_id = r[0]
+        cur.execute('select category.name,user_id,title,content from conversation inner join category using (cat_id) where d_id=%s',(d_id,))
+        test = cur.fetchone()
+        name = util.formatCategoryName(test[0]);
+        title = util.escape(test[2])
+        item = {'user':fetchUser(cur,test[1]),'content':util.escape(test[3]).replace('\n','<br />')}
+        
+        cur.execute('select user_id,content from response where d_id=%s order by replyDate desc limit '+str(MAX_RESPONSES),(d_id,))
+        responses = []
+        for r2 in cur.fetchall():
+            responses.insert(0,{'user':fetchUser(cur,r2[0]),'content':util.escape(r2[1]).replace('\n','<br />')})
+        if (responses < MAX_RESPONSES):
+            responses.insert(0,item)
+        convos.append({'title':title,'category_name':name,'responses':responses})
+    return convos
 def fetchNewUsers(cur):
     cur.execute('select user_id,name,signup_date from user order by user_id desc limit 10')
     users = []

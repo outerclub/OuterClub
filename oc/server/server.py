@@ -29,6 +29,17 @@ import conversationViews
 import authViews
 import viewFunctions
 
+@app.route('/weekly')
+def weekly():
+    conn = app.config['pool'].connection()
+    cur = conn.cursor()
+    items = db.fetchWeekly(cur)
+    cur.close()
+    conn.close()
+    data = render_template('weekly.html',items=items)
+    #util.send(app.config,'ice.arch@gmail.com',items[0]['title']+' - OuterClub',data)
+    return data
+    
 @app.route('/')
 def index():
     if not viewFunctions.isLoggedIn():
