@@ -173,7 +173,7 @@ def insertNews(cursor,user_id,item):
 
 def fetchWeekly(cur):
     cur.execute('select d_id,count(*) from response where replyDate > (select subtime(now(), \'7 00:00:00\')) group by d_id order by count(*) desc limit 5')
-    MAX_RESPONSES = 3
+    MAX_RESPONSES = 5
     convos = []
     for r in cur.fetchall():
         d_id = r[0]
@@ -181,7 +181,9 @@ def fetchWeekly(cur):
         test = cur.fetchone()
         name = util.formatCategoryName(test[0]);
         title = util.escape(test[2].encode('utf-8'))
-        item = {'user':fetchUser(cur,test[1]),'content':util.escape(test[3].encode('utf-8')).replace('\n','<br />')}
+        poster = fetchUser(cur,test[1])
+        
+        item = {'user':poster,'content':util.escape(test[3].encode('utf-8')).replace('\n','<br />')}
         
         cur.execute('select user_id,content from response where d_id=%s order by replyDate desc limit '+str(MAX_RESPONSES),(d_id,))
         responses = []
@@ -189,7 +191,17 @@ def fetchWeekly(cur):
             responses.insert(0,{'user':fetchUser(cur,r2[0]),'content':util.escape(r2[1].encode('utf-8')).replace('\n','<br />')})
         if (responses < MAX_RESPONSES):
             responses.insert(0,item)
-        convos.append({'title':title,'category_name':name,'responses':responses})
+            
+        # count replies
+        numReplies = r[1]
+
+        # count participants
+        cur.execute('select DISTINCT user_id from response where d_id=%s',(d_id,))
+        uids = set()
+        for u in cur.fetchall():
+            uids.add(u[0])
+        uids.add(poster['user_id'])
+        convos.append({'title':title,'category_name':name,'responses':responses,'numReplies':numReplies,'numUsers':len(uids)})
     return convos
 def fetchNewUsers(cur):
     cur.execute('select user_id,name,signup_date from user order by user_id desc limit 10')

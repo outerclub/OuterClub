@@ -227,7 +227,8 @@ def invite():
         
         # only actually send if it's in prod mode
         if not app.config['DEBUG']:
-            util.send(app.config,email,'%s, welcome to OuterClub!' % (name),data)
+            m = util.createMessage(email,'%s, welcome to OuterClub!' % (name),data)
+            util.send(app.config,m)
     if error:
         return flask.jsonify(error=error)
     else:

@@ -117,14 +117,21 @@ def findMentions(cur,data):
 class Upvote:
     UserType = 0
 
-def send(config,to,subject,msg):
-    m = MIMEText(msg,'html')
-    fro = '"OuterClub" <%s>' % config['EMAIL_ADDRESS']
-    m['From'] = fro
-    m['To'] = to
+def createMessage(to,subject,content):
+    m = MIMEText(content,'html')
     m['Subject'] = subject
+    m['To'] = to
+    return m
+
+def send(config,msgs):
+    fro = '"OuterClub" <%s>' % config['EMAIL_ADDRESS']
     server = smtplib.SMTP_SSL(config['EMAIL_SERVER'],config['EMAIL_PORT'])
     server.login(config['EMAIL_USER'],config['EMAIL_PASSWORD'])
-    server.sendmail(fro,to,m.as_string())
+    if not isinstance(msgs,list):
+        msgs = [msgs]
+    
+    for m in msgs:
+        m['From'] = fro
+        server.sendmail(fro,m['To'],m.as_string())
     server.quit()
 

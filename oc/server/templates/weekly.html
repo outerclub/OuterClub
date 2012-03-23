@@ -1,16 +1,19 @@
 <html>
 <body style="margin:20px 0;padding:0;background-color:white;font-family: 'Helvetica Neue', Helvetica, Arial'">
 <div style="width:585px;margin:0 auto">
-	<h1><a href="http://outerclub.com" style="color: #111111;text-decoration:none">OuterClub</a></h1>
+	<h1><a href="http://outerclub.com/?t={{ track }}" style="color: #111111;text-decoration:none">OuterClub</a></h1>
+	<h2>Trending Conversations</h2>
 	<table>
 	{% for i in items %}
-	<tr><td>
+	<tr>
+	<td style="padding:10px;{% if loop.index == 1 %}background-color:#efefef{% endif %}">
 		<h2 style="margin:0; font-size:20px">
-			<a href="http://outerclub.com" style="color: #77a1cc;text-decoration:none">
-			{{ i['category_name'] }}: {{ i['title'] }}
+			<a href="http://outerclub.com/?t={{ track }}" style="{% if loop.index == 1 %}color: #ff8211;font-size:24px{% else %}color: #77a1cc{% endif %};text-decoration:none">
+			{{ loop.index }}. {{ i['category_name'] }}: {{ i['title']|safe }}
 			<span style="font-size:13px;color:#111111">read more...</span>
 			</a>
 			</h2>
+			<div style="font-size:11px; color: #333;font-weight:bold;margin-bottom:3px">{{ i['numReplies'] }} replies | {{ i['numUsers'] }} users</div>
 		{% for r in i['responses'] %}
 		<div style="font-size:14px;margin-left:15px">
 			<span style="font-weight:bold; color: #888;">{{ r['user']['name'] }}:</span>
@@ -20,6 +23,10 @@
 	</td></tr>
 	{% endfor %}
 	</table>
+	<br />
+	<hr />
+	
+	<span style="font-size:10px;color:gray;">To disable weekly trends from OuterClub, please visit: <a style="color:#77a1cc" href="http://outerclub.com/u/{{ email }}?k={{ key }}">http://outerclub.com/u/{{ email }}?k={{ key }}</a></span>
 </div>
 </body>
 </html>

@@ -28,17 +28,54 @@ import userViews
 import conversationViews
 import authViews
 import viewFunctions
+import hashlib
+import uuid
+
+def genKey(s):
+   return hashlib.sha224(str(s)).hexdigest()[:7] 
+
+@app.route('/u/<email>')
+def unsubscribe(email):
+    ret = ''
+    if 'k' in request.args:
+        conn = app.config['pool'].connection()
+        cur = conn.cursor()
+        cur.execute('select user_id from user where email=%s',(email,))
+        r = cur.fetchone()[0]
+        if (genKey(r) == request.args['k']):
+            cur.execute('update user set subscribe_trend=false where user_id=%s',(r,))
+            conn.commit()
+            ret = '<span style="font-family:Arial">Success!</span>'
+        cur.close()
+        conn.close()
+    return ret
 
 @app.route('/weekly')
 def weekly():
+    if not viewFunctions.isLoggedIn():
+        return viewFunctions.displaySignup()
     conn = app.config['pool'].connection()
     cur = conn.cursor()
+    
+    uid = viewFunctions.getUid()
+    cur.execute('select admin from user where user_id=%s',(uid,))    
+    isAdmin = cur.fetchone()[0]
+    if not isAdmin:
+        cur.close()
+        conn.close()
+        return ''
+    
     items = db.fetchWeekly(cur)
+    cur.execute('select user_id,email from user where subscribe_trend=true')
+    messages = []
+    for e in cur.fetchall():
+        track = str(uuid.uuid4())[:6]
+        data = render_template('weekly.html',items=items,email=e[1],key=genKey(e[0]),track=track)
+        messages.append(util.createMessage(e[1],items[0]['title']+' - OuterClub',data))
     cur.close()
     conn.close()
-    data = render_template('weekly.html',items=items)
-    #util.send(app.config,'ice.arch@gmail.com',items[0]['title']+' - OuterClub',data)
-    return data
+    util.send(app.config,messages)
+    return 'Success!'
     
 @app.route('/')
 def index():
