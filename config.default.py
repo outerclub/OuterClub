@@ -22,9 +22,10 @@ class WebserverConfig:
     FB_APPID = '251976601561013'
     
     UPLOAD_FOLDER='oc/server/static/upload'
-    COVERS_FOLDER = 'oc/server/static/images/covers'
-    AVATARS_FOLDER = 'oc/server/static/images/avatars'
-    MAX_CONTENT_LENGTH=10*1024*1024
+    COVER_FOLDER = 'oc/server/static/images/covers'
+    AVATAR_FOLDER = 'oc/server/static/images/avatars'
+    MAX_CONTENT_LENGTH=5*1024*1024
+    IMAGEMAGICK_CONVERT = '/usr/bin/convert'
 
 class RtgConfig:
     PORT = 9090

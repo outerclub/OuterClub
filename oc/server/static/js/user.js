@@ -432,78 +432,61 @@ oc.User.View.prototype.go = function(user_id) {
                     '<div class="border"><h2>Select Cover</h2><div class="center"></div></div></div>');
             
             goog.dom.appendChild(profileElement,coverOverlay);
-
-            /**
-             * @param {function()} close
-             */
-            var coversCallback = function(close) {
-                var center = goog.dom.query('.center',coverOverlay)[0];
-                center.innerHTML = '';
-                var selectEl = /** @type {Element} **/ goog.dom.htmlToDocumentFragment(oc.Templates.User.coverSelect({current_cover:self.user.cover_image}));
-                var previewFormEl = goog.dom.query('form[name="preview"]',selectEl)[0];
-                var fileInputEl = goog.dom.query('input[type="file"]',previewFormEl)[0];
-                var submitEl = goog.dom.query('input[type="submit"]',selectEl)[0];
-               	submitEl.setAttribute('disabled','disabled');
-               	
-                goog.dom.appendChild(center,selectEl);
-                goog.events.listen(fileInputEl,goog.events.EventType.CHANGE,function(e) {
-               		goog.events.removeAll(submitEl);
-                	var io = new goog.net.IframeIo();
-                	
-                	io.sendFromForm(previewFormEl);
-                	goog.events.listen(io,goog.net.EventType.COMPLETE,function(e2) {
-                		var file = io.getResponseJson()['file'];
-                		goog.dom.query('img',selectEl)[0].setAttribute('src','/static/upload/'+file);
-                		submitEl.removeAttribute('disabled');
-                		goog.events.listen(submitEl,goog.events.EventType.CLICK,function(e3) {
-                			goog.net.XhrIo.send('/cover',function() {
-                                self.changeCover(file);
-                				close();
-                			},'POST',
-                			goog.uri.utils.buildQueryDataFromMap({'temp_file':file}));
-                			
-                		});
-                	});
-                });
-            };
-            oc.overlay(goog.dom.query("a[rel='#cover']",profileElement)[0],coversCallback);
     
             var avatarOverlay = /** @type {Element} */ goog.dom.htmlToDocumentFragment('<div id="avatar" class="overlay">'+
                     '<div class="border"><h2>Select Avatar</h2><div class="center"></div></div>');
             
             goog.dom.appendChild(profileElement,avatarOverlay);
 
-            var avatarsCallback = function(close) {
-                var center = goog.dom.query('.center',avatarOverlay)[0];
-                center.innerHTML = '';
-                var selectEl = /** @type {Element} **/ goog.dom.htmlToDocumentFragment(oc.Templates.User.avatarSelect({current_avatar:self.user.avatar_image}));
-                var previewFormEl = goog.dom.query('form[name="preview"]',selectEl)[0];
-                var fileInputEl = goog.dom.query('input[type="file"]',previewFormEl)[0];
-                var submitEl = goog.dom.query('input[type="submit"]',selectEl)[0];
-               	submitEl.setAttribute('disabled','disabled');
-               	
-                goog.dom.appendChild(center,selectEl);
-                goog.events.listen(fileInputEl,goog.events.EventType.CHANGE,function(e) {
-               		goog.events.removeAll(submitEl);
-                	var io = new goog.net.IframeIo();
-                	
-                	io.sendFromForm(previewFormEl);
-                	goog.events.listen(io,goog.net.EventType.COMPLETE,function(e2) {
-                		var file = io.getResponseJson()['file'];
-                		goog.dom.query('img',selectEl)[0].setAttribute('src','/static/upload/'+file);
-                		submitEl.removeAttribute('disabled');
-                		goog.events.listen(submitEl,goog.events.EventType.CLICK,function(e3) {
-                			goog.net.XhrIo.send('/avatar',function() {
-                                self.changeAvatar(file);
-                				close();
-                			},'POST',
-                			goog.uri.utils.buildQueryDataFromMap({'temp_file':file}));
-                			
-                		});
-                	});
-                });
+            var fileCallback = function(overlay,uri,html) {
+            	return function(close) {
+	                var center = goog.dom.query('.center',overlay)[0];
+	                center.innerHTML = '';
+	                var selectEl = /** @type {Element} **/ goog.dom.htmlToDocumentFragment(html);
+	                var previewFormEl = goog.dom.query('form[name="preview"]',selectEl)[0];
+	                var fileInputEl = goog.dom.query('input[type="file"]',previewFormEl)[0];
+	                var submitEl = goog.dom.query('input[type="submit"]',selectEl)[0];
+	                var errorEl = goog.dom.query('.error',selectEl)[0];
+	               	submitEl.setAttribute('disabled','disabled');
+	               	
+	                goog.dom.appendChild(center,selectEl);
+	                goog.events.listen(fileInputEl,goog.events.EventType.CHANGE,function(e) {
+	               		goog.events.removeAll(submitEl);
+	                	var io = new goog.net.IframeIo();
+	                	
+	                	io.sendFromForm(previewFormEl);
+	                	goog.events.listen(io,goog.net.EventType.COMPLETE,function(e2) {
+	                		var file = io.getResponseJson();
+	                		if (file != null)
+	                		{
+		                		if ('file' in file)
+		                		{
+		                			errorEl.innerHTML = '';
+		                			file = file['file'];
+			                		goog.dom.query('img',selectEl)[0].setAttribute('src','/static/upload/'+file);
+			                		submitEl.removeAttribute('disabled');
+			                		goog.events.listen(submitEl,goog.events.EventType.CLICK,function(e3) {
+			                			goog.net.XhrIo.send(uri,function() {
+			                                self.changeAvatar(file);
+			                				close();
+			                			},'POST',
+			                			goog.uri.utils.buildQueryDataFromMap({'temp_file':file}));
+			                		});
+		                		} else {
+		                			errorEl.innerHTML = 'Unknown image type (only JPG/PNG type currently supported).';
+		                		}
+	                		} else {
+		                		errorEl.innerHTML = 'Maximum image size: 5MB.';
+	                		}
+	                	});
+	                });
+            	}
             };
-            oc.overlay(goog.dom.query("a[rel='#avatar']",profileElement)[0],avatarsCallback);
+            oc.overlay(goog.dom.query("a[rel='#avatar']",profileElement)[0],fileCallback(avatarOverlay,'/avatar',
+            		oc.Templates.User.avatarSelect({current_avatar:self.user.avatar_image})
+            		));
+            oc.overlay(goog.dom.query("a[rel='#cover']",profileElement)[0],fileCallback(coverOverlay,'/cover',
+            		oc.Templates.User.coverSelect({current_cover:self.user.cover_image})));
       }
     }); // getJson
 };

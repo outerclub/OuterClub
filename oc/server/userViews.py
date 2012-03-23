@@ -6,6 +6,8 @@ import flask
 from flask import request
 from werkzeug import secure_filename
 import uuid
+import imghdr
+import subprocess
 ALLOWED_EXTENSIONS = set(['png','jpg','jpeg'])
 
 def allowed_file(filename):
@@ -41,31 +43,44 @@ def blurb():
 
 @app.route('/avatar',methods=['POST'])
 def avatar():
+    return filefunc('avatar',100,100)
+    
+def filefunc(type,width,height):
     if not viewFunctions.isLoggedIn():
         return ''
-    if 'avatar' in request.files:
-        file = request.files['avatar']
+    if type in request.files:
+        file = request.files[type]
         if file and allowed_file(file.filename):
             rand = uuid.uuid4()
             fileext = secure_filename(file.filename).rsplit('.',1)[1].lower()
-            filename = 'avatar-%s.%s' % (rand,fileext)
+            filename = '%s-%s.%s' % (type,rand,fileext)
             if not os.path.exists(app.config['UPLOAD_FOLDER']):
                 os.makedirs(app.config['UPLOAD_FOLDER'])
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-            return flask.jsonify(file=filename)
+            full_path = os.path.join(app.config['UPLOAD_FOLDER'],filename)
+            file.save(full_path)
+            what = imghdr.what(full_path)
+            if what != None and (what == 'jpeg' or what == 'png'):
+                subprocess.call([app.config['IMAGEMAGICK_CONVERT'], \
+                                 full_path, \
+                                 '-resize', \
+                                 '%sx%s!' % (width,height), \
+                                 full_path])
+                return flask.jsonify(file=filename)
+            else:
+                os.remove(full_path)
     elif 'temp_file' in request.form:
         temp_file = secure_filename(request.form['temp_file'])
         if temp_file != '':
             try:
                 full_path = os.path.join(app.config['UPLOAD_FOLDER'],temp_file)
                 open(full_path)
-                os.rename(full_path,os.path.join(app.config['AVATARS_FOLDER'],temp_file))
+                os.rename(full_path,os.path.join(app.config['%s_FOLDER' % (type.upper())],temp_file))
                 
                 # update the user
                 uid = viewFunctions.getUid()
                 conn = app.config['pool'].connection()
                 cur = conn.cursor()
-                cur.execute('update user set avatar_image=%s where user_id=%s',(temp_file,uid))
+                cur.execute('update user set '+type+'_image=%s where user_id=%s',(temp_file,uid))
                 db.invalidateUserCache(cur,uid)
                 conn.commit()
                 cur.close()
@@ -76,47 +91,12 @@ def avatar():
                 app.config['transport'].close()
             except Exception as e:
                 print e
-    return ''
+    return '{}'
     
 @app.route('/cover',methods=['POST'])
 def cover():
-    if not viewFunctions.isLoggedIn():
-        return ''
-    if 'cover' in request.files:
-        file = request.files['cover']
-        if file and allowed_file(file.filename):
-            rand = uuid.uuid4()
-            fileext = secure_filename(file.filename).rsplit('.',1)[1].lower()
-            filename = 'cover-%s.%s' % (rand,fileext)
-            if not os.path.exists(app.config['UPLOAD_FOLDER']):
-                os.makedirs(app.config['UPLOAD_FOLDER'])
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'],filename))
-            return flask.jsonify(file=filename)
-    elif 'temp_file' in request.form:
-        temp_file = secure_filename(request.form['temp_file'])
-        if temp_file != '':
-            try:
-                full_path = os.path.join(app.config['UPLOAD_FOLDER'],temp_file)
-                open(full_path)
-                os.rename(full_path,os.path.join(app.config['COVERS_FOLDER'],temp_file))
-                
-                # update the user
-                uid = viewFunctions.getUid()
-                conn = app.config['pool'].connection()
-                cur = conn.cursor()
-                cur.execute('update user set cover_image=%s where user_id=%s',(temp_file,uid))
-                db.invalidateUserCache(cur,uid)
-                conn.commit()
-                cur.close()
-                conn.close()
-        
-                app.config['transport'].open()
-                app.config['client'].userModified(uid)
-                app.config['transport'].close()
-            except Exception as e:
-                print e
-    return ''
-
+    return filefunc('cover',875,323)
+    
 '''
 @app.route('/covers',methods=['GET','POST'])
 def covers():

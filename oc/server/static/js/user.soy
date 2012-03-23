@@ -70,9 +70,10 @@
 <h1>Preview</h1>
 <img height="100" width="271" src="/static/images/covers/{$current_cover}" />
 </div>
-Recommended size: 875x323.<br />
+Your image will be resized to: 875x323.<br />
 <form name="preview" action="/cover" enctype="multipart/form-data" method="POST">
 	<input name="cover" type="file" />
+	<div class="error"></div>
 </form>
 <input type="submit" name="submit" value="Save" disabled="disabled"/>
 </div>
@@ -87,9 +88,10 @@ Recommended size: 875x323.<br />
 <h1>Preview</h1>
 <img height="100" width="100" src="/static/images/avatars/{$current_avatar}" />
 </div>
-Recommended size: 100x100.<br />
+Your image will be resized to: 100x100.<br />
 <form name="preview" action="/avatar" enctype="multipart/form-data" method="POST">
 	<input name="avatar" type="file" />
+	<div class="error"></div>
 </form>
 <input type="submit" name="submit" value="Save" disabled="disabled"/>
 </div>
