@@ -44,7 +44,7 @@ def ext_restart(pwd):
     with cd(pwd):
         run('mkdir -p logs')
         with settings(warn_only=True):
-            local('pkill -f "%s"' % pwd)
+            run('pkill -f "%s"' % pwd)
         run('rm -f logs/*.log logs/*.err')
         run('rm -f %s/upload/*' % BASE_DIR)
         run('screen -d -m sh -c "python -u %s/rtg.py > logs/rtg.log 2>&1"' % pwd,pty=False)
@@ -87,6 +87,11 @@ def ext_deployStatic():
     run('mkdir -p /var/www')
     run('cp -r %s /var/www' % (BASE_DIR))
     
+def ext_restartProd():
+    with cd('TheOuterClub'):
+        d = run('pwd')
+        ext_restart(d)
+        
 def ext_deployProd():
     with cd('TheOuterClub'):
         d = run('pwd')

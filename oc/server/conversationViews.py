@@ -39,7 +39,7 @@ def conversation(id):
     cur.execute(sql,(id,myUid,util.Upvote.UserType)+tuple(user_ids))
     
     for r in cur.fetchall():
-        user_ids.remove(r[0])
+        user_ids.discard(r[0])
 
     # can't vote for self
     user_ids.discard(myUid)
