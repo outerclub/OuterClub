@@ -41,30 +41,30 @@ def local_dev():
     local('python -u %s/main.py &' % (pwd))
     
 def ext_restart(pwd):
-    with cd(pwd):
-        run('mkdir -p logs')
+        local('mkdir -p logs')
         with settings(warn_only=True):
-            run('pkill -f "%s"' % pwd)
-        run('rm -f logs/*.log logs/*.err')
-        run('rm -f %s/upload/*' % BASE_DIR)
-        run('screen -d -m sh -c "python -u %s/rtg.py > logs/rtg.log 2>&1"' % pwd,pty=False)
-        run('screen -d -m sh -c "python -u %s/main.py > logs/main.log 2>&1"' % pwd,pty=False)
+            local('pkill -f "rtg"')
+            local('pkill -f "main"')
+        local('rm -f logs/*.log logs/*.err')
+        local('rm -f %s/upload/*' % BASE_DIR)
+        local('screen -d -m sh -c "python -u rtg.py > logs/rtg.log 2>&1"')
+        local('screen -d -m sh -c "python -u main.py > logs/main.log 2>&1"')
     
 def ext_compile():
-    run('git pull')
-    run('mkdir -p %s' % BUILD_DIR)
-    run('java -jar tools/SoyToJsSrcCompiler.jar \
+    local('git pull')
+    local('mkdir -p %s' % BUILD_DIR)
+    local('java -jar tools/SoyToJsSrcCompiler.jar \
         --shouldProvideRequireSoyNamespaces \
         --shouldGenerateJsdoc \
         --outputPathFormat %s/soy.js \
         oc/server/static/js/*.soy' % BUILD_DIR)
-    run('java -jar tools/closure-stylesheets-20111230.jar --allow-unrecognized-functions %s/reset.css %s/misc.css %s/footer.css %s/layout.css %s/welcome.css %s/about.css %s/trending.css %s/user.css %s/category.css %s/conversation.css > .c.css'.replace('%s',BASE_DIR+'/css'))
+    local('java -jar tools/closure-stylesheets-20111230.jar --allow-unrecognized-functions %s/reset.css %s/misc.css %s/footer.css %s/layout.css %s/welcome.css %s/about.css %s/trending.css %s/user.css %s/category.css %s/conversation.css > .c.css'.replace('%s',BASE_DIR+'/css'))
     
-    checksum=run("md5sum .c.css | awk '{print $1}'")
+    checksum=local("md5sum .c.css | awk '{print $1}'")
     css_file = '%s.c.css' % checksum
-    run('mv .c.css %s/%s' % (BUILD_DIR,css_file))
+    local('mv .c.css %s/%s' % (BUILD_DIR,css_file))
 
-    run('python tools/closure-library-read-only/closure/bin/calcdeps.py  \
+    local('python tools/closure-library-read-only/closure/bin/calcdeps.py  \
         --path tools/closure-library-read-only/closure/goog \
         --path tools/soyutils_usegoog.js \
         --path oc/server/static/js/ \
@@ -78,14 +78,14 @@ def ext_compile():
         --compiler_flags="--warning_level=VERBOSE" \
         --compiler_flags="--jscomp_error=checkTypes" \
         > .c.js'.replace('%s',BUILD_DIR))
-    checksum=run("md5sum .c.js | awk '{print $1}'")
+    checksum=local("md5sum .c.js | awk '{print $1}'")
     js_file = '%s.c.js' % checksum
-    run('mv .c.js %s/%s' %(BUILD_DIR,js_file) )
-    run('echo -e "[css]\nfile=%s\n[js]\nfile=%s" > .c.properties' % (css_file,js_file))
+    local('mv .c.js %s/%s' %(BUILD_DIR,js_file) )
+    local('echo "[css]\nfile=%s\n[js]\nfile=%s" > .c.properties' % (css_file,js_file))
     
 def ext_deployStatic():
-    run('mkdir -p /var/www')
-    run('cp -r %s /var/www' % (BASE_DIR))
+    local('mkdir -p /var/www')
+    local('cp -r %s /var/www' % (BASE_DIR))
     
 def ext_restartProd():
     with cd('TheOuterClub'):
@@ -104,3 +104,9 @@ def ext_deployDev():
         d = run('pwd')
         ext_compile()
         ext_restart(d)
+
+def go():
+  d = local('pwd')
+  ext_compile()
+  ext_deployStatic()
+  ext_restart(d)

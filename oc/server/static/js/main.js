@@ -125,7 +125,7 @@ oc.Main.prototype.start = function() {
 	        }); 
 	    });
     }
-   	initTwitter();
+   	// initTwitter();
     var initHappening = function(data)
     {
     	self.happening = [];
@@ -443,7 +443,7 @@ oc.Main.prototype.start = function() {
                 if (t == '!/welcome')
 	            {
                 	initHappening(self.happening);
-                	initTwitter();
+                	// initTwitter();
 	        	}
             }
         } else if (t.indexOf('!/user/') == 0) {

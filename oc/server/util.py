@@ -124,6 +124,7 @@ def createMessage(to,subject,content):
     return m
 
 def send(config,msgs):
+    return
     fro = '"OuterClub" <%s>' % config['EMAIL_ADDRESS']
     server = smtplib.SMTP_SSL(config['EMAIL_SERVER'],config['EMAIL_PORT'])
     server.login(config['EMAIL_USER'],config['EMAIL_PASSWORD'])
