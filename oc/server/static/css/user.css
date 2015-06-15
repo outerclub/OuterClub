@@ -64,7 +64,7 @@
 .blurb span {
     width:170px;
     display:inline-block;
-    text-align:right;
+    text-align:left;
     margin-right:7px;
     font-weight:bold;
 }

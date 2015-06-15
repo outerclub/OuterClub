@@ -10,7 +10,7 @@
     position: absolute;
     width:190px;
     padding:5px 10px 5px 10px;
-    background-color: rgba(0,0,0,0.3);
+    background-color: rgba(0,0,0,0.8);
 }
 
 /**
@@ -152,7 +152,7 @@
 }
 .reply {
     float: right;
-    margin-right: 75px;
+    margin-right: 40px;
 }
 .reply textarea {
     display:block;
