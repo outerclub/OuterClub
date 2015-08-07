@@ -144,6 +144,44 @@ body{
 	font-weight:bold
 }
 */
+#announcements {
+  font-size: 14px;
+  box-sizing: border-box;
+	width:600px;
+  padding: 16px;
+  position:absolute;
+	margin-left:-300px;
+	left:50%;
+	top:180px;
+	background-color:rgba(0,0,0,0.5);
+	-webkit-border-radius:5px;
+	-moz-border-radius:5px;
+	border-radius:5px;
+	overflow:hidden;
+}
+#announcements h1 {
+  text-transform: uppercase;
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+#announcements h2 {
+  font-size: 16px;
+  text-decoration: underline;
+}
+#announcements h3 {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 16px 0;
+}
+#announcements ul {
+  list-style-type: disc;
+  line-height: 18px;
+  margin-left: 16px;
+}
+#announcements li {
+  margin-bottom: 8px;
+}
+
 #chat {
 	width:600px;
 	position:absolute;

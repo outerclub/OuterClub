@@ -139,66 +139,66 @@ oc.Main.prototype.start = function() {
     /**
      * Chat
      */
-   	var chat = goog.dom.getElement("chat");
-   	var chatMessages = goog.dom.query('ul.messages',chat)[0];
-   	var chatUsers= goog.dom.query('ul.users',chat)[0];
-   	var fixChatHeight = function() {
-   		var h;
-    	var chatItems = goog.dom.query('li',chat);
-    	for (var x=0; x < chatItems.length; x++)
-    	{
-    		h = goog.style.getSize(chat).height;
-    		if (h > 500)
-    			goog.dom.removeNode(chatItems[x]);
-    	}
-   	}
-    var addChatItem = function(data)
-    {
-    	var msg = data['message'];
-    	var user = oc.User.extractFromJson(data['user']);
-    	var date = goog.date.fromIsoString(data['date']);
-    	chatMessages.appendChild(
-    			goog.dom.htmlToDocumentFragment(
-    					oc.Templates.Main.chatItem({
-    						date:date.toIsoTimeString(false),
-    						name:user.name,
-    						content:msg,
-    						user_id:user.id
-    					})));
-    }
-    this.socket.addCallback('chat_init',function(chatItems) {
-    	goog.style.showElement(chat,true);
-    	goog.array.forEach(chatItems,addChatItem);
-    	fixChatHeight();
-    });
+   	// var chat = goog.dom.getElement("chat");
+   	// var chatMessages = goog.dom.query('ul.messages',chat)[0];
+   	// var chatUsers= goog.dom.query('ul.users',chat)[0];
+   	// var fixChatHeight = function() {
+   	// 	var h;
+    // 	var chatItems = goog.dom.query('li',chat);
+    // 	for (var x=0; x < chatItems.length; x++)
+    // 	{
+    // 		h = goog.style.getSize(chat).height;
+    // 		if (h > 500)
+    // 			goog.dom.removeNode(chatItems[x]);
+    // 	}
+   	// }
+    // var addChatItem = function(data)
+    // {
+    // 	var msg = data['message'];
+    // 	var user = oc.User.extractFromJson(data['user']);
+    // 	var date = goog.date.fromIsoString(data['date']);
+    // 	chatMessages.appendChild(
+    // 			goog.dom.htmlToDocumentFragment(
+    // 					oc.Templates.Main.chatItem({
+    // 						date:date.toIsoTimeString(false),
+    // 						name:user.name,
+    // 						content:msg,
+    // 						user_id:user.id
+    // 					})));
+    // }
+    // this.socket.addCallback('chat_init',function(chatItems) {
+    // 	goog.style.showElement(chat,true);
+    // 	goog.array.forEach(chatItems,addChatItem);
+    // 	fixChatHeight();
+    // });
     this.socket.addCallback('users',function(users) {
-    	chatUsers.innerHTML = '';
-    	goog.array.forEach(users,function(u) {
-    		chatUsers.appendChild(goog.dom.htmlToDocumentFragment(
-    				oc.Templates.Main.userItem({
-    					avatar_image:u['avatar_image'],
-    					name:u['name'],
-    					user_id:u['user_id']
-    				})));
-    	});
+    	// chatUsers.innerHTML = '';
+    	// goog.array.forEach(users,function(u) {
+    	// 	chatUsers.appendChild(goog.dom.htmlToDocumentFragment(
+    	// 			oc.Templates.Main.userItem({
+    	// 				avatar_image:u['avatar_image'],
+    	// 				name:u['name'],
+    	// 				user_id:u['user_id']
+    	// 			})));
+    	// });
         // reveal everything
         goog.array.forEach(goog.dom.query('#miniProfile,#menu,.footer'),function(item) {
             if (!goog.style.isElementShown(item))
                 (new goog.fx.dom.FadeInAndShow(item,500)).play();
         });
     });
-    this.socket.addCallback('chat',function(data) {
-    	addChatItem(data);
-    	fixChatHeight();
-    });
+    // this.socket.addCallback('chat',function(data) {
+    // 	addChatItem(data);
+    // 	fixChatHeight();
+    // });
     
-    goog.events.listen(goog.dom.query('input',chat)[0],goog.events.EventType.KEYPRESS,function(e) {
-    	if (e.keyCode == goog.events.KeyCodes.ENTER)
-		{
-    		self.socket.send({'chat':this.value});
-    		this.value = '';
-		}
-    });
+    // goog.events.listen(goog.dom.query('input',chat)[0],goog.events.EventType.KEYPRESS,function(e) {
+    // 	if (e.keyCode == goog.events.KeyCodes.ENTER)
+		// {
+    // 		self.socket.send({'chat':this.value});
+    // 		this.value = '';
+		// }
+    // });
     
     // do the hover dropdown menu
     var myUser = goog.dom.getElement('myUser');
